@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catskills Events</title>
+  <style>
+    :root {
+      --bg: #faf9f6;
+      --card-bg: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6b6b6b;
+      --border: #e5e2dc;
+      --accent: #2d5a27;
+      --accent-light: #e8f0e6;
+      --tag-music: #7c3aed;
+      --tag-food: #d97706;
+      --tag-culture: #2563eb;
+      --tag-nature: #059669;
+      --tag-community: #dc2626;
+      --tag-nightlife: #db2777;
+      --tag-wellness: #0891b2;
+      --tag-other: #6b7280;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px 120px;
+    }
+
+    #events.wide {
+      max-width: 90vw;
+      margin: 0 auto;
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90vw;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .filter-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      width: 100%;
+      margin-bottom: 2px;
+    }
+
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--card-bg);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text);
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .filter-btn[data-category="music"].active { background: var(--tag-music); border-color: var(--tag-music); }
+    .filter-btn[data-category="food"].active { background: var(--tag-food); border-color: var(--tag-food); }
+    .filter-btn[data-category="culture"].active { background: var(--tag-culture); border-color: var(--tag-culture); }
+    .filter-btn[data-category="nature"].active { background: var(--tag-nature); border-color: var(--tag-nature); }
+    .filter-btn[data-category="community"].active { background: var(--tag-community); border-color: var(--tag-community); }
+    .filter-btn[data-category="nightlife"].active { background: var(--tag-nightlife); border-color: var(--tag-nightlife); }
+    .filter-btn[data-category="wellness"].active { background: var(--tag-wellness); border-color: var(--tag-wellness); }
+
+    .search-box {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--card-bg);
+      margin-bottom: 24px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+    }
+
+    .section-header {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 32px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--text);
+    }
+
+    .section-header:first-of-type {
+      margin-top: 0;
+    }
+
+    .event-count {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    .event-card {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .event-card:last-child {
+      border-bottom: none;
+    }
+
+    .event-date-col {
+      flex-shrink: 0;
+      width: 52px;
+      text-align: center;
+      padding-top: 2px;
+    }
+
+    .event-date-col .day-name {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+
+    .event-date-col .day-num {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .event-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .event-name {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .event-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .event-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .event-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: white;
+      margin-top: 6px;
+    }
+
+    .event-sources {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .event-link {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .event-link:hover {
+      text-decoration: underline;
+    }
+
+    .link-icon {
+      font-size: 12px;
+      opacity: 0.4;
+      transition: opacity 0.15s;
+    }
+
+    .event-link:hover .link-icon {
+      opacity: 0.8;
+    }
+
+    .event-sources a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .event-sources a:hover {
+      text-decoration: underline;
+    }
+
+    .source-sep {
+      margin: 0 4px;
+      color: var(--border);
+    }
+
+    .event-distance {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .distance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 8px;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .distance-close { background: #dcfce7; color: #166534; }
+    .distance-medium { background: #fef9c3; color: #854d0e; }
+    .distance-far { background: #fee2e2; color: #991b1b; }
+
+    .direction-arrow {
+      display: inline-block;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .distance-slider-wrap {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .distance-slider-wrap label {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .distance-slider-wrap input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .tag-music { background: var(--tag-music); }
+    .tag-food { background: var(--tag-food); }
+    .tag-culture { background: var(--tag-culture); }
+    .tag-nature { background: var(--tag-nature); }
+    .tag-community { background: var(--tag-community); }
+    .tag-nightlife { background: var(--tag-nightlife); }
+    .tag-wellness { background: var(--tag-wellness); }
+    .tag-other { background: var(--tag-other); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .stats {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .view-toggle {
+      display: flex;
+      gap: 4px;
+    }
+
+    .view-btn {
+      padding: 4px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--card-bg);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .view-btn.active {
+      background: var(--text);
+      border-color: var(--text);
+      color: white;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .cal-day {
+      min-height: 120px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      background: var(--card-bg);
+      overflow-y: auto;
+    }
+
+    .cal-day.today {
+      border-color: var(--accent);
+      border-width: 2px;
+    }
+
+    .cal-day-header {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .cal-day-header .cal-day-num {
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .cal-event {
+      font-size: 11px;
+      padding: 4px 6px;
+      margin-bottom: 4px;
+      border-radius: 5px;
+      background: #f3f3f0;
+      line-height: 1.3;
+      cursor: default;
+    }
+
+    .cal-event:hover {
+      background: #e8e8e4;
+    }
+
+    .cal-event-time {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .cal-event-name {
+      font-weight: 500;
+    }
+
+    .cal-event-venue {
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
+    .cal-event .event-tag {
+      font-size: 9px;
+      padding: 0 5px;
+      margin-top: 2px;
+    }
+
+    .cal-week-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .cal-week-nav button {
+      padding: 4px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--card-bg);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .cal-week-label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tooltip {
+      position: fixed;
+      z-index: 100;
+      max-width: 320px;
+      padding: 10px 14px;
+      background: var(--text);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .tooltip.visible { opacity: 1; }
+
+    .tooltip .tt-name {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .tooltip .tt-meta {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+
+    .tooltip .tt-desc {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+
+    @media (max-width: 700px) {
+      .cal-grid {
+        grid-template-columns: 1fr;
+      }
+      .cal-day { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Catskills Events</h1>
+      <p>Aggregated from local newsletters, tourism boards, and venue sites</p>
+    </header>
+
+    <input class="search-box" type="text" placeholder="Search events, venues, towns..." id="search" />
+
+    <div class="filters">
+      <div class="filter-group">
+        <div class="filter-group-label">When</div>
+        <button class="filter-btn active" data-time="all">All</button>
+        <button class="filter-btn" data-time="tonight">Tonight</button>
+        <button class="filter-btn" data-time="week">This Week</button>
+        <button class="filter-btn" data-time="month">This Month</button>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">What</div>
+        <button class="filter-btn" data-category="music">Music</button>
+        <button class="filter-btn" data-category="food">Food</button>
+        <button class="filter-btn" data-category="culture">Culture</button>
+        <button class="filter-btn" data-category="nature">Nature</button>
+        <button class="filter-btn" data-category="community">Community</button>
+        <button class="filter-btn" data-category="nightlife">Nightlife</button>
+        <button class="filter-btn" data-category="wellness">Wellness</button>
+      </div>
+    </div>
+
+    <div class="distance-slider-wrap">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">
+        <input type="text" id="zip-input" placeholder="Your zip" value="12438" maxlength="5"
+          style="width:80px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;text-align:center" />
+        <label style="flex:1;display:flex;justify-content:space-between;margin:0">
+          <span id="location-label">Halcottsville</span>
+          <span id="distance-label">Any distance</span>
+        </label>
+      </div>
+      <input type="range" id="distance-slider" min="0" max="120" value="120" step="5" />
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="stats" id="stats"></div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="list">List</button>
+        <button class="view-btn" data-view="calendar">Calendar</button>
+      </div>
+    </div>
+    <div id="events"></div>
+  </div>
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const CATEGORY_LABELS = {
+      music: 'Music', food: 'Food & Drink', culture: 'Arts & Culture',
+      nature: 'Nature', community: 'Community', nightlife: 'Nightlife',
+      wellness: 'Wellness', other: 'Other',
+    };
+    const FULL_DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    let allEvents = [];
+    let homeLat = 42.2079, homeLng = -74.5998;
+    let activeCategories = new Set();
+    let activeTime = 'all';
+    let searchQuery = '';
+    let maxDistance = 120;
+    let activeView = 'list';
+    let calWeekOffset = 0;
+    let calEventMap = {};
+
+    function toRad(d) { return d * Math.PI / 180; }
+
+    function haversine(lat1, lng1, lat2, lng2) {
+      const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+      return 3959 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function bearingDeg(lat1, lng1, lat2, lng2) {
+      const dLng = toRad(lng2 - lng1);
+      const y = Math.sin(dLng) * Math.cos(toRad(lat2));
+      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLng);
+      return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+    }
+
+    function computeDistances() {
+      for (const e of allEvents) {
+        if (e._lat != null && e._lng != null) {
+          e._miles = Math.round(haversine(homeLat, homeLng, e._lat, e._lng));
+          e._bearing = bearingDeg(homeLat, homeLng, e._lat, e._lng);
+        } else {
+          e._miles = null;
+          e._bearing = null;
+        }
+      }
+    }
+
+    function parseTime(t) {
+      if (!t || t === 'null') return 9999;
+      const m = t.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm|AM|PM)?/);
+      if (!m) return 9999;
+      let h = parseInt(m[1]);
+      const min = parseInt(m[2] || '0');
+      const ampm = (m[3] || '').toLowerCase();
+      if (ampm === 'pm' && h < 12) h += 12;
+      if (ampm === 'am' && h === 12) h = 0;
+      return h * 60 + min;
+    }
+
+    function sortByTime(events) {
+      return events.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+    }
+
+    function syncToUrl() {
+      const p = new URLSearchParams();
+      if (activeView !== 'list') p.set('view', activeView);
+      if (activeTime !== 'all') p.set('when', activeTime);
+      if (activeCategories.size) p.set('cat', [...activeCategories].join(','));
+      if (searchQuery) p.set('q', searchQuery);
+      if (maxDistance < 120) p.set('dist', maxDistance);
+      if (calWeekOffset) p.set('week', calWeekOffset);
+      const zip = document.getElementById('zip-input').value;
+      if (zip !== '12438') p.set('zip', zip);
+      const str = p.toString();
+      history.replaceState(null, '', str ? '?' + str : location.pathname);
+    }
+
+    function readFromUrl() {
+      const p = new URLSearchParams(location.search);
+      if (p.has('view')) activeView = p.get('view');
+      if (p.has('when')) activeTime = p.get('when');
+      if (p.has('cat')) p.get('cat').split(',').forEach(c => activeCategories.add(c));
+      if (p.has('q')) { searchQuery = p.get('q'); document.getElementById('search').value = searchQuery; }
+      if (p.has('dist')) { maxDistance = parseInt(p.get('dist')); document.getElementById('distance-slider').value = maxDistance; document.getElementById('distance-label').textContent = `Within ${maxDistance} mi`; }
+      if (p.has('week')) calWeekOffset = parseInt(p.get('week'));
+      if (p.has('zip')) { const z = p.get('zip'); document.getElementById('zip-input').value = z; geocodeZip(z); }
+
+      // Sync button states
+      document.querySelectorAll('.filter-btn[data-time]').forEach(b => {
+        b.classList.toggle('active', b.dataset.time === activeTime);
+      });
+      document.querySelectorAll('.filter-btn[data-category]').forEach(b => {
+        b.classList.toggle('active', activeCategories.has(b.dataset.category));
+      });
+      document.querySelectorAll('.view-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === activeView);
+      });
+      document.getElementById('events').classList.toggle('wide', activeView === 'calendar');
+    }
+
+    async function geocodeZip(zip) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${zip}&country=US&format=json&limit=1`, {
+          headers: { 'User-Agent': 'CatskillsEvents/1.0' }
+        });
+        const data = await res.json();
+        if (data.length) {
+          homeLat = parseFloat(data[0].lat);
+          homeLng = parseFloat(data[0].lon);
+          const name = data[0].display_name.split(',')[0];
+          document.getElementById('location-label').textContent = name;
+          computeDistances();
+          render();
+        }
+      } catch {}
+    }
+
+    async function init() {
+      const res = await fetch('./output/events.json');
+      allEvents = await res.json();
+      readFromUrl();
+      computeDistances();
+      render();
+      bindFilters();
+    }
+
+    function bindFilters() {
+      document.querySelectorAll('.filter-btn[data-time]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn[data-time]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeTime = btn.dataset.time;
+          render();
+        });
+      });
+
+      document.querySelectorAll('.filter-btn[data-category]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('active');
+          const cat = btn.dataset.category;
+          if (activeCategories.has(cat)) activeCategories.delete(cat);
+          else activeCategories.add(cat);
+          render();
+        });
+      });
+
+      document.getElementById('search').addEventListener('input', e => {
+        searchQuery = e.target.value.toLowerCase();
+        render();
+      });
+
+      const slider = document.getElementById('distance-slider');
+      const distLabel = document.getElementById('distance-label');
+      slider.addEventListener('input', () => {
+        maxDistance = parseInt(slider.value);
+        distLabel.textContent = maxDistance >= 120 ? 'Any distance' : `Within ${maxDistance} mi`;
+        render();
+      });
+
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeView = btn.dataset.view;
+          calWeekOffset = 0;
+          document.getElementById('events').classList.toggle('wide', activeView === 'calendar');
+          render();
+        });
+      });
+
+      let zipTimer;
+      document.getElementById('zip-input').addEventListener('input', e => {
+        clearTimeout(zipTimer);
+        const zip = e.target.value.trim();
+        if (zip.length === 5 && /^\d{5}$/.test(zip)) {
+          zipTimer = setTimeout(() => geocodeZip(zip), 300);
+        }
+      });
+    }
+
+    function classifyTime(event) {
+      if (!event.date) return 'month';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const d = new Date(event.date + 'T00:00:00');
+
+      if (d < today) return 'past';
+      if (d.getTime() === today.getTime()) return 'tonight';
+
+      const endOfWeek = new Date(today);
+      endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
+      if (d <= endOfWeek) return 'week';
+
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      if (d <= endOfMonth) return 'month';
+
+      return 'later';
+    }
+
+    function matchesFilters(event) {
+      const timeBucket = classifyTime(event);
+      if (timeBucket === 'past') return false;
+
+      if (activeTime === 'tonight' && timeBucket !== 'tonight') return false;
+      if (activeTime === 'week' && timeBucket !== 'tonight' && timeBucket !== 'week') return false;
+      if (activeTime === 'month' && timeBucket === 'later') return false;
+
+      if (activeCategories.size > 0 && !activeCategories.has(event.category)) return false;
+
+      if (searchQuery) {
+        const hay = [event.name, event.venue, event.town, event.description]
+          .filter(Boolean).join(' ').toLowerCase();
+        if (!hay.includes(searchQuery)) return false;
+      }
+
+      if (maxDistance < 120 && event._miles != null && event._miles > maxDistance) return false;
+
+      return true;
+    }
+
+    function render() {
+      syncToUrl();
+      const filtered = allEvents.filter(matchesFilters);
+      const container = document.getElementById('events');
+      document.getElementById('stats').textContent = `${filtered.length} events`;
+
+      if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state">No events match your filters</div>';
+        return;
+      }
+
+      if (activeView === 'calendar') {
+        renderCalendar(filtered, container);
+      } else {
+        renderList(filtered, container);
+      }
+    }
+
+    function renderList(filtered, container) {
+      const bucketOrder = ['tonight', 'week', 'month', 'later'];
+      const bucketLabels = { tonight: 'Tonight', week: 'This Week', month: 'This Month', later: 'Coming Up' };
+      const grouped = {};
+      for (const e of filtered) {
+        const bucket = classifyTime(e);
+        if (!grouped[bucket]) grouped[bucket] = [];
+        grouped[bucket].push(e);
+      }
+
+      let html = '';
+      for (const bucket of bucketOrder) {
+        const events = grouped[bucket];
+        if (!events || !events.length) continue;
+
+        sortByTime(events);
+
+        html += `<div class="section-header">${bucketLabels[bucket]}<span class="event-count">${events.length}</span></div>`;
+
+        for (const e of events) {
+          html += renderEventCard(e);
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderEventCard(e) {
+      const d = e.date ? new Date(e.date + 'T00:00:00') : null;
+      const dayName = d ? DAY_NAMES[d.getDay()] : '';
+      const dayNum = d ? d.getDate() : '?';
+      const timePart = e.time && e.time !== 'null' ? e.time : '';
+      const venuePart = [e.venue, e.town].filter(Boolean).join(', ');
+      const metaParts = [timePart, venuePart].filter(Boolean).join(' • ');
+      const cat = e.category || 'other';
+      const tagClass = `tag-${cat}`;
+      const sourceLinks = buildSourceLinks(e);
+
+      return `
+        <div class="event-card">
+          <div class="event-date-col">
+            <div class="day-name">${dayName}</div>
+            <div class="day-num">${dayNum}</div>
+          </div>
+          <div class="event-body">
+            <div class="event-name">${e.url ? `<a href="${esc(e.url)}" target="_blank" class="event-link">${esc(e.name)} <span class="link-icon">&#x1F517;</span></a>` : esc(e.name)}</div>
+            ${metaParts ? `<div class="event-meta">${esc(metaParts)}</div>` : ''}
+            ${e.description ? `<div class="event-desc">${esc(e.description)}</div>` : ''}
+            <span class="event-tag ${tagClass}">${CATEGORY_LABELS[cat] || cat}</span>
+            ${distanceBadge(e)}
+            ${sourceLinks}
+          </div>
+        </div>`;
+    }
+
+    function renderCalendar(filtered, container) {
+      calEventMap = {};
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Rolling 7-day window starting from today + offset
+      const start = new Date(today);
+      start.setDate(today.getDate() + (calWeekOffset * 7));
+
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        days.push(d);
+      }
+
+      const weekLabel = `${MONTH_NAMES[days[0].getMonth()]} ${days[0].getDate()} – ${MONTH_NAMES[days[6].getMonth()]} ${days[6].getDate()}`;
+
+      // Group filtered events by date string
+      const byDate = {};
+      for (const e of filtered) {
+        if (!e.date) continue;
+        if (!byDate[e.date]) byDate[e.date] = [];
+        byDate[e.date].push(e);
+      }
+
+      let html = `
+        <div class="cal-week-nav">
+          <button onclick="calWeekOffset--;render()">← Prev</button>
+          <span class="cal-week-label">${weekLabel}</span>
+          <button onclick="calWeekOffset++;render()">Next →</button>
+        </div>
+        <div class="cal-grid">`;
+
+      for (const day of days) {
+        const dateStr = day.toISOString().slice(0, 10);
+        const isToday = day.getTime() === today.getTime();
+        const dayEvents = sortByTime(byDate[dateStr] || []);
+        const cat = isToday ? 'cal-day today' : 'cal-day';
+
+        html += `<div class="${cat}">`;
+        html += `<div class="cal-day-header">${FULL_DAY_NAMES[day.getDay()].slice(0, 3)} <span class="cal-day-num">${day.getDate()}</span></div>`;
+
+        for (let ei = 0; ei < dayEvents.length; ei++) {
+          const e = dayEvents[ei];
+          const timePart = e.time && e.time !== 'null' ? `<span class="cal-event-time">${esc(e.time)}</span> ` : '';
+          const catCls = `tag-${e.category || 'other'}`;
+          const eid = `${dateStr}-${ei}`;
+          calEventMap[eid] = e;
+          html += `<div class="cal-event" data-eid="${eid}">
+            ${timePart}<span class="cal-event-name">${e.url ? `<a href="${esc(e.url)}" target="_blank" class="event-link">${esc(e.name)}</a>` : esc(e.name)}</span>
+            ${e.venue ? `<div class="cal-event-venue">${esc(e.venue)}</div>` : ''}
+            <span class="event-tag ${catCls}">${CATEGORY_LABELS[e.category] || e.category || 'other'}</span>
+            ${distanceBadge(e)}
+          </div>`;
+        }
+
+        if (!dayEvents.length) {
+          html += '<div style="color:var(--text-muted);font-size:11px;opacity:0.5">No events</div>';
+        }
+
+        html += '</div>';
+      }
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function distanceBadge(e) {
+      if (e._miles == null) return '';
+      const mi = e._miles;
+      const cls = mi <= 15 ? 'distance-close' : mi <= 40 ? 'distance-medium' : 'distance-far';
+      const deg = e._bearing != null ? Math.round(e._bearing) : 0;
+      return ` <span class="distance-badge ${cls}"><span class="direction-arrow" style="transform:rotate(${deg}deg)">↑</span>${mi} mi</span>`;
+    }
+
+    function buildSourceLinks(e) {
+      const urls = e.sourceUrls || {};
+      const sources = e.sources || (e.source ? [e.source] : []);
+      if (!sources.length && !e.sourceUrl) return '';
+
+      // Single source, no merge
+      if (!sources.length && e.sourceUrl) {
+        return `<div class="event-sources">via <a href="${esc(e.sourceUrl)}" target="_blank">${esc(e.source || 'source')}</a></div>`;
+      }
+
+      const links = sources.map(s => {
+        const url = urls[s] || e.sourceUrl;
+        return url
+          ? `<a href="${esc(url)}" target="_blank">${esc(s)}</a>`
+          : esc(s);
+      });
+
+      return `<div class="event-sources">via ${links.join('<span class="source-sep">·</span>')}</div>`;
+    }
+
+    function esc(s) {
+      const el = document.createElement('span');
+      el.textContent = s;
+      return el.innerHTML;
+    }
+
+    const tooltip = document.getElementById('tooltip');
+    let ttVisible = false;
+
+    let lastEid = null;
+
+    document.addEventListener('mousemove', e => {
+      const card = e.target.closest('.cal-event[data-eid]');
+      if (!card) { hideTooltip(); lastEid = null; return; }
+
+      const eid = card.dataset.eid;
+      if (eid !== lastEid) {
+        lastEid = eid;
+        const ev = calEventMap[eid];
+        if (!ev) return;
+
+        const time = ev.time && ev.time !== 'null' ? ev.time : '';
+        const venue = [ev.venue, ev.town].filter(Boolean).join(', ');
+        const meta = [time, venue].filter(Boolean).join(' · ');
+
+        tooltip.innerHTML = `
+          <div class="tt-name">${esc(ev.name)}</div>
+          ${meta ? `<div class="tt-meta">${esc(meta)}</div>` : ''}
+          ${ev.description ? `<div class="tt-desc">${esc(ev.description)}</div>` : ''}
+        `;
+        ttVisible = true;
+        tooltip.classList.add('visible');
+      }
+
+      let top = e.clientY + 14;
+      let left = e.clientX + 14;
+      if (left + 320 > window.innerWidth) left = e.clientX - 330;
+      if (top + tooltip.offsetHeight > window.innerHeight) top = e.clientY - tooltip.offsetHeight - 10;
+      tooltip.style.top = top + 'px';
+      tooltip.style.left = left + 'px';
+    });
+
+    function hideTooltip() {
+      ttVisible = false;
+      tooltip.classList.remove('visible');
+    }
+
+    init();
+  </script>
+</body>
+</html>
