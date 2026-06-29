@@ -8,6 +8,10 @@ import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { WEB_SOURCES } from "./lib/sources.mjs";
 
+const KNOWN_TOWNS = new Set(
+  Object.keys(JSON.parse(readFileSync("./lib/town-coords.json", "utf-8")))
+);
+
 const OUTPUT_DIR = "./output";
 const CONCURRENCY = 5;
 const SCRAPE_CACHE_FILE = `${OUTPUT_DIR}/scrape-cache.json`;
@@ -34,6 +38,35 @@ function getCached(url) {
 
 function setCache(url, events) {
   scrapeCache[url] = { ts: Date.now(), events };
+}
+
+// --- Town helpers ---
+
+const ALLEVENTS_TOWN_RE = /allevents\.in\/([^/]+)\/all/;
+const TOWN_SUFFIXES = ["-ny", "-new-york"];
+
+function extractTownFromUrl(url) {
+  const m = url.match(ALLEVENTS_TOWN_RE);
+  if (!m) return null;
+  let slug = m[1];
+  for (const suffix of TOWN_SUFFIXES) {
+    if (slug.endsWith(suffix)) slug = slug.slice(0, -suffix.length);
+  }
+  return slug.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+}
+
+function backfillTown(event, townHint) {
+  // Extract town from venue parens only if it's a known town name
+  if (!event.town && event.venue) {
+    const m = event.venue.match(/\(([^)]+)\)\s*$/);
+    if (m && KNOWN_TOWNS.has(m[1].toLowerCase().trim())) {
+      event.town = m[1];
+      event.venue = event.venue.replace(/\s*\([^)]+\)\s*$/, "").trim();
+    }
+  }
+  if (!event.town && townHint) {
+    event.town = townHint;
+  }
 }
 
 // --- Helpers ---
@@ -164,9 +197,13 @@ async function handleCalendar(source) {
     }
 
     const { pageTitle, h1, body } = parseHtml(html);
+    const townHint = extractTownFromUrl(url);
     const events = await extractEvents(body, source.name, { pageTitle, h1 });
     console.log(`  ✓ ${events.length} events extracted`);
-    const tagged = events.map((e) => ({ ...e, source: source.name, sourceUrl: url }));
+    const tagged = events.map((e) => {
+      backfillTown(e, townHint);
+      return { ...e, source: source.name, sourceUrl: url };
+    });
     setCache(url, tagged);
     saveScrapeCache();
     allEvents.push(...tagged);
