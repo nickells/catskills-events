@@ -788,7 +788,7 @@
         const events = grouped[bucket];
         if (!events || !events.length) continue;
 
-        sortByTime(events);
+        events.sort((a, b) => (a.date || '').localeCompare(b.date || '') || parseTime(a.time) - parseTime(b.time));
 
         html += `<div class="section-header">${bucketLabels[bucket]}<span class="event-count">${events.length}</span></div>`;
 
