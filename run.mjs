@@ -2,7 +2,7 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import * as cheerio from "cheerio";
 import { fetchPage } from "./lib/fetch.mjs";
-import { extractEvents } from "./lib/openai.mjs";
+import { extractEvents, resolveVenueTowns } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
@@ -299,6 +299,23 @@ async function main() {
   console.log(`Before: ${allEvents.length} events`);
   const deduped = deduplicateEvents(allEvents);
   console.log(`After: ${deduped.length} events`);
+
+  // Resolve missing towns via LLM
+  const needsTown = deduped.filter((e) => !e.town && e.venue);
+  if (needsTown.length) {
+    const uniqueVenues = [...new Set(needsTown.map((e) => e.venue))];
+    console.log(`\n--- Town Resolution (${uniqueVenues.length} venues) ---`);
+    const townMap = await resolveVenueTowns(uniqueVenues);
+    let filled = 0;
+    for (const e of needsTown) {
+      const town = townMap[e.venue];
+      if (town) {
+        e.town = town;
+        filled++;
+      }
+    }
+    console.log(`  Resolved ${filled}/${needsTown.length} events`);
+  }
 
   // Geocode events and add coordinates
   loadGeoCache();
