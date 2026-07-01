@@ -283,11 +283,19 @@ async function handleTockify(source) {
       const tagTown = tags.find((t) => KNOWN_TOWNS.has(t.toLowerCase()));
       const town = loc.c_locality || tagTown || null;
 
+      // Extract venue from title if place field is empty (e.g. "Locals Night at Wayside Cider")
+      const titleText = c.summary?.text || "Unknown Event";
+      let venue = c.place || null;
+      if (!venue) {
+        const atMatch = titleText.match(/\bat\s+(.+)/i);
+        if (atMatch) venue = atMatch[1].trim();
+      }
+
       return {
-        name: c.summary?.text || "Unknown Event",
+        name: titleText,
         date,
         time: timeStr,
-        venue: c.place || null,
+        venue,
         town,
         description: c.description?.text?.slice(0, 200) || null,
         url: c.customButtonLink || `https://tockify.com/${source.tockifyCalendar}/detail/${e.eid?.uid}`,
