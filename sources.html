@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sources – Catskills Events</title>
+  <style>
+    :root {
+      --bg: #faf9f6;
+      --card-bg: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6b6b6b;
+      --border: #e5e2dc;
+      --accent: #2d5a27;
+      --accent-light: #e8f0e6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px 120px;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header h1 a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    header h1 a:hover {
+      text-decoration: underline;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .header-nav a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .header-nav a:hover {
+      text-decoration: underline;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 32px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--text);
+    }
+
+    h2:first-of-type {
+      margin-top: 0;
+    }
+
+    .source-card {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .source-card:last-child {
+      border-bottom: none;
+    }
+
+    .source-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .source-name a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .source-name a:hover {
+      text-decoration: underline;
+    }
+
+    .source-type {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--accent-light);
+      color: var(--accent);
+      margin-left: 8px;
+    }
+
+    .source-url {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      word-break: break-all;
+    }
+
+    .source-url a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .source-url a:hover {
+      text-decoration: underline;
+    }
+
+    .venue-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .venue-item {
+      font-size: 14px;
+      padding: 8px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .venue-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    .intro {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><a href="index.html">Catskills Events</a></h1>
+      <div class="header-nav">
+        <a href="index.html">&larr; Back to events</a>
+      </div>
+    </header>
+
+    <p class="intro">
+      Events are aggregated from the following sources. Each event links back
+      to its original listing. If you run a local venue or calendar and would
+      like to be included, open an issue on the project.
+    </p>
+
+    <h2>Aggregator Sources</h2>
+    <div id="aggregators"></div>
+
+    <h2>Instagram</h2>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
+      Local town and tourism Instagram accounts. Event details are extracted
+      from post captions and image text using AI.
+    </p>
+    <div id="instagram"></div>
+
+    <h2>Venue &amp; Organization Sources</h2>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
+      Events from these venues were discovered through the aggregators above
+      or scraped directly from venue sites.
+    </p>
+    <div class="venue-list" id="venues"></div>
+  </div>
+
+  <script>
+    const AGGREGATORS = [
+      { name: "Catskill Crew", url: "https://catskillcrew.beehiiv.com/", type: "newsletter" },
+      { name: "VISITvortex", url: "https://visitvortex.com/events", type: "calendar" },
+      { name: "HVNY", url: "https://hvny.info/calendar", type: "calendar" },
+      { name: "Great Northern Catskills", url: "https://www.greatnortherncatskills.com/events", type: "calendar" },
+      { name: "Chronogram", url: "https://calendar.chronogram.com/hudsonvalley/EventSearch?v=d", type: "calendar" },
+      { name: "Catskill Mountain Foundation", url: "https://www.catskillmtn.org/performances/", type: "calendar" },
+      { name: "Great Western Catskills", url: "https://greatwesterncatskills.com/events/", type: "calendar" },
+      { name: "AllEvents.in", url: "https://allevents.in/catskill/all", type: "calendar" },
+    ];
+
+    const INSTAGRAM = [
+      { handle: "visitmargaretvilleny", label: "Visit Margaretville NY" },
+      { handle: "roxburyinthecatskills", label: "Roxbury in the Catskills" },
+      { handle: "visitfleischmannsny", label: "Visit Fleischmanns NY" },
+      { handle: "tannersville_ny", label: "Tannersville NY" },
+      { handle: "livingstonmanorny", label: "Livingston Manor NY" },
+      { handle: "catskillhappenings", label: "Catskill Happenings" },
+      { handle: "visitcatskills", label: "Visit the Catskills" },
+      { handle: "sullivancatskills", label: "Sullivan Catskills" },
+      { handle: "catskilltourism", label: "Great Northern Catskills" },
+      { handle: "hudsonvalleyevents", label: "Hudson Valley Events" },
+    ];
+
+    const TYPE_LABELS = { newsletter: "Newsletter", calendar: "Event Calendar" };
+
+    function esc(s) {
+      const el = document.createElement('span');
+      el.textContent = s;
+      return el.innerHTML;
+    }
+
+    const aggContainer = document.getElementById('aggregators');
+    document.getElementById('instagram').innerHTML = INSTAGRAM.map(s => `
+      <div class="source-card">
+        <span class="source-name"><a href="https://instagram.com/${esc(s.handle)}/" target="_blank">@${esc(s.handle)}</a></span>
+        <span class="source-type">Instagram</span>
+        <div class="source-url" style="margin-top:1px">${esc(s.label)}</div>
+      </div>
+    `).join('');
+
+    aggContainer.innerHTML = AGGREGATORS.map(s => `
+      <div class="source-card">
+        <span class="source-name"><a href="${esc(s.url)}" target="_blank">${esc(s.name)}</a></span>
+        <span class="source-type">${TYPE_LABELS[s.type] || s.type}</span>
+        <div class="source-url"><a href="${esc(s.url)}" target="_blank">${esc(s.url)}</a></div>
+      </div>
+    `).join('');
+
+    fetch('./output/events.json')
+      .then(r => r.json())
+      .then(events => {
+        const aggregatorNames = new Set(AGGREGATORS.map(a => a.name));
+        const venueCounts = {};
+
+        for (const e of events) {
+          const sources = e.sources || (e.source ? [e.source] : []);
+          for (const s of sources) {
+            if (!aggregatorNames.has(s)) {
+              venueCounts[s] = (venueCounts[s] || 0) + 1;
+            }
+          }
+        }
+
+        const sorted = Object.entries(venueCounts).sort((a, b) => a[0].localeCompare(b[0]));
+        document.getElementById('venues').innerHTML = sorted.map(([name, count]) =>
+          `<div class="venue-item">${esc(name)}<span class="venue-count">${count} event${count !== 1 ? 's' : ''}</span></div>`
+        ).join('');
+      });
+  </script>
+</body>
+</html>

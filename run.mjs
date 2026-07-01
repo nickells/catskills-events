@@ -6,7 +6,8 @@ import { extractEvents, resolveVenueTowns } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
-import { WEB_SOURCES } from "./lib/sources.mjs";
+import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
+import { scrapeInstagramProfiles } from "./lib/instagram.mjs";
 
 const KNOWN_TOWNS = new Set(
   Object.keys(JSON.parse(readFileSync("./lib/town-coords.json", "utf-8")))
@@ -262,6 +263,53 @@ async function handleVenues() {
   return allEvents;
 }
 
+async function handleInstagram() {
+  console.log(`\n[Instagram] Scraping ${INSTAGRAM_SOURCES.length} profiles...`);
+
+  const profiles = await scrapeInstagramProfiles(INSTAGRAM_SOURCES);
+  const allEvents = [];
+
+  for (const profile of profiles) {
+    if (!profile.posts.length) continue;
+
+    const cacheKey = `instagram:${profile.handle}`;
+    const cached = getCached(cacheKey);
+    if (cached) {
+      console.log(`  @${profile.handle} — ${cached.length} events (cached)`);
+      allEvents.push(...cached);
+      continue;
+    }
+
+    // Combine all post alt texts into a single document for the LLM
+    const postTexts = profile.posts
+      .map((p, i) => `--- Post ${i + 1} ---\n${p.alt}`)
+      .join("\n\n");
+
+    const events = await extractEvents(
+      postTexts,
+      `Instagram @${profile.handle}`,
+      { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }
+    );
+    console.log(`  @${profile.handle} — ${events.length} events extracted`);
+
+    const tagged = events.map((e) => {
+      if (!e.town && profile.town) e.town = profile.town;
+      return {
+        ...e,
+        source: `Instagram @${profile.handle}`,
+        sourceUrl: `https://www.instagram.com/${profile.handle}/`,
+      };
+    });
+
+    setCache(cacheKey, tagged);
+    allEvents.push(...tagged);
+  }
+
+  saveScrapeCache();
+  console.log(`  ✓ ${allEvents.length} total Instagram events`);
+  return allEvents;
+}
+
 // --- Main ---
 
 async function main() {
@@ -292,6 +340,14 @@ async function main() {
     allEvents.push(...venueEvents);
   } catch (err) {
     console.error(`  ✗ Error processing venues: ${err.message}`);
+  }
+
+  // Process Instagram profiles
+  try {
+    const igEvents = await handleInstagram();
+    allEvents.push(...igEvents);
+  } catch (err) {
+    console.error(`  ✗ Error processing Instagram: ${err.message}`);
   }
 
   // Deduplicate
