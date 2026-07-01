@@ -7,11 +7,12 @@ import { deduplicateEvents } from "./lib/dedup.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
-import { scrapeInstagramProfiles } from "./lib/instagram.mjs";
+import { scrapeInstagramProfiles, formatPostsForLLM } from "./lib/instagram.mjs";
 
 const KNOWN_TOWNS = new Set(
   Object.keys(JSON.parse(readFileSync("./lib/town-coords.json", "utf-8")))
 );
+
 
 const OUTPUT_DIR = "./output";
 const CONCURRENCY = 5;
@@ -280,10 +281,7 @@ async function handleInstagram() {
       continue;
     }
 
-    // Combine all post alt texts into a single document for the LLM
-    const postTexts = profile.posts
-      .map((p, i) => `--- Post ${i + 1} ---\n${p.alt}`)
-      .join("\n\n");
+    const postTexts = formatPostsForLLM(profile.posts);
 
     const events = await extractEvents(
       postTexts,
@@ -356,21 +354,30 @@ async function main() {
   const deduped = deduplicateEvents(allEvents);
   console.log(`After: ${deduped.length} events`);
 
-  // Resolve missing towns via LLM
+  // Resolve missing towns (and correct address-as-venue-name) via LLM
   const needsTown = deduped.filter((e) => !e.town && e.venue);
   if (needsTown.length) {
     const uniqueVenues = [...new Set(needsTown.map((e) => e.venue))];
     console.log(`\n--- Town Resolution (${uniqueVenues.length} venues) ---`);
-    const townMap = await resolveVenueTowns(uniqueVenues);
+    const venueMap = await resolveVenueTowns(uniqueVenues);
     let filled = 0;
     for (const e of needsTown) {
-      const town = townMap[e.venue];
-      if (town) {
-        e.town = town;
+      const info = venueMap[e.venue];
+      if (!info) continue;
+      if (info.venueName) e.venue = info.venueName;
+      if (info.town) {
+        e.town = info.town;
         filled++;
       }
     }
     console.log(`  Resolved ${filled}/${needsTown.length} events`);
+  }
+
+  // Normalize town names: strip state suffixes like ", NY" or " New York"
+  for (const e of deduped) {
+    if (e.town) {
+      e.town = e.town.replace(/,?\s*(NY|New York|USA)$/i, "").trim();
+    }
   }
 
   // Geocode events and add coordinates

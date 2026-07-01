@@ -26,11 +26,10 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - run: npx playwright install --with-deps chromium chrome
       - run: node run.mjs
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PROXY_URL: ${{ secrets.PROXY_URL }}
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
       - name: Prepare site
         run: |
           mkdir _site
