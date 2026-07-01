@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import * as cheerio from "cheerio";
-import { fetchPage } from "./lib/fetch.mjs";
+import { fetchPage, fetchPageWithBrowser, closeBrowser } from "./lib/fetch.mjs";
 import { extractEvents, resolveVenueTowns, ocrEventImage } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
@@ -198,9 +198,20 @@ async function handleCalendar(source) {
       continue;
     }
 
-    const { pageTitle, h1, body } = parseHtml(html);
+    let { pageTitle, h1, body } = parseHtml(html);
     const townHint = extractTownFromUrl(url);
-    const events = await extractEvents(body, source.name, { pageTitle, h1 });
+    let events = await extractEvents(body, source.name, { pageTitle, h1 });
+
+    // Fallback: if 0 events, the page may be JS-rendered — retry with Playwright
+    if (!events.length) {
+      console.log(`  → 0 events from static HTML, trying browser render...`);
+      const rendered = await fetchPageWithBrowser(url);
+      if (rendered) {
+        ({ pageTitle, h1, body } = parseHtml(rendered));
+        events = await extractEvents(body, source.name, { pageTitle, h1 });
+      }
+    }
+
     console.log(`  ✓ ${events.length} events extracted`);
     const tagged = events.map((e) => {
       backfillTown(e, townHint);
@@ -451,6 +462,8 @@ async function main() {
 
   writeFileSync(`${OUTPUT_DIR}/events.md`, markdown);
   writeFileSync(`${OUTPUT_DIR}/events.json`, JSON.stringify(json, null, 2));
+
+  await closeBrowser();
 
   console.log(`\n--- Done ---`);
   console.log(`Saved ${deduped.length} events to output/events.md and output/events.json`);
