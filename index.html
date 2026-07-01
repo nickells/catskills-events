@@ -795,18 +795,20 @@
 
         html += `<div class="section-header">${bucketLabels[bucket]}<span class="event-count">${events.length}</span></div>`;
 
+        const showMonth = bucket === 'month' || bucket === 'later';
         for (const e of events) {
-          html += renderEventCard(e);
+          html += renderEventCard(e, showMonth);
         }
       }
 
       container.innerHTML = html;
     }
 
-    function renderEventCard(e) {
+    function renderEventCard(e, showMonth) {
       const d = e.date ? new Date(e.date + 'T00:00:00') : null;
       const dayName = d ? DAY_NAMES[d.getDay()] : '';
       const dayNum = d ? d.getDate() : '?';
+      const monthLabel = (d && showMonth) ? MONTH_NAMES[d.getMonth()] : '';
       const timePart = e.time && e.time !== 'null' ? e.time : '';
       const venuePart = [e.venue, e.town].filter(Boolean).join(', ');
       const metaParts = [timePart, venuePart].filter(Boolean).join(' • ');
@@ -817,8 +819,9 @@
       return `
         <div class="event-card">
           <div class="event-date-col">
-            <div class="day-name">${dayName}</div>
+            <div class="day-name">${monthLabel ? monthLabel : dayName}</div>
             <div class="day-num">${dayNum}</div>
+            ${monthLabel ? `<div class="day-name">${dayName}</div>` : ''}
           </div>
           <div class="event-body">
             <div class="event-name">${e.url ? `<a href="${esc(e.url)}" target="_blank" class="event-link">${esc(e.name)} <span class="link-icon">&#x1F517;</span></a>` : esc(e.name)}</div>
