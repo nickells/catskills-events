@@ -2,7 +2,7 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import * as cheerio from "cheerio";
 import { fetchPage } from "./lib/fetch.mjs";
-import { extractEvents, resolveVenueTowns } from "./lib/openai.mjs";
+import { extractEvents, resolveVenueTowns, ocrEventImage } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
@@ -289,6 +289,25 @@ async function handleInstagram() {
       { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }
     );
     console.log(`  @${profile.handle} — ${events.length} events extracted`);
+
+    // OCR flyer images for events missing date or venue
+    const needsOcr = events.filter((e) => !e.date || !e.venue);
+    if (needsOcr.length) {
+      console.log(`    → OCR pass for ${needsOcr.length} incomplete event(s)`);
+      for (const e of needsOcr) {
+        const post = profile.posts.find(
+          (p) => p.url === e.url || (p.caption && p.caption.includes(e.name))
+        );
+        if (!post?.displayUrl) continue;
+        const patched = await ocrEventImage(post.displayUrl, e);
+        for (const [key, val] of Object.entries(patched)) {
+          if (val && !e[key]) e[key] = val;
+        }
+        if (Object.keys(patched).some((k) => patched[k])) {
+          console.log(`      ✓ ${e.name}: filled ${Object.keys(patched).filter((k) => patched[k]).join(", ")}`);
+        }
+      }
+    }
 
     const tagged = events.map((e) => {
       if (!e.town && profile.town) e.town = profile.town;
