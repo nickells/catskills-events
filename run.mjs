@@ -507,10 +507,21 @@ async function main() {
     console.error(`  ✗ Error processing venues: ${err.message}`);
   }
 
-  // Process Instagram profiles
+  // Process Instagram profiles (every other day; use cache on off-days)
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const isIgDay = dayOfYear % 2 === 0;
   try {
-    const igEvents = await handleInstagram();
-    allEvents.push(...igEvents);
+    if (isIgDay || !INSTAGRAM_SOURCES.every((s) => getCached(`instagram:${s.handle}`))) {
+      console.log(isIgDay ? "" : "\n[Instagram] Cache miss — fetching despite off-day");
+      const igEvents = await handleInstagram();
+      allEvents.push(...igEvents);
+    } else {
+      console.log("\n[Instagram] Off-day — using cached events");
+      for (const s of INSTAGRAM_SOURCES) {
+        const cached = getCached(`instagram:${s.handle}`);
+        if (cached) allEvents.push(...cached);
+      }
+    }
   } catch (err) {
     console.error(`  ✗ Error processing Instagram: ${err.message}`);
   }
