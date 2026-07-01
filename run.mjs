@@ -225,6 +225,91 @@ async function handleCalendar(source) {
   return allEvents;
 }
 
+const TOCKIFY_CATEGORY_MAP = {
+  "music": "music", "concert": "music", "live-music": "music", "jazz": "music", "bluegrass": "music",
+  "food": "food", "drinks": "food", "cider": "food", "beer": "food", "market": "food", "farmers-market": "food",
+  "art": "culture", "theater": "culture", "film": "culture", "workshop": "culture", "class": "culture",
+  "pottery": "culture", "reading": "culture", "lecture": "culture", "history": "culture",
+  "hike": "nature", "hiking": "nature", "outdoor": "nature", "garden": "nature", "nature": "nature",
+  "fundraiser": "community", "festival": "community", "parade": "community", "fair": "community",
+  "yoga": "wellness", "meditation": "wellness", "wellness": "wellness",
+  "comedy": "nightlife", "trivia": "nightlife",
+};
+
+function tockifyCategory(tags) {
+  for (const tag of tags) {
+    const mapped = TOCKIFY_CATEGORY_MAP[tag.toLowerCase()];
+    if (mapped) return mapped;
+  }
+  return "community";
+}
+
+async function handleTockify(source) {
+  const cacheKey = `tockify:${source.tockifyCalendar}`;
+  const cached = getCached(cacheKey);
+  if (cached) {
+    console.log(`\n[${source.name}] ✓ ${cached.length} events (cached)`);
+    return cached;
+  }
+
+  const startMs = Date.now();
+  const url = `https://tockify.com/api/ngevent?calname=${source.tockifyCalendar}&max=100&startms=${startMs}`;
+  console.log(`\n[${source.name}] Fetching Tockify API...`);
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.log(`  ✗ Tockify API returned ${res.status}`);
+      return [];
+    }
+    const data = await res.json();
+    const events = (data.events || []).map((e) => {
+      const c = e.content || {};
+      const w = e.when || {};
+      const start = w.start?.millis;
+      const loc = c.location || {};
+      const tags = c.tagset?.tags?.default || [];
+
+      const date = start ? new Date(start).toISOString().slice(0, 10) : null;
+      const timeStr = start ? new Date(start).toLocaleTimeString("en-US", {
+        hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/New_York",
+      }) : null;
+
+      const tagTown = tags.find((t) => KNOWN_TOWNS.has(t.toLowerCase()));
+      const town = loc.c_locality || tagTown || null;
+
+      return {
+        name: c.summary?.text || "Unknown Event",
+        date,
+        time: timeStr,
+        venue: c.place || null,
+        town,
+        description: c.description?.text?.slice(0, 200) || null,
+        url: c.customButtonLink || null,
+        category: tockifyCategory(tags),
+        source: source.name,
+        sourceUrl: `https://greatwesterncatskills.com/events/`,
+        _lat: loc.latitude || null,
+        _lng: loc.longitude || null,
+      };
+    }).filter((e) => e.date);
+
+    // Skip online events
+    const filtered = events.filter((e) => {
+      const name = (e.name || "").toLowerCase();
+      return !name.includes("online") || name.includes("from ");
+    });
+
+    console.log(`  ✓ ${filtered.length} events from Tockify API`);
+    setCache(cacheKey, filtered);
+    saveScrapeCache();
+    return filtered;
+  } catch (err) {
+    console.log(`  ✗ Tockify error: ${err.message}`);
+    return [];
+  }
+}
+
 async function handleVenues() {
   const venuesFile = `${OUTPUT_DIR}/venues-with-events.json`;
   if (!existsSync(venuesFile)) {
@@ -390,6 +475,8 @@ async function main() {
       let events;
       if (source.type === "newsletter-archive") {
         events = await handleNewsletterArchive(source);
+      } else if (source.type === "tockify") {
+        events = await handleTockify(source);
       } else {
         events = await handleCalendar(source);
       }
