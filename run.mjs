@@ -295,16 +295,20 @@ async function handleInstagram() {
     if (needsOcr.length) {
       console.log(`    → OCR pass for ${needsOcr.length} incomplete event(s)`);
       for (const e of needsOcr) {
-        const post = profile.posts.find(
-          (p) => p.url === e.url || (p.caption && p.caption.includes(e.name))
-        );
-        if (!post?.displayUrl) continue;
-        const patched = await ocrEventImage(post.displayUrl, e);
-        for (const [key, val] of Object.entries(patched)) {
-          if (val && !e[key]) e[key] = val;
-        }
-        if (Object.keys(patched).some((k) => patched[k])) {
-          console.log(`      ✓ ${e.name}: filled ${Object.keys(patched).filter((k) => patched[k]).join(", ")}`);
+        try {
+          const post = profile.posts.find(
+            (p) => p.url === e.url || (p.caption && p.caption.includes(e.name))
+          );
+          if (!post?.displayUrl) continue;
+          const patched = await ocrEventImage(post.displayUrl, e);
+          for (const [key, val] of Object.entries(patched)) {
+            if (val && !e[key]) e[key] = val;
+          }
+          if (Object.keys(patched).some((k) => patched[k])) {
+            console.log(`      ✓ ${e.name}: filled ${Object.keys(patched).filter((k) => patched[k]).join(", ")}`);
+          }
+        } catch (err) {
+          console.log(`      ✗ OCR failed for "${e.name}": ${err.message.slice(0, 80)}`);
         }
       }
     }
@@ -313,27 +317,31 @@ async function handleInstagram() {
     const stillIncomplete = events.filter((e) => !e.date || !e.venue);
     if (stillIncomplete.length) {
       for (const e of stillIncomplete) {
-        const post = profile.posts.find(
-          (p) => p.url === e.url || (p.caption && p.caption.includes(e.name))
-        );
-        if (!post?.caption) continue;
-        const urlMatch = post.caption.match(/https?:\/\/[^\s)]+|(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s)]*)?/i);
-        if (!urlMatch) continue;
-        const siteUrl = urlMatch[0].startsWith("http") ? urlMatch[0] : `https://${urlMatch[0]}`;
-        console.log(`    → Fetching linked site for "${e.name}": ${siteUrl}`);
-        const html = await fetchPage(siteUrl);
-        if (!html) continue;
-        const { body } = parseHtml(html);
-        const siteEvents = await extractEvents(body.slice(0, 20_000), `${siteUrl} (via Instagram)`, {});
-        const match = siteEvents.find((se) =>
-          se.name && e.name && se.name.toLowerCase().includes(e.name.toLowerCase().split(" ")[0])
-        ) || siteEvents[0];
-        if (match) {
-          if (match.date && !e.date) { e.date = match.date; console.log(`      ✓ filled date: ${match.date}`); }
-          if (match.time && !e.time) { e.time = match.time; console.log(`      ✓ filled time: ${match.time}`); }
-          if (match.venue && !e.venue) { e.venue = match.venue; console.log(`      ✓ filled venue: ${match.venue}`); }
-          if (match.town && !e.town) { e.town = match.town; console.log(`      ✓ filled town: ${match.town}`); }
-          if (match.description && !e.description) e.description = match.description;
+        try {
+          const post = profile.posts.find(
+            (p) => p.url === e.url || (p.caption && p.caption.includes(e.name))
+          );
+          if (!post?.caption) continue;
+          const urlMatch = post.caption.match(/https?:\/\/[^\s)]+|(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s)]*)?/i);
+          if (!urlMatch) continue;
+          const siteUrl = urlMatch[0].startsWith("http") ? urlMatch[0] : `https://${urlMatch[0]}`;
+          console.log(`    → Fetching linked site for "${e.name}": ${siteUrl}`);
+          const html = await fetchPage(siteUrl);
+          if (!html) continue;
+          const { body } = parseHtml(html);
+          const siteEvents = await extractEvents(body.slice(0, 20_000), `${siteUrl} (via Instagram)`, {});
+          const match = siteEvents.find((se) =>
+            se.name && e.name && se.name.toLowerCase().includes(e.name.toLowerCase().split(" ")[0])
+          ) || siteEvents[0];
+          if (match) {
+            if (match.date && !e.date) { e.date = match.date; console.log(`      ✓ filled date: ${match.date}`); }
+            if (match.time && !e.time) { e.time = match.time; console.log(`      ✓ filled time: ${match.time}`); }
+            if (match.venue && !e.venue) { e.venue = match.venue; console.log(`      ✓ filled venue: ${match.venue}`); }
+            if (match.town && !e.town) { e.town = match.town; console.log(`      ✓ filled town: ${match.town}`); }
+            if (match.description && !e.description) e.description = match.description;
+          }
+        } catch (err) {
+          console.log(`      ✗ Site scrape failed for "${e.name}": ${err.message.slice(0, 80)}`);
         }
       }
     }
