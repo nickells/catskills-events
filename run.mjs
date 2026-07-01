@@ -7,7 +7,7 @@ import { deduplicateEvents } from "./lib/dedup.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
-import { scrapeInstagramProfiles, formatPostsForLLM } from "./lib/instagram.mjs";
+import { scrapeInstagramProfiles, collectInstagramResults, formatPostsForLLM } from "./lib/instagram.mjs";
 
 const KNOWN_TOWNS = new Set(
   Object.keys(JSON.parse(readFileSync("./lib/town-coords.json", "utf-8")))
@@ -365,10 +365,10 @@ async function handleVenues() {
   return allEvents;
 }
 
-async function handleInstagram() {
-  console.log(`\n[Instagram] Scraping ${INSTAGRAM_SOURCES.length} profiles...`);
-
-  const profiles = await scrapeInstagramProfiles(INSTAGRAM_SOURCES);
+async function handleInstagram(apifyHandle) {
+  const profiles = apifyHandle
+    ? await collectInstagramResults(apifyHandle)
+    : await scrapeInstagramProfiles(INSTAGRAM_SOURCES);
   const allEvents = [];
 
   for (const profile of profiles) {
@@ -482,6 +482,19 @@ async function main() {
 
   const allEvents = [];
 
+  // Kick off Instagram scrape early so it runs in parallel with web sources
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const isIgDay = dayOfYear % 2 === 0;
+  const needsIgFetch = isIgDay || !INSTAGRAM_SOURCES.every((s) => getCached(`instagram:${s.handle}`));
+  let apifyHandle = null;
+  if (needsIgFetch) {
+    try {
+      apifyHandle = await scrapeInstagramProfiles(INSTAGRAM_SOURCES);
+    } catch (err) {
+      console.error(`  ✗ Error starting Instagram scrape: ${err.message}`);
+    }
+  }
+
   // Process web sources
   for (const source of WEB_SOURCES) {
     try {
@@ -507,13 +520,10 @@ async function main() {
     console.error(`  ✗ Error processing venues: ${err.message}`);
   }
 
-  // Process Instagram profiles (every other day; use cache on off-days)
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const isIgDay = dayOfYear % 2 === 0;
+  // Collect Instagram results (Apify was started earlier in parallel)
   try {
-    if (isIgDay || !INSTAGRAM_SOURCES.every((s) => getCached(`instagram:${s.handle}`))) {
-      console.log(isIgDay ? "" : "\n[Instagram] Cache miss — fetching despite off-day");
-      const igEvents = await handleInstagram();
+    if (apifyHandle) {
+      const igEvents = await handleInstagram(apifyHandle);
       allEvents.push(...igEvents);
     } else {
       console.log("\n[Instagram] Off-day — using cached events");
