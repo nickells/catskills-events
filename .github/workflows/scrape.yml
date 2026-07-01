@@ -30,6 +30,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          PROXY_URL: ${{ secrets.PROXY_URL }}
       - name: Prepare site
         run: |
           mkdir _site
