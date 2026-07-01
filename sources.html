@@ -210,18 +210,8 @@
       { name: "AllEvents.in", url: "https://allevents.in/catskill/all", type: "calendar" },
     ];
 
-    const INSTAGRAM = [
-      { handle: "visitmargaretvilleny", label: "Visit Margaretville NY" },
-      { handle: "roxburyinthecatskills", label: "Roxbury in the Catskills" },
-      { handle: "visitfleischmannsny", label: "Visit Fleischmanns NY" },
-      { handle: "tannersville_ny", label: "Tannersville NY" },
-      { handle: "livingstonmanorny", label: "Livingston Manor NY" },
-      { handle: "catskillhappenings", label: "Catskill Happenings" },
-      { handle: "visitcatskills", label: "Visit the Catskills" },
-      { handle: "sullivancatskills", label: "Sullivan Catskills" },
-      { handle: "catskilltourism", label: "Great Northern Catskills" },
-      { handle: "hudsonvalleyevents", label: "Hudson Valley Events" },
-    ];
+    // Instagram sources are populated dynamically from event data
+    let INSTAGRAM = [];
 
     const TYPE_LABELS = { newsletter: "Newsletter", calendar: "Event Calendar" };
 
@@ -232,13 +222,7 @@
     }
 
     const aggContainer = document.getElementById('aggregators');
-    document.getElementById('instagram').innerHTML = INSTAGRAM.map(s => `
-      <div class="source-card">
-        <span class="source-name"><a href="https://instagram.com/${esc(s.handle)}/" target="_blank">@${esc(s.handle)}</a></span>
-        <span class="source-type">Instagram</span>
-        <div class="source-url" style="margin-top:1px">${esc(s.label)}</div>
-      </div>
-    `).join('');
+    // Instagram section is populated from events.json below
 
     aggContainer.innerHTML = AGGREGATORS.map(s => `
       <div class="source-card">
@@ -252,18 +236,32 @@
       .then(r => r.json())
       .then(events => {
         const aggregatorNames = new Set(AGGREGATORS.map(a => a.name));
+        const igAccounts = {};
         const venueCounts = {};
 
         for (const e of events) {
           const sources = e.sources || (e.source ? [e.source] : []);
           for (const s of sources) {
-            if (!aggregatorNames.has(s)) {
+            if (s.startsWith('Instagram @')) {
+              const handle = s.replace('Instagram @', '');
+              igAccounts[handle] = (igAccounts[handle] || 0) + 1;
+            } else if (!aggregatorNames.has(s)) {
               venueCounts[s] = (venueCounts[s] || 0) + 1;
             }
           }
         }
 
         const sorted = Object.entries(venueCounts).sort((a, b) => a[0].localeCompare(b[0]));
+        // Render Instagram accounts sorted by event count
+        const igSorted = Object.entries(igAccounts).sort((a, b) => b[1] - a[1]);
+        document.getElementById('instagram').innerHTML = igSorted.map(([handle, count]) =>
+          `<div class="source-card">
+            <span class="source-name"><a href="https://instagram.com/${esc(handle)}/" target="_blank">@${esc(handle)}</a></span>
+            <span class="source-type">Instagram</span>
+            <span class="venue-count" style="margin-left:8px">${count} event${count !== 1 ? 's' : ''}</span>
+          </div>`
+        ).join('');
+
         document.getElementById('venues').innerHTML = sorted.map(([name, count]) =>
           `<div class="venue-item">${esc(name)}<span class="venue-count">${count} event${count !== 1 ? 's' : ''}</span></div>`
         ).join('');
