@@ -2,7 +2,7 @@ name: Scrape & Deploy
 
 on:
   schedule:
-    - cron: "0 10 * * *" # 10 AM UTC (6 AM ET) daily
+    - cron: "0 10 */2 * *" # 10 AM UTC (6 AM ET) every other day
   workflow_dispatch:
 
 permissions:
