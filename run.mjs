@@ -86,16 +86,20 @@ async function pool(items, fn, concurrency) {
   return results;
 }
 
-function parseHtml(html) {
+function parseHtml(html, baseUrl) {
   const $ = cheerio.load(html);
   const pageTitle = $("title").text().trim();
   const h1 = $("h1").first().text().trim();
   $("script, style, nav, footer, noscript, iframe, svg").remove();
-  // Convert links to markdown-style so the LLM can see URLs
+  // Resolve relative URLs and convert links to markdown-style so the LLM can see them
   $("a[href]").each((_, el) => {
-    const href = $(el).attr("href");
+    let href = $(el).attr("href");
     const text = $(el).text().trim();
-    if (href && text && href.startsWith("http")) {
+    if (!href || !text) return;
+    if (href.startsWith("/") && baseUrl) {
+      try { href = new URL(href, baseUrl).href; } catch {}
+    }
+    if (href.startsWith("http")) {
       $(el).replaceWith(`[${text}](${href})`);
     }
   });
@@ -154,7 +158,7 @@ async function handleNewsletterArchive(source) {
       continue;
     }
 
-    let { pageTitle, h1, body } = parseHtml(issueHtml);
+    let { pageTitle, h1, body } = parseHtml(issueHtml, issueUrl);
 
     // Catskill Crew: the structured event listings start at a day header
     // Find the earliest one to trim prose/promos before it
@@ -198,7 +202,7 @@ async function handleCalendar(source) {
       continue;
     }
 
-    let { pageTitle, h1, body } = parseHtml(html);
+    let { pageTitle, h1, body } = parseHtml(html, url);
     const townHint = extractTownFromUrl(url);
     let events = await extractEvents(body, source.name, { pageTitle, h1 });
 
@@ -207,7 +211,7 @@ async function handleCalendar(source) {
       console.log(`  → 0 events from static HTML, trying browser render...`);
       const rendered = await fetchPageWithBrowser(url);
       if (rendered) {
-        ({ pageTitle, h1, body } = parseHtml(rendered));
+        ({ pageTitle, h1, body } = parseHtml(rendered, url));
         events = await extractEvents(body, source.name, { pageTitle, h1 });
       }
     }
@@ -339,7 +343,7 @@ async function handleVenues() {
         return [];
       }
 
-      const { pageTitle, h1, body } = parseHtml(html);
+      const { pageTitle, h1, body } = parseHtml(html, venue.eventPageUrl);
       const events = await extractEvents(body, venue.name, { pageTitle, h1 });
       console.log(`  [${done}/${venues.length}] ${venue.name} — ${events.length} events    `);
       const tagged = events.map((e) => ({
@@ -424,7 +428,7 @@ async function handleInstagram() {
           console.log(`    → Fetching linked site for "${e.name}": ${siteUrl}`);
           const html = await fetchPage(siteUrl);
           if (!html) continue;
-          const { body } = parseHtml(html);
+          const { body } = parseHtml(html, siteUrl);
           const siteEvents = await extractEvents(body.slice(0, 20_000), `${siteUrl} (via Instagram)`, {});
           const match = siteEvents.find((se) =>
             se.name && e.name && se.name.toLowerCase().includes(e.name.toLowerCase().split(" ")[0])
