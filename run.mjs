@@ -289,7 +289,7 @@ async function handleTockify(source) {
         venue: c.place || null,
         town,
         description: c.description?.text?.slice(0, 200) || null,
-        url: c.customButtonLink || null,
+        url: c.customButtonLink || `https://tockify.com/${source.tockifyCalendar}/detail/${e.eid?.uid}`,
         category: tockifyCategory(tags),
         source: source.name,
         sourceUrl: `https://greatwesterncatskills.com/events/`,
