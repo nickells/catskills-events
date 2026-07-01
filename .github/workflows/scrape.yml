@@ -1,4 +1,4 @@
-name: Daily Scrape
+name: Scrape & Deploy
 
 on:
   schedule:
@@ -27,11 +27,22 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Restore scrape cache
+        uses: actions/cache/restore@v4
+        with:
+          path: output/scrape-cache.json
+          key: scrape-cache-${{ github.run_id }}
+          restore-keys: scrape-cache-
       - run: node run.mjs
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           PROXY_URL: ${{ secrets.PROXY_URL }}
+      - name: Save scrape cache
+        uses: actions/cache/save@v4
+        with:
+          path: output/scrape-cache.json
+          key: scrape-cache-${{ github.run_id }}
       - name: Prepare site
         run: |
           mkdir _site

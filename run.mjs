@@ -18,6 +18,7 @@ const OUTPUT_DIR = "./output";
 const CONCURRENCY = 5;
 const SCRAPE_CACHE_FILE = `${OUTPUT_DIR}/scrape-cache.json`;
 const CACHE_TTL_MS = 20 * 60 * 60 * 1000; // 20 hours
+const IG_CACHE_TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
 
 let scrapeCache = {};
 
@@ -31,10 +32,10 @@ function saveScrapeCache() {
   writeFileSync(SCRAPE_CACHE_FILE, JSON.stringify(scrapeCache, null, 2));
 }
 
-function getCached(url) {
+function getCached(url, ttl = CACHE_TTL_MS) {
   const entry = scrapeCache[url];
   if (!entry) return null;
-  if (Date.now() - entry.ts > CACHE_TTL_MS) return null;
+  if (Date.now() - entry.ts > ttl) return null;
   return entry.events;
 }
 
@@ -374,12 +375,20 @@ async function handleInstagram() {
     if (!profile.posts.length) continue;
 
     const cacheKey = `instagram:${profile.handle}`;
+    const countKey = `instagram-count:${profile.handle}`;
+
+    // Skip LLM extraction if postsCount hasn't changed since last run
+    const cachedCount = scrapeCache[countKey]?.events;
+    const currentCount = profile.postsCount;
     const cached = getCached(cacheKey);
-    if (cached) {
-      console.log(`  @${profile.handle} — ${cached.length} events (cached)`);
+    if (cached && cachedCount === currentCount) {
+      console.log(`  @${profile.handle} — ${cached.length} events (no new posts)`);
       allEvents.push(...cached);
       continue;
     }
+
+    // Store current postsCount for next comparison
+    setCache(countKey, currentCount);
 
     const postTexts = formatPostsForLLM(profile.posts);
 
