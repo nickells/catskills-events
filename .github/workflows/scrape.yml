@@ -30,6 +30,7 @@ jobs:
       - run: node run.mjs
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PROXY_URL: ${{ secrets.PROXY_URL }}
       - name: Prepare site
         run: |
           mkdir _site
