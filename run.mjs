@@ -9,6 +9,7 @@ import { categorizeEvents } from "./lib/categorize.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { locateEvents } from "./lib/locate.mjs";
+import { cleanEvent } from "./lib/clean.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
 import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
@@ -321,13 +322,23 @@ async function handleTockify(source) {
   }
 }
 
+// Cleans "null" text from an account's events and fills in the account's town where a
+// post named none, for fresh and cached events alike.
+function withAccountTown(events, source) {
+  for (const e of events || []) {
+    cleanEvent(e);
+    if (!e.town && source.town) e.town = source.town;
+  }
+  return events;
+}
+
 async function handleInstagram(profiles) {
   console.log(`\n[Instagram] ${profiles.filter((p) => p.available).length}/${profiles.length} profiles fetched`);
   const allEvents = [];
 
   for (const profile of profiles) {
     const cacheKey = `instagram:${profile.handle}`;
-    const cached = getCached(cacheKey, IG_CACHE_TTL_MS);
+    const cached = withAccountTown(getCached(cacheKey, IG_CACHE_TTL_MS), profile);
 
     if (!profile.available) {
       if (cached) allEvents.push(...cached);
@@ -355,6 +366,7 @@ async function handleInstagram(profiles) {
       (text) => extractEvents(text, `Instagram @${profile.handle}`, { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }),
       scrapeCache
     );
+    events.forEach(cleanEvent);
     console.log(`  @${profile.handle} — ${events.length} events from ${profile.posts.length} posts (${extracted} extracted${failed ? `, ${failed} failed` : ""})`);
 
     // Interpret relative phrases against the post timestamp, then do calendar math in code.
@@ -412,8 +424,7 @@ async function handleInstagram(profiles) {
       }
     }
 
-    const tagged = events.map((e) => {
-      if (!e.town && profile.town) e.town = profile.town;
+    const tagged = withAccountTown(events, profile).map((e) => {
       return {
         ...e,
         source: `Instagram @${profile.handle}`,
@@ -485,7 +496,7 @@ async function main() {
   if (igEvents) allEvents.push(...igEvents);
   else {
     for (const source of instagramSources) {
-      const cached = getCached(`instagram:${source.handle}`, IG_CACHE_TTL_MS);
+      const cached = withAccountTown(getCached(`instagram:${source.handle}`, IG_CACHE_TTL_MS), source);
       if (cached) allEvents.push(...cached);
     }
   }
@@ -503,6 +514,9 @@ async function main() {
   } catch (err) {
     console.error(`  ✗ Error discovering Instagram sources: ${err.message}`);
   }
+
+  // Cached web-source events predate the cleanup in extractEvents.
+  allEvents.forEach(cleanEvent);
 
   // Drop events clearly outside New York (e.g. same-named towns elsewhere)
   const { kept: nyEvents, dropped: outOfState } = filterOutsideNewYork(allEvents);
