@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # commits lib/discovered-sources.json
   pages: write
   id-token: write
 
@@ -41,6 +41,17 @@ jobs:
           META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           PROXY_URL: ${{ secrets.PROXY_URL }}
+      - name: Commit discovered sources
+        continue-on-error: true # never block the cache save and deploy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add lib/discovered-sources.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update discovered Instagram sources"
+            git pull --rebase --autostash
+            git push
+          fi
       - name: Save scrape cache
         uses: actions/cache/save@v4
         with:

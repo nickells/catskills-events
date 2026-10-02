@@ -9,7 +9,9 @@ import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
 import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
+import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
 import {
+  createMetaProfileLookup,
   fetchInstagramProfiles,
   formatPostsForLLM,
   checkInstagramPoll,
@@ -502,9 +504,17 @@ async function main() {
 
   const allEvents = [];
 
+  // Hand-picked sources plus accounts found by discovery on earlier runs.
+  const discovered = loadDiscoveredSources();
+  const handPicked = new Set(INSTAGRAM_SOURCES.map((source) => source.handle.toLowerCase()));
+  const instagramSources = [
+    ...INSTAGRAM_SOURCES,
+    ...discovered.accepted.filter((source) => !handPicked.has(source.handle.toLowerCase())),
+  ];
+
   // Fetch every Instagram profile daily (Meta, with Apify fallback) in parallel with web sources.
   console.log("[Instagram] Fetching profiles in the background...");
-  const instagramFetch = fetchInstagramProfiles(INSTAGRAM_SOURCES, scrapeCache).catch((err) => {
+  const instagramFetch = fetchInstagramProfiles(instagramSources, scrapeCache).catch((err) => {
     console.error(`  ✗ Error fetching Instagram: ${err.message}`);
     return null;
   });
@@ -544,10 +554,24 @@ async function main() {
   }
   if (igEvents) allEvents.push(...igEvents);
   else {
-    for (const source of INSTAGRAM_SOURCES) {
+    for (const source of instagramSources) {
       const cached = getCached(`instagram:${source.handle}`, IG_CACHE_TTL_MS);
       if (cached) allEvents.push(...cached);
     }
+  }
+
+  // Vet accounts that sources @mention; accepted ones are fetched from the next run on.
+  console.log(`\n--- Instagram Discovery ---`);
+  try {
+    await discoverInstagramSources({
+      sources: instagramSources,
+      cache: scrapeCache,
+      registry: discovered,
+      lookupProfile: await createMetaProfileLookup(),
+    });
+    saveDiscoveredSources(discovered);
+  } catch (err) {
+    console.error(`  ✗ Error discovering Instagram sources: ${err.message}`);
   }
 
   // Deduplicate
