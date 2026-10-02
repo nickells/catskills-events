@@ -1,3 +1,70 @@
 {
-  "accepted": []
+  "accepted": [
+    {
+      "handle": "bigeddyfilmfestival",
+      "town": "Narrowsburg",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "theheronny",
+        "callicoontheater"
+      ]
+    },
+    {
+      "handle": "catskill.mtn.embers",
+      "town": "Arkville",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "uniongrovedistillery"
+      ]
+    },
+    {
+      "handle": "greatwesterncatskills",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "visitmargaretvilleny",
+        "thewaltontheatre"
+      ]
+    },
+    {
+      "handle": "mvillecauliflowerfest",
+      "town": "Margaretville",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "visitmargaretvilleny"
+      ]
+    },
+    {
+      "handle": "pollinator.spirits",
+      "town": "Bethel",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "bethelwoodscenter"
+      ]
+    },
+    {
+      "handle": "returnoutpost",
+      "town": "Catskill",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "returnbrewing"
+      ]
+    },
+    {
+      "handle": "see_and_be_kitchen",
+      "town": "Cairo",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "subversivebeer",
+        "catskillfarmersmarket"
+      ]
+    },
+    {
+      "handle": "waltonnychamber",
+      "town": "Walton",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "thewaltontheatre"
+      ]
+    }
+  ]
 }
