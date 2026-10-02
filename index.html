@@ -301,6 +301,85 @@
       margin-bottom: 16px;
     }
 
+    .place-picker {
+      position: relative;
+      flex: none;
+    }
+
+    #zip-input {
+      width: 160px;
+      padding: 6px 28px 6px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--card-bg);
+      cursor: text;
+    }
+
+    #place-toggle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    #zip-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    #place-options {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 20;
+      width: 220px;
+      max-height: 280px;
+      overflow-y: auto;
+      margin: 0;
+      padding: 4px;
+      list-style: none;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    #place-options li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    #place-options li.active,
+    #place-options li[data-i]:hover {
+      background: var(--accent-light);
+    }
+
+    #place-options li .count {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #place-options li.hint {
+      color: var(--text-muted);
+      cursor: default;
+    }
+
     .distance-slider-wrap label {
       font-size: 13px;
       color: var(--text-muted);
@@ -526,10 +605,16 @@
 
     <div class="distance-slider-wrap">
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">
-        <input type="text" id="zip-input" placeholder="Your zip" value="" maxlength="5" inputmode="numeric"
-          style="width:80px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;text-align:center" />
+        <div class="place-picker">
+          <input type="text" id="zip-input" placeholder="Town or zip" value="" autocomplete="off"
+            role="combobox" aria-expanded="false" aria-controls="place-options" aria-label="Your town or zip code" />
+          <button type="button" id="place-toggle" tabindex="-1" aria-label="Show towns">
+            <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <ul id="place-options" role="listbox" hidden></ul>
+        </div>
         <label style="flex:1;display:flex;justify-content:space-between;margin:0">
-          <span id="location-label">Set your zip for distances</span>
+          <span id="location-label">Set your town for distances</span>
           <span id="distance-label">Any distance</span>
         </label>
       </div>
@@ -559,9 +644,29 @@
 
     let allEvents = [];
     let homeLat = null, homeLng = null;
-    const ZIP_KEY = 'catskills-events:zip';
-    function savedZip() { try { return localStorage.getItem(ZIP_KEY) || ''; } catch { return ''; } }
-    function saveZip(zip) { try { zip ? localStorage.setItem(ZIP_KEY, zip) : localStorage.removeItem(ZIP_KEY); } catch {} }
+    // Your place is a zip or a town name. The key predates towns, so saved zips carry over.
+    const PLACE_KEY = 'catskills-events:zip';
+    function savedPlace() { try { return localStorage.getItem(PLACE_KEY) || ''; } catch { return ''; } }
+    function savePlace(place) { try { place ? localStorage.setItem(PLACE_KEY, place) : localStorage.removeItem(PLACE_KEY); } catch {} }
+    let currentPlace = '';
+
+    // Towns that have events, with coordinates taken from the events themselves.
+    let townIndex = new Map();
+    let commonTowns = [];
+    function buildTownIndex() {
+      townIndex = new Map();
+      for (const e of allEvents) {
+        if (!e.town || e._lat == null || /[&,/]/.test(e.town)) continue;
+        const key = e.town.toLowerCase();
+        const town = townIndex.get(key) || { name: e.town, lat: e._lat, lng: e._lng, count: 0 };
+        town.count++;
+        townIndex.set(key, town);
+      }
+      commonTowns = [...townIndex.values()]
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 24)
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
     let activeCategories = new Set();
     let activeTime = 'all';
     let hideStarted = false;
@@ -623,9 +728,8 @@
       if (searchQuery) p.set('q', searchQuery);
       if (maxDistance < 120) p.set('dist', maxDistance);
       if (calWeekOffset) p.set('week', calWeekOffset);
-      const zip = document.getElementById('zip-input').value;
-      // Only shared-link zips go in the URL; your own zip lives in localStorage.
-      if (zip && zip !== savedZip()) p.set('zip', zip);
+      // Only a shared link's place goes in the URL; your own lives in localStorage.
+      if (currentPlace && currentPlace !== savedPlace()) p.set(/^\d{5}$/.test(currentPlace) ? 'zip' : 'near', currentPlace);
       const str = p.toString();
       history.replaceState(null, '', str ? '?' + str : location.pathname);
     }
@@ -639,9 +743,13 @@
       if (p.has('q')) { searchQuery = p.get('q'); document.getElementById('search').value = searchQuery; }
       if (p.has('dist')) { maxDistance = parseInt(p.get('dist')); document.getElementById('distance-slider').value = maxDistance; document.getElementById('distance-label').textContent = `Within ${maxDistance} mi`; }
       if (p.has('week')) calWeekOffset = parseInt(p.get('week'));
-      // A shared link's zip wins for this visit without replacing your saved one.
-      const zip = p.get('zip') || savedZip();
-      if (zip) { document.getElementById('zip-input').value = zip; geocodeZip(zip); }
+      // A shared link's place wins for this visit without replacing your saved one.
+      const place = p.get('zip') || p.get('near') || savedPlace();
+      if (place) {
+        currentPlace = place;
+        document.getElementById('zip-input').value = place;
+        applyPlace(place);
+      }
 
       // Sync button states
       document.querySelectorAll('.filter-btn[data-time]').forEach(b => {
@@ -664,22 +772,57 @@
         });
         const data = await res.json();
         if (data.length) {
-          homeLat = parseFloat(data[0].lat);
-          homeLng = parseFloat(data[0].lon);
           // Postcode results start with the zip itself ("12498, Town of Woodstock, ...").
           const parts = data[0].display_name.split(',').map(part => part.trim());
           const name = (parts.find(part => !/^\d{5}$/.test(part)) || zip).replace(/^(Town|City|Village) of /, '');
-          document.getElementById('location-label').textContent = name;
-          document.getElementById('distance-slider').disabled = false;
-          computeDistances();
-          render();
+          setHome(parseFloat(data[0].lat), parseFloat(data[0].lon), name);
         }
       } catch {}
+    }
+
+    // A saved or shared town that has no events right now.
+    async function geocodeTown(name) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(name)}&state=New%20York&country=US&format=json&limit=1`, {
+          headers: { 'User-Agent': 'CatskillsEvents/1.0' }
+        });
+        const data = await res.json();
+        if (data.length) setHome(parseFloat(data[0].lat), parseFloat(data[0].lon), name);
+      } catch {}
+    }
+
+    function setHome(lat, lng, name) {
+      homeLat = lat;
+      homeLng = lng;
+      // A zip shows the town it resolved to; a picked town is already in the box.
+      const typed = document.getElementById('zip-input').value.trim().toLowerCase();
+      document.getElementById('location-label').textContent = name.toLowerCase() === typed ? '' : name;
+      document.getElementById('distance-slider').disabled = false;
+      computeDistances();
+      render();
+    }
+
+    function clearHome() {
+      homeLat = homeLng = null;
+      document.getElementById('location-label').textContent = 'Set your town for distances';
+      document.getElementById('distance-slider').disabled = true;
+      computeDistances();
+      render();
+    }
+
+    function applyPlace(place) {
+      const value = place.trim();
+      if (!value) return clearHome();
+      if (/^\d{5}$/.test(value)) return geocodeZip(value);
+      const town = townIndex.get(value.toLowerCase());
+      if (town) setHome(town.lat, town.lng, town.name);
+      else geocodeTown(value);
     }
 
     async function init() {
       const res = await fetch('./output/events.json');
       allEvents = await res.json();
+      buildTownIndex();
       readFromUrl();
       computeDistances();
       render();
@@ -736,21 +879,109 @@
         });
       });
 
+      bindPlacePicker();
+    }
+
+    // One field for both: pick a common town from the list, or type a zip.
+    function bindPlacePicker() {
+      const input = document.getElementById('zip-input');
+      const list = document.getElementById('place-options');
+      let shown = [];
+      let active = -1;
       let zipTimer;
-      document.getElementById('zip-input').addEventListener('input', e => {
+
+      function open(filter) {
+        const f = filter.trim().toLowerCase();
+        const digits = /^\d+$/.test(f);
+        shown = digits ? [] : commonTowns.filter(t => t.name.toLowerCase().includes(f));
+        active = -1;
+        list.innerHTML = shown.map((t, i) =>
+          `<li role="option" data-i="${i}">${esc(t.name)}<span class="count">${t.count} event${t.count !== 1 ? 's' : ''}</span></li>`
+        ).join('') || `<li class="hint">${digits ? 'Keep typing your zip' : 'No match. Try a zip code'}</li>`;
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+      }
+
+      function close() {
+        list.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+      }
+
+      function highlight(i) {
+        active = i;
+        list.querySelectorAll('li[data-i]').forEach(li => li.classList.toggle('active', +li.dataset.i === i));
+        list.querySelector('li.active')?.scrollIntoView({ block: 'nearest' });
+      }
+
+      function choose(place) {
+        currentPlace = place;
+        input.value = place;
+        savePlace(place);
+        close();
+        applyPlace(place);
+      }
+
+      input.addEventListener('focus', () => {
+        input.select();
+        open('');
+      });
+
+      input.addEventListener('input', () => {
         clearTimeout(zipTimer);
-        const zip = e.target.value.trim();
-        if (/^\d{5}$/.test(zip)) {
-          saveZip(zip);
-          zipTimer = setTimeout(() => geocodeZip(zip), 300);
-        } else if (!zip) {
-          saveZip('');
-          homeLat = homeLng = null;
-          document.getElementById('location-label').textContent = 'Set your zip for distances';
-          document.getElementById('distance-slider').disabled = true;
-          computeDistances();
-          render();
+        const value = input.value.trim();
+        if (/^\d{5}$/.test(value)) {
+          close();
+          zipTimer = setTimeout(() => choose(value), 300);
+        } else if (!value) {
+          choose('');
+          open('');
+        } else {
+          open(value);
         }
+      });
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (list.hidden) open(input.value);
+          if (!shown.length) return;
+          const step = e.key === 'ArrowDown' ? 1 : -1;
+          highlight((active + step + shown.length) % shown.length);
+        } else if (e.key === 'Enter') {
+          const town = shown[active] || (shown.length === 1 ? shown[0] : null);
+          if (town) choose(town.name);
+          else if (/^\d{5}$/.test(input.value.trim())) choose(input.value.trim());
+          input.blur();
+        } else if (e.key === 'Escape') {
+          input.blur();
+        }
+      });
+
+      // The caret opens the list, or closes it if open. mousedown keeps the input's focus.
+      document.getElementById('place-toggle').addEventListener('mousedown', e => {
+        e.preventDefault();
+        if (!list.hidden) input.blur();
+        else if (document.activeElement === input) open('');
+        else input.focus();
+      });
+
+      // mousedown fires before the input's blur, so the pick isn't lost.
+      list.addEventListener('mousedown', e => {
+        e.preventDefault();
+        const li = e.target.closest('li[data-i]');
+        if (li) {
+          choose(shown[+li.dataset.i].name);
+          input.blur();
+        }
+      });
+
+      // Leaving half-typed text puts back the place in use.
+      input.addEventListener('blur', () => {
+        close();
+        const value = input.value.trim();
+        const town = townIndex.get(value.toLowerCase());
+        if (town && town.name !== currentPlace) choose(town.name);
+        else if (!/^\d{5}$/.test(value)) input.value = currentPlace;
       });
     }
 
