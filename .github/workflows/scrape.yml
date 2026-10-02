@@ -36,6 +36,9 @@ jobs:
       - run: node run.mjs
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          GOOGLE_VISION_API_KEY: ${{ secrets.GOOGLE_VISION_API_KEY }}
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           PROXY_URL: ${{ secrets.PROXY_URL }}
       - name: Save scrape cache

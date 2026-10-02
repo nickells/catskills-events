@@ -4,10 +4,17 @@ import * as cheerio from "cheerio";
 import { fetchPage, fetchPageWithBrowser, closeBrowser } from "./lib/fetch.mjs";
 import { extractEvents, resolveVenueTowns, ocrEventImage } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
+import { categorizeEvents } from "./lib/categorize.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
-import { scrapeInstagramProfiles, collectInstagramResults, formatPostsForLLM } from "./lib/instagram.mjs";
+import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
+import {
+  fetchInstagramProfiles,
+  formatPostsForLLM,
+  checkInstagramPoll,
+  recordInstagramPoll,
+} from "./lib/instagram.mjs";
 
 const KNOWN_TOWNS = new Set(
   Object.keys(JSON.parse(readFileSync("./lib/town-coords.json", "utf-8")))
@@ -18,7 +25,7 @@ const OUTPUT_DIR = "./output";
 const CONCURRENCY = 5;
 const SCRAPE_CACHE_FILE = `${OUTPUT_DIR}/scrape-cache.json`;
 const CACHE_TTL_MS = 20 * 60 * 60 * 1000; // 20 hours
-const IG_CACHE_TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
+const IG_CACHE_TTL_MS = 8 * 24 * 60 * 60 * 1000; // Rides out several days of Instagram fetch failures
 
 let scrapeCache = {};
 
@@ -373,30 +380,34 @@ async function handleVenues() {
   return allEvents;
 }
 
-async function handleInstagram(apifyHandle) {
-  const profiles = apifyHandle
-    ? await collectInstagramResults(apifyHandle)
-    : await scrapeInstagramProfiles(INSTAGRAM_SOURCES);
+async function handleInstagram(profiles) {
+  console.log(`\n[Instagram] ${profiles.filter((p) => p.available).length}/${profiles.length} profiles fetched`);
   const allEvents = [];
 
   for (const profile of profiles) {
-    if (!profile.posts.length) continue;
-
     const cacheKey = `instagram:${profile.handle}`;
-    const countKey = `instagram-count:${profile.handle}`;
+    const cached = getCached(cacheKey, IG_CACHE_TTL_MS);
 
-    // Skip LLM extraction if postsCount hasn't changed since last run
-    const cachedCount = scrapeCache[countKey]?.events;
-    const currentCount = profile.postsCount;
-    const cached = getCached(cacheKey);
-    if (cached && cachedCount === currentCount) {
+    if (!profile.available) {
+      if (cached) allEvents.push(...cached);
+      continue;
+    }
+
+    const poll = checkInstagramPoll(scrapeCache, profile);
+
+    if (!profile.posts.length) {
+      recordInstagramPoll(scrapeCache, profile);
+      if (cached) allEvents.push(...cached);
+      continue;
+    }
+
+    // An unchanged set of recent posts doesn't need re-extracting.
+    if (cached && !poll.changed) {
+      recordInstagramPoll(scrapeCache, profile);
       console.log(`  @${profile.handle} — ${cached.length} events (no new posts)`);
       allEvents.push(...cached);
       continue;
     }
-
-    // Store current postsCount for next comparison
-    setCache(countKey, currentCount);
 
     const postTexts = formatPostsForLLM(profile.posts);
 
@@ -407,15 +418,16 @@ async function handleInstagram(apifyHandle) {
     );
     console.log(`  @${profile.handle} — ${events.length} events extracted`);
 
+    // Interpret relative phrases against the post timestamp, then do calendar math in code.
+    await resolveInstagramRelativeDates(events, profile.posts, scrapeCache);
+
     // OCR flyer images for events missing date or venue
     const needsOcr = events.filter((e) => !e.date || !e.venue);
     if (needsOcr.length) {
       console.log(`    → OCR pass for ${needsOcr.length} incomplete event(s)`);
       for (const e of needsOcr) {
         try {
-          const post = profile.posts.find(
-            (p) => p.url === e.url || (p.caption && p.caption.includes(e.name))
-          );
+          const post = findPostForEvent(e, profile.posts);
           if (!post?.displayUrl) continue;
           const patched = await ocrEventImage(post.displayUrl, e);
           for (const [key, val] of Object.entries(patched)) {
@@ -435,9 +447,7 @@ async function handleInstagram(apifyHandle) {
     if (stillIncomplete.length) {
       for (const e of stillIncomplete) {
         try {
-          const post = profile.posts.find(
-            (p) => p.url === e.url || (p.caption && p.caption.includes(e.name))
-          );
+          const post = findPostForEvent(e, profile.posts);
           if (!post?.caption) continue;
           const urlMatch = post.caption.match(/https?:\/\/[^\s)]+|(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s)]*)?/i);
           if (!urlMatch) continue;
@@ -473,6 +483,8 @@ async function handleInstagram(apifyHandle) {
     });
 
     setCache(cacheKey, tagged);
+    // Record the poll only once events are cached, so a failed extraction is retried.
+    recordInstagramPoll(scrapeCache, profile);
     allEvents.push(...tagged);
   }
 
@@ -490,18 +502,12 @@ async function main() {
 
   const allEvents = [];
 
-  // Kick off Instagram scrape early so it runs in parallel with web sources
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const isIgDay = dayOfYear % 2 === 0;
-  const needsIgFetch = isIgDay || !INSTAGRAM_SOURCES.every((s) => getCached(`instagram:${s.handle}`));
-  let apifyHandle = null;
-  if (needsIgFetch) {
-    try {
-      apifyHandle = await scrapeInstagramProfiles(INSTAGRAM_SOURCES);
-    } catch (err) {
-      console.error(`  ✗ Error starting Instagram scrape: ${err.message}`);
-    }
-  }
+  // Fetch every Instagram profile daily (Meta, with Apify fallback) in parallel with web sources.
+  console.log("[Instagram] Fetching profiles in the background...");
+  const instagramFetch = fetchInstagramProfiles(INSTAGRAM_SOURCES, scrapeCache).catch((err) => {
+    console.error(`  ✗ Error fetching Instagram: ${err.message}`);
+    return null;
+  });
 
   // Process web sources
   for (const source of WEB_SOURCES) {
@@ -528,20 +534,20 @@ async function main() {
     console.error(`  ✗ Error processing venues: ${err.message}`);
   }
 
-  // Collect Instagram results (Apify was started earlier in parallel)
+  // Collect Instagram results; on failure every profile falls back to its cached events.
+  let igEvents = null;
   try {
-    if (apifyHandle) {
-      const igEvents = await handleInstagram(apifyHandle);
-      allEvents.push(...igEvents);
-    } else {
-      console.log("\n[Instagram] Off-day — using cached events");
-      for (const s of INSTAGRAM_SOURCES) {
-        const cached = getCached(`instagram:${s.handle}`);
-        if (cached) allEvents.push(...cached);
-      }
-    }
+    const profiles = await instagramFetch;
+    if (profiles) igEvents = await handleInstagram(profiles);
   } catch (err) {
     console.error(`  ✗ Error processing Instagram: ${err.message}`);
+  }
+  if (igEvents) allEvents.push(...igEvents);
+  else {
+    for (const source of INSTAGRAM_SOURCES) {
+      const cached = getCached(`instagram:${source.handle}`, IG_CACHE_TTL_MS);
+      if (cached) allEvents.push(...cached);
+    }
   }
 
   // Deduplicate
@@ -581,6 +587,10 @@ async function main() {
   const townCoords = JSON.parse(readFileSync("./lib/town-coords.json", "utf-8"));
   console.log(`\n--- Geocoding ---`);
   await geocodeEvents(deduped, townCoords);
+
+  // Classify only publishable events, after merging evidence from duplicate sources.
+  console.log(`\n--- Event Categorization ---`);
+  await categorizeEvents(formatJSON(deduped), scrapeCache);
 
   // Save caches
   saveScrapeCache();

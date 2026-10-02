@@ -1,4 +1,11 @@
 node_modules/
 .env
 openai.txt
+openai_key
+jev-key
+gcloud_key
+apifey_key
+meta_key
+meta_app_id
+meta_secret
 output/
