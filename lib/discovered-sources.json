@@ -10,6 +10,15 @@
       ]
     },
     {
+      "handle": "calicooutlawbrewing",
+      "town": "Arkville",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "uniongrovedistillery",
+        "catskill.mtn.embers"
+      ]
+    },
+    {
       "handle": "catskill.mtn.embers",
       "town": "Arkville",
       "addedAt": "2026-10-02",
@@ -64,6 +73,23 @@
       "addedAt": "2026-10-02",
       "foundVia": [
         "thewaltontheatre"
+      ]
+    },
+    {
+      "handle": "westkillbrewing",
+      "town": "West Kill",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "returnbrewing",
+        "returnoutpost"
+      ]
+    },
+    {
+      "handle": "yo_adriennee",
+      "town": "Narrowsburg",
+      "addedAt": "2026-10-02",
+      "foundVia": [
+        "dvartsalliance"
       ]
     }
   ]
