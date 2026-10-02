@@ -310,6 +310,10 @@
       accent-color: var(--accent);
     }
 
+    .distance-slider-wrap input[type="range"]:disabled {
+      opacity: 0.4;
+    }
+
     .tag-music { background: var(--tag-music); }
     .tag-food { background: var(--tag-food); }
     .tag-culture { background: var(--tag-culture); }
@@ -517,14 +521,14 @@
 
     <div class="distance-slider-wrap">
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">
-        <input type="text" id="zip-input" placeholder="Your zip" value="12438" maxlength="5"
+        <input type="text" id="zip-input" placeholder="Your zip" value="" maxlength="5" inputmode="numeric"
           style="width:80px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;text-align:center" />
         <label style="flex:1;display:flex;justify-content:space-between;margin:0">
-          <span id="location-label">Halcottsville</span>
+          <span id="location-label">Set your zip for distances</span>
           <span id="distance-label">Any distance</span>
         </label>
       </div>
-      <input type="range" id="distance-slider" min="0" max="120" value="120" step="5" />
+      <input type="range" id="distance-slider" min="0" max="120" value="120" step="5" disabled />
     </div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -549,7 +553,10 @@
     const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     let allEvents = [];
-    let homeLat = 42.2079, homeLng = -74.5998;
+    let homeLat = null, homeLng = null;
+    const ZIP_KEY = 'catskills-events:zip';
+    function savedZip() { try { return localStorage.getItem(ZIP_KEY) || ''; } catch { return ''; } }
+    function saveZip(zip) { try { zip ? localStorage.setItem(ZIP_KEY, zip) : localStorage.removeItem(ZIP_KEY); } catch {} }
     let activeCategories = new Set();
     let activeTime = 'all';
     let searchQuery = '';
@@ -575,7 +582,7 @@
 
     function computeDistances() {
       for (const e of allEvents) {
-        if (e._lat != null && e._lng != null) {
+        if (homeLat != null && e._lat != null && e._lng != null) {
           e._miles = Math.round(haversine(homeLat, homeLng, e._lat, e._lng));
           e._bearing = bearingDeg(homeLat, homeLng, e._lat, e._lng);
         } else {
@@ -610,7 +617,8 @@
       if (maxDistance < 120) p.set('dist', maxDistance);
       if (calWeekOffset) p.set('week', calWeekOffset);
       const zip = document.getElementById('zip-input').value;
-      if (zip !== '12438') p.set('zip', zip);
+      // Only shared-link zips go in the URL; your own zip lives in localStorage.
+      if (zip && zip !== savedZip()) p.set('zip', zip);
       const str = p.toString();
       history.replaceState(null, '', str ? '?' + str : location.pathname);
     }
@@ -623,7 +631,9 @@
       if (p.has('q')) { searchQuery = p.get('q'); document.getElementById('search').value = searchQuery; }
       if (p.has('dist')) { maxDistance = parseInt(p.get('dist')); document.getElementById('distance-slider').value = maxDistance; document.getElementById('distance-label').textContent = `Within ${maxDistance} mi`; }
       if (p.has('week')) calWeekOffset = parseInt(p.get('week'));
-      if (p.has('zip')) { const z = p.get('zip'); document.getElementById('zip-input').value = z; geocodeZip(z); }
+      // A shared link's zip wins for this visit without replacing your saved one.
+      const zip = p.get('zip') || savedZip();
+      if (zip) { document.getElementById('zip-input').value = zip; geocodeZip(zip); }
 
       // Sync button states
       document.querySelectorAll('.filter-btn[data-time]').forEach(b => {
@@ -647,8 +657,11 @@
         if (data.length) {
           homeLat = parseFloat(data[0].lat);
           homeLng = parseFloat(data[0].lon);
-          const name = data[0].display_name.split(',')[0];
+          // Postcode results start with the zip itself ("12498, Town of Woodstock, ...").
+          const parts = data[0].display_name.split(',').map(part => part.trim());
+          const name = (parts.find(part => !/^\d{5}$/.test(part)) || zip).replace(/^(Town|City|Village) of /, '');
           document.getElementById('location-label').textContent = name;
+          document.getElementById('distance-slider').disabled = false;
           computeDistances();
           render();
         }
@@ -712,8 +725,16 @@
       document.getElementById('zip-input').addEventListener('input', e => {
         clearTimeout(zipTimer);
         const zip = e.target.value.trim();
-        if (zip.length === 5 && /^\d{5}$/.test(zip)) {
+        if (/^\d{5}$/.test(zip)) {
+          saveZip(zip);
           zipTimer = setTimeout(() => geocodeZip(zip), 300);
+        } else if (!zip) {
+          saveZip('');
+          homeLat = homeLng = null;
+          document.getElementById('location-label').textContent = 'Set your zip for distances';
+          document.getElementById('distance-slider').disabled = true;
+          computeDistances();
+          render();
         }
       });
     }
