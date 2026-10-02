@@ -100,6 +100,10 @@
       color: var(--text);
     }
 
+    .filter-btn[data-toggle] {
+      margin-left: auto;
+    }
+
     .filter-btn:hover {
       border-color: var(--accent);
     }
@@ -506,6 +510,7 @@
         <button class="filter-btn" data-time="tonight">Tonight</button>
         <button class="filter-btn" data-time="week">This Week</button>
         <button class="filter-btn" data-time="month">This Month</button>
+        <button class="filter-btn" data-toggle="hide-started" title="Hide events that have already started today">Hide started</button>
       </div>
       <div class="filter-group">
         <div class="filter-group-label">What</div>
@@ -559,6 +564,7 @@
     function saveZip(zip) { try { zip ? localStorage.setItem(ZIP_KEY, zip) : localStorage.removeItem(ZIP_KEY); } catch {} }
     let activeCategories = new Set();
     let activeTime = 'all';
+    let hideStarted = false;
     let searchQuery = '';
     let maxDistance = 120;
     let activeView = 'list';
@@ -612,6 +618,7 @@
       const p = new URLSearchParams();
       if (activeView !== 'list') p.set('view', activeView);
       if (activeTime !== 'all') p.set('when', activeTime);
+      if (hideStarted) p.set('started', 'hide');
       if (activeCategories.size) p.set('cat', [...activeCategories].join(','));
       if (searchQuery) p.set('q', searchQuery);
       if (maxDistance < 120) p.set('dist', maxDistance);
@@ -627,6 +634,7 @@
       const p = new URLSearchParams(location.search);
       if (p.has('view')) activeView = p.get('view');
       if (p.has('when')) activeTime = p.get('when');
+      hideStarted = p.get('started') === 'hide';
       if (p.has('cat')) p.get('cat').split(',').forEach(c => activeCategories.add(c));
       if (p.has('q')) { searchQuery = p.get('q'); document.getElementById('search').value = searchQuery; }
       if (p.has('dist')) { maxDistance = parseInt(p.get('dist')); document.getElementById('distance-slider').value = maxDistance; document.getElementById('distance-label').textContent = `Within ${maxDistance} mi`; }
@@ -642,6 +650,7 @@
       document.querySelectorAll('.filter-btn[data-category]').forEach(b => {
         b.classList.toggle('active', activeCategories.has(b.dataset.category));
       });
+      document.querySelector('.filter-btn[data-toggle="hide-started"]').classList.toggle('active', hideStarted);
       document.querySelectorAll('.view-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.view === activeView);
       });
@@ -685,6 +694,12 @@
           activeTime = btn.dataset.time;
           render();
         });
+      });
+
+      document.querySelector('.filter-btn[data-toggle="hide-started"]').addEventListener('click', e => {
+        hideStarted = !hideStarted;
+        e.currentTarget.classList.toggle('active', hideStarted);
+        render();
       });
 
       document.querySelectorAll('.filter-btn[data-category]').forEach(btn => {
@@ -758,9 +773,17 @@
       return 'later';
     }
 
+    function hasStarted(event) {
+      const start = parseTime(event.time);
+      if (start === 9999) return false;
+      const now = new Date();
+      return start < now.getHours() * 60 + now.getMinutes();
+    }
+
     function matchesFilters(event) {
       const timeBucket = classifyTime(event);
       if (timeBucket === 'past') return false;
+      if (hideStarted && timeBucket === 'tonight' && hasStarted(event)) return false;
 
       if (activeTime === 'tonight' && timeBucket !== 'tonight') return false;
       if (activeTime === 'week' && timeBucket !== 'tonight' && timeBucket !== 'week') return false;
