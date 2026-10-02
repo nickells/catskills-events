@@ -214,8 +214,8 @@
 
     <h2>By Town</h2>
     <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
-      Where current events come from. Larger circles have more accounts and
-      calendars listing events there; tap a town to see them.
+      Instagram accounts with current events, by town. Larger circles have
+      more accounts; tap a town to see them.
     </p>
     <div id="town-map"></div>
     <script>
@@ -228,15 +228,10 @@
           maxZoom: 14,
         }).addTo(map);
 
-        const aggregatorUrls = Object.fromEntries(AGGREGATORS.map(a => [a.name, a.url]));
-        function sourceLink(source) {
-          if (source.startsWith('Instagram @')) {
-            const handle = source.slice('Instagram @'.length);
-            return `<a href="https://instagram.com/${esc(handle)}/" target="_blank">@${esc(handle)}</a>`;
-          }
-          const url = aggregatorUrls[source];
-          return url ? `<a href="${esc(url)}" target="_blank">${esc(source)}</a>` : esc(source);
-        }
+        // Skip towns geocoded far outside the region (e.g. a same-named town abroad).
+        const region = L.latLngBounds([40.4, -76.5], [43.6, -72.8]);
+        // Frame the Catskills core; outlying towns (Brooklyn, the Mohawk Valley) stay a pan away.
+        const core = L.latLngBounds([41.45, -75.3], [42.6, -73.55]);
 
         fetch('./output/events.json')
           .then(r => r.json())
@@ -244,20 +239,23 @@
             const towns = new Map();
             for (const e of events) {
               if (!e.town || e._lat == null || e._lng == null) continue;
+              if (!region.contains([e._lat, e._lng])) continue;
+              const handles = (e.sources || (e.source ? [e.source] : []))
+                .filter(s => s.startsWith('Instagram @'))
+                .map(s => s.slice('Instagram @'.length));
+              if (!handles.length) continue;
               let t = towns.get(e.town);
-              if (!t) towns.set(e.town, t = { name: e.town, lat: e._lat, lng: e._lng, events: 0, sources: {} });
+              if (!t) towns.set(e.town, t = { name: e.town, lat: e._lat, lng: e._lng, events: 0, accounts: {} });
               t.events++;
-              for (const s of e.sources || (e.source ? [e.source] : [])) {
-                t.sources[s] = (t.sources[s] || 0) + 1;
-              }
+              for (const h of handles) t.accounts[h] = (t.accounts[h] || 0) + 1;
             }
 
-            const core = [];
+            const bounds = [];
             for (const t of towns.values()) {
-              const sources = Object.entries(t.sources).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-              if (sources.length > 1) core.push([t.lat, t.lng]);
+              const accounts = Object.entries(t.accounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+              if (core.contains([t.lat, t.lng])) bounds.push([t.lat, t.lng]);
               L.circleMarker([t.lat, t.lng], {
-                radius: 5 + 3 * Math.sqrt(sources.length),
+                radius: 5 + 3 * Math.sqrt(accounts.length),
                 color: '#2d5a27',
                 weight: 1.5,
                 fillColor: '#2d5a27',
@@ -266,13 +264,12 @@
                 .bindTooltip(t.name)
                 .bindPopup(`<div class="town-popup">
                   <h3>${esc(t.name)}</h3>
-                  <div class="town-meta">${t.events} event${t.events !== 1 ? 's' : ''} · ${sources.length} source${sources.length !== 1 ? 's' : ''}</div>
-                  <ul>${sources.map(([s, n]) => `<li>${sourceLink(s)}<span class="venue-count">${n}</span></li>`).join('')}</ul>
+                  <div class="town-meta">${t.events} event${t.events !== 1 ? 's' : ''} · ${accounts.length} account${accounts.length !== 1 ? 's' : ''}</div>
+                  <ul>${accounts.map(([h, n]) => `<li><a href="https://instagram.com/${esc(h)}/" target="_blank">@${esc(h)}</a><span class="venue-count">${n}</span></li>`).join('')}</ul>
                 </div>`, { maxWidth: 240, autoPanPadding: [16, 16] })
                 .addTo(map);
             }
-            // Frame the towns with more than one source so stray one-off geocodes don't zoom the map out.
-            if (core.length > 1) map.fitBounds(core, { padding: [20, 20] });
+            if (bounds.length > 1) map.fitBounds(bounds, { padding: [20, 20] });
           });
       });
     </script>
