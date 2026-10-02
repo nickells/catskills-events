@@ -797,7 +797,8 @@
         if (!hay.includes(searchQuery)) return false;
       }
 
-      if (maxDistance < 120 && event._miles != null && event._miles > maxDistance) return false;
+      // With a distance set, an event we couldn't place isn't known to be within it.
+      if (maxDistance < 120 && homeLat != null && (event._miles == null || event._miles > maxDistance)) return false;
 
       return true;
     }

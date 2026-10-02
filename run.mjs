@@ -2,12 +2,13 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import * as cheerio from "cheerio";
 import { fetchPage, fetchPageWithBrowser, closeBrowser } from "./lib/fetch.mjs";
-import { extractEvents, resolveVenueTowns, ocrEventImage } from "./lib/openai.mjs";
+import { extractEvents, resolveVenueTowns, ocrEventImage, locateFromPage, locateFromKnowledge } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
 import { filterOutsideNewYork } from "./lib/location.mjs";
 import { categorizeEvents } from "./lib/categorize.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
+import { locateEvents } from "./lib/locate.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
 import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
@@ -543,11 +544,31 @@ async function main() {
     }
   }
 
+  const townCoords = JSON.parse(readFileSync("./lib/town-coords.json", "utf-8"));
+
+  // Pin down upcoming events whose town can't be placed (missing, misspelled, several towns,
+  // or not in town-coords) from their own page or the model's knowledge, so they get a distance.
+  console.log(`\n--- Location ---`);
+  const today = new Date().toISOString().slice(0, 10);
+  const { checked, located } = await locateEvents(deduped.filter((e) => !e.date || e.date >= today), {
+    townCoords,
+    fetchText: async (url) => {
+      const html = await fetchPage(url);
+      return html ? parseHtml(html, url).body : null;
+    },
+    askPage: locateFromPage,
+    askKnowledge: locateFromKnowledge,
+    cache: scrapeCache,
+    log: console.log,
+  });
+  console.log(`  Located ${located}/${checked} events`);
+  saveScrapeCache();
+
   // Geocode events and add coordinates
   loadGeoCache();
-  const townCoords = JSON.parse(readFileSync("./lib/town-coords.json", "utf-8"));
   console.log(`\n--- Geocoding ---`);
   await geocodeEvents(deduped, townCoords);
+  for (const e of deduped) delete e._state;
 
   // Classify only publishable events, after merging evidence from duplicate sources.
   console.log(`\n--- Event Categorization ---`);
