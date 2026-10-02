@@ -1,6 +1,8 @@
 name: Scrape & Deploy
 
 on:
+  push:
+    branches: [main] # site-only redeploy of the published events
   schedule:
     - cron: "0 10 * * *" # 10 AM UTC (6 AM ET) daily
   workflow_dispatch:
@@ -22,6 +24,8 @@ concurrency:
 jobs:
   scrape-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      SKIP_SCRAPE: ${{ github.event_name == 'push' || inputs.skip_scrape == true }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -31,18 +35,18 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-        if: ${{ !inputs.skip_scrape }}
+        if: env.SKIP_SCRAPE != 'true'
       - run: npx playwright install --with-deps chromium
-        if: ${{ !inputs.skip_scrape }}
+        if: env.SKIP_SCRAPE != 'true'
       - name: Restore scrape cache
-        if: ${{ !inputs.skip_scrape }}
+        if: env.SKIP_SCRAPE != 'true'
         uses: actions/cache/restore@v4
         with:
           path: output/scrape-cache.json
           key: scrape-cache-${{ github.run_id }}
           restore-keys: scrape-cache-
       - run: node run.mjs
-        if: ${{ !inputs.skip_scrape }}
+        if: env.SKIP_SCRAPE != 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
@@ -51,7 +55,7 @@ jobs:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           PROXY_URL: ${{ secrets.PROXY_URL }}
       - name: Commit discovered sources
-        if: ${{ !inputs.skip_scrape }}
+        if: env.SKIP_SCRAPE != 'true'
         continue-on-error: true # never block the cache save and deploy
         run: |
           git config user.name "github-actions[bot]"
@@ -63,13 +67,13 @@ jobs:
             git push
           fi
       - name: Save scrape cache
-        if: ${{ !inputs.skip_scrape }}
+        if: env.SKIP_SCRAPE != 'true'
         uses: actions/cache/save@v4
         with:
           path: output/scrape-cache.json
           key: scrape-cache-${{ github.run_id }}
       - name: Fetch published events
-        if: ${{ inputs.skip_scrape }}
+        if: env.SKIP_SCRAPE == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
