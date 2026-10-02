@@ -4,6 +4,7 @@ import * as cheerio from "cheerio";
 import { fetchPage, fetchPageWithBrowser, closeBrowser } from "./lib/fetch.mjs";
 import { extractEvents, resolveVenueTowns, ocrEventImage } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
+import { filterOutsideNewYork } from "./lib/location.mjs";
 import { categorizeEvents } from "./lib/categorize.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
@@ -574,10 +575,18 @@ async function main() {
     console.error(`  ✗ Error discovering Instagram sources: ${err.message}`);
   }
 
+  // Drop events clearly outside New York (e.g. same-named towns elsewhere)
+  const { kept: nyEvents, dropped: outOfState } = filterOutsideNewYork(allEvents);
+  if (outOfState.length) {
+    console.log(`\n--- Location filter ---`);
+    console.log(`Dropped ${outOfState.length} events outside New York`);
+    for (const e of outOfState) console.log(`  ✗ ${e.name} @ ${e.venue}`);
+  }
+
   // Deduplicate
   console.log(`\n--- Deduplication ---`);
-  console.log(`Before: ${allEvents.length} events`);
-  const deduped = deduplicateEvents(allEvents);
+  console.log(`Before: ${nyEvents.length} events`);
+  const deduped = deduplicateEvents(nyEvents);
   console.log(`After: ${deduped.length} events`);
 
   // Resolve missing towns (and correct address-as-venue-name) via LLM
