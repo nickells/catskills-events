@@ -25,7 +25,6 @@ const KNOWN_TOWNS = new Set(
 
 
 const OUTPUT_DIR = "./output";
-const CONCURRENCY = 5;
 const SCRAPE_CACHE_FILE = `${OUTPUT_DIR}/scrape-cache.json`;
 const CACHE_TTL_MS = 20 * 60 * 60 * 1000; // 20 hours
 const IG_CACHE_TTL_MS = 8 * 24 * 60 * 60 * 1000; // Rides out several days of Instagram fetch failures
@@ -83,19 +82,6 @@ function backfillTown(event, townHint) {
 }
 
 // --- Helpers ---
-
-async function pool(items, fn, concurrency) {
-  const results = [];
-  let i = 0;
-  async function worker() {
-    while (i < items.length) {
-      const idx = i++;
-      results[idx] = await fn(items[idx], idx);
-    }
-  }
-  await Promise.all(Array.from({ length: concurrency }, worker));
-  return results;
-}
 
 function parseHtml(html, baseUrl) {
   const $ = cheerio.load(html);
@@ -333,56 +319,6 @@ async function handleTockify(source) {
   }
 }
 
-async function handleVenues() {
-  const venuesFile = `${OUTPUT_DIR}/venues-with-events.json`;
-  if (!existsSync(venuesFile)) {
-    console.log(`\n[Venues] No venues file found — run discover-venues.mjs and find-event-pages.mjs first`);
-    return [];
-  }
-
-  const venues = JSON.parse(readFileSync(venuesFile, "utf-8"));
-  console.log(`\n[Venues] Scraping ${venues.length} venue event pages...`);
-
-  let done = 0;
-  let cacheHits = 0;
-  const results = await pool(
-    venues,
-    async (venue) => {
-      done++;
-      const cached = getCached(venue.eventPageUrl);
-      if (cached) {
-        cacheHits++;
-        console.log(`  [${done}/${venues.length}] ${venue.name} — ${cached.length} events (cached)    `);
-        return cached;
-      }
-
-      const html = await fetchPage(venue.eventPageUrl);
-      if (!html) {
-        console.log(`  [${done}/${venues.length}] ${venue.name} — skipped    `);
-        return [];
-      }
-
-      const { pageTitle, h1, body } = parseHtml(html, venue.eventPageUrl);
-      const events = await extractEvents(body, venue.name, { pageTitle, h1 });
-      console.log(`  [${done}/${venues.length}] ${venue.name} — ${events.length} events    `);
-      const tagged = events.map((e) => ({
-        ...e,
-        venue: e.venue || venue.name,
-        town: e.town || venue.address?.split(",")[1]?.trim(),
-        source: venue.name,
-        sourceUrl: venue.eventPageUrl,
-      }));
-      setCache(venue.eventPageUrl, tagged);
-      return tagged;
-    },
-    CONCURRENCY
-  );
-
-  const allEvents = results.flat();
-  console.log(`\n  ✓ ${allEvents.length} total venue events (${cacheHits} cached)`);
-  return allEvents;
-}
-
 async function handleInstagram(profiles) {
   console.log(`\n[Instagram] ${profiles.filter((p) => p.available).length}/${profiles.length} profiles fetched`);
   const allEvents = [];
@@ -535,14 +471,6 @@ async function main() {
     } catch (err) {
       console.error(`  ✗ Error processing ${source.name}: ${err.message}`);
     }
-  }
-
-  // Process venue sites
-  try {
-    const venueEvents = await handleVenues();
-    allEvents.push(...venueEvents);
-  } catch (err) {
-    console.error(`  ✗ Error processing venues: ${err.message}`);
   }
 
   // Collect Instagram results; on failure every profile falls back to its cached events.
