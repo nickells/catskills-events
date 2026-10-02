@@ -14,9 +14,10 @@ import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources 
 import {
   createMetaProfileLookup,
   fetchInstagramProfiles,
-  formatPostsForLLM,
   checkInstagramPoll,
   recordInstagramPoll,
+  extractPostEvents,
+  prunePostEvents,
 } from "./lib/instagram.mjs";
 
 const KNOWN_TOWNS = new Set(
@@ -348,14 +349,12 @@ async function handleInstagram(profiles) {
       continue;
     }
 
-    const postTexts = formatPostsForLLM(profile.posts);
-
-    const events = await extractEvents(
-      postTexts,
-      `Instagram @${profile.handle}`,
-      { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }
+    const { events, extracted, failed } = await extractPostEvents(
+      profile.posts,
+      (text) => extractEvents(text, `Instagram @${profile.handle}`, { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }),
+      scrapeCache
     );
-    console.log(`  @${profile.handle} — ${events.length} events extracted`);
+    console.log(`  @${profile.handle} — ${events.length} events from ${profile.posts.length} posts (${extracted} extracted${failed ? `, ${failed} failed` : ""})`);
 
     // Interpret relative phrases against the post timestamp, then do calendar math in code.
     await resolveInstagramRelativeDates(events, profile.posts, scrapeCache);
@@ -422,11 +421,12 @@ async function handleInstagram(profiles) {
     });
 
     setCache(cacheKey, tagged);
-    // Record the poll only once events are cached, so a failed extraction is retried.
-    recordInstagramPoll(scrapeCache, profile);
+    // Record the poll only once every post is extracted, so failed posts are retried.
+    if (!failed) recordInstagramPoll(scrapeCache, profile);
     allEvents.push(...tagged);
   }
 
+  prunePostEvents(scrapeCache);
   saveScrapeCache();
   console.log(`  ✓ ${allEvents.length} total Instagram events`);
   return allEvents;
