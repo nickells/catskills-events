@@ -49,6 +49,18 @@ Fetched posts are stored for 30 days in the scrape cache, and events are only
 re-extracted when that set of posts changes. A profile that can't be fetched
 keeps its cached events for up to eight days.
 
+## Instagram discovery
+
+After each scrape, gpt-5.4-mini reads new captions for the accounts they mention
+(Meta's API strips the `@`). A running tally ranks mentioned accounts by how many
+sources mention them. Up to 25 a run are vetted: Meta Business Discovery fetches the
+bio and recent posts (personal and nonexistent accounts are rejected), and Jev
+decides whether it's a Catskills/Hudson Valley event host and in which town.
+Accepted hosts (confidence ≥ 0.7) are appended to `lib/discovered-sources.json`,
+which CI commits, and are fetched from the next run on. Rejections are kept in the
+scrape cache and rechecked after 90 days. Discovery stops adding at 175 sources to
+stay inside Meta's hourly rate limit. Remove a bad addition by deleting its entry.
+
 Instagram captions with relative dates such as `this Wednesday`, `next Friday`,
 `tomorrow`, and `tonight` get a second date pass. Jev reads the named day and week
 qualifier from the matching caption; calendar code resolves it from that post's
