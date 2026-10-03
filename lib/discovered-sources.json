@@ -27,11 +27,35 @@
       ]
     },
     {
+      "handle": "gaagallery",
+      "town": "Catskill",
+      "addedAt": "2026-10-03",
+      "foundVia": [
+        "forelandcatskill"
+      ]
+    },
+    {
       "handle": "greatwesterncatskills",
       "addedAt": "2026-10-02",
       "foundVia": [
         "visitmargaretvilleny",
         "thewaltontheatre"
+      ]
+    },
+    {
+      "handle": "greseproductionsevents",
+      "town": "Narrowsburg",
+      "addedAt": "2026-10-03",
+      "foundVia": [
+        "cochectonpumphouse"
+      ]
+    },
+    {
+      "handle": "local111restaurant",
+      "town": "Hudson",
+      "addedAt": "2026-10-03",
+      "foundVia": [
+        "basilicahudson"
       ]
     },
     {
@@ -65,6 +89,15 @@
       "foundVia": [
         "subversivebeer",
         "catskillfarmersmarket"
+      ]
+    },
+    {
+      "handle": "themeadowson28",
+      "town": "Margaretville",
+      "addedAt": "2026-10-03",
+      "foundVia": [
+        "greatwesterncatskills",
+        "visitmargaretvilleny"
       ]
     },
     {
