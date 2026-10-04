@@ -67,9 +67,23 @@
       ]
     },
     {
+      "handle": "oysterparty",
+      "addedAt": "2026-10-04",
+      "foundVia": [
+        "westkillbrewing"
+      ]
+    },
+    {
       "handle": "pollinator.spirits",
       "town": "Bethel",
       "addedAt": "2026-10-02",
+      "foundVia": [
+        "bethelwoodscenter"
+      ]
+    },
+    {
+      "handle": "resortsworldcatskills",
+      "addedAt": "2026-10-04",
       "foundVia": [
         "bethelwoodscenter"
       ]
@@ -98,6 +112,14 @@
       "foundVia": [
         "greatwesterncatskills",
         "visitmargaretvilleny"
+      ]
+    },
+    {
+      "handle": "troutunlimitedapwc",
+      "addedAt": "2026-10-04",
+      "foundVia": [
+        "visitmargaretvilleny",
+        "themeadowson28"
       ]
     },
     {
