@@ -51,6 +51,14 @@
       ]
     },
     {
+      "handle": "herbalwoodstock",
+      "town": "Woodstock",
+      "addedAt": "2026-10-05",
+      "foundVia": [
+        "woodstockfilmfestival"
+      ]
+    },
+    {
       "handle": "local111restaurant",
       "town": "Hudson",
       "addedAt": "2026-10-03",
@@ -97,12 +105,28 @@
       ]
     },
     {
+      "handle": "saltandsmokemd",
+      "town": "Mountaindale",
+      "addedAt": "2026-10-05",
+      "foundVia": [
+        "thedalepizza"
+      ]
+    },
+    {
       "handle": "see_and_be_kitchen",
       "town": "Cairo",
       "addedAt": "2026-10-02",
       "foundVia": [
         "subversivebeer",
         "catskillfarmersmarket"
+      ]
+    },
+    {
+      "handle": "sugarblastmusic",
+      "town": "Kingston",
+      "addedAt": "2026-10-05",
+      "foundVia": [
+        "returnoutpost"
       ]
     },
     {
