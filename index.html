@@ -736,16 +736,19 @@
     @keyframes ticker { to { transform: translateX(-50%); } }
     @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
 
-    /* ─ Controls: one label column, controls on a shared line ─ */
-    .where, .filter-group, .find {
+    /* ─ Controls: one label column, controls on a shared line, and every row the same 40px
+       box 12px apart, so rows fall on an even 52px rhythm whatever control they hold. ─ */
+    .where, .where-range, .filter-group, .find {
       display: flex;
       align-items: center;
       gap: var(--space-2);
+      min-height: var(--h-input);
       margin: 0 0 var(--space-3);
       font: var(--meta);
       color: var(--text);
     }
     .where { flex-wrap: wrap; row-gap: var(--space-3); }
+    .where-range { margin: 0; }
     .where-word, .filter-group-label, .find-word {
       flex: none;
       width: var(--label-col);
@@ -754,8 +757,8 @@
     .where-range { flex: 1 0 100%; gap: var(--space-2); }
     .where input[type="range"] { flex: 1; accent-color: var(--accent); }
     #location-label { color: var(--text-muted); }
-    #distance-label { min-width: 0; width: 88px; font: var(--meta); font-weight: 700; color: var(--text); text-align: right; }
-    .filters { margin: var(--space-5) 0 0; }
+    #distance-label { flex: none; min-width: 0; width: auto; white-space: nowrap; font: var(--meta); font-weight: 700; color: var(--text); text-align: right; }
+    .filters { display: block; margin: 0; }
     /* The label holds the label column, so chips that wrap stay on the control line. */
     .filter-group {
       position: relative;
@@ -769,7 +772,7 @@
       left: 0;
       transform: translateY(-50%);
     }
-    .find { margin: var(--space-5) 0 var(--space-4); }
+    .find { margin: 0 0 var(--space-5); }
 
     #zip-input, .search-box {
       height: var(--h-input);
@@ -879,7 +882,8 @@
       border-image: linear-gradient(to top, var(--text) 2px, var(--bg) 2px) fill 0 / 0 0 2px / 0 100vmax;
     }
     .results-bar { flex-wrap: wrap; }
-    .results-bar .stats { flex: 1 1 240px; margin: 0; line-height: var(--h-button-s); }
+    /* Sized to its text: the buttons drop to their own line only when the summary is long. */
+    .results-bar .stats { flex: 1 1 auto; margin: 0; line-height: var(--h-button-s); }
     .results-actions { margin-left: auto; }
     .results-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; }
 
@@ -1057,8 +1061,8 @@
         scrollbar-width: none;
         /* Bleed to both screen edges so chips scroll off the edge, not short of it. */
         width: calc(100% + 2 * var(--gutter));
-        margin: 0 calc(-1 * var(--gutter)) var(--space-1);
-        padding: var(--space-1) var(--gutter) var(--space-2);
+        margin: 0 calc(-1 * var(--gutter)) var(--space-3);
+        padding: var(--space-1) var(--gutter); /* 4 + 32 + 4: the same 40px row, with room for chip shadows */
       }
       .filter-group::-webkit-scrollbar { display: none; }
       /* Fade out whichever end has more chips scrolled out of view. */
