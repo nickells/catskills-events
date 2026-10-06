@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test lib/"
+    "test": "node --test lib/*.test.mjs"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,7 @@
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
     "openai": "^6.42.0",
-    "playwright": "^1.61.1"
+    "playwright": "^1.61.1",
+    "sharp": "^0.34.5"
   }
 }

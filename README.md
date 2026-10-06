@@ -84,3 +84,16 @@ npm test
 
 API contract: [TypeSafe HTTP API](https://docs.typesafe.ai/api),
 [Choice guidance](https://docs.typesafe.ai/primitives/choice).
+
+## Flyer board (beta)
+
+`board.html` pins upcoming Instagram flyers up by date, drawn as paper in WebGL
+(three.js). Instagram image URLs expire within days, so the scrape downloads each
+post's image the first run it sees the post, resizes it to a 600px-wide WebP with
+`sharp`, and saves it to `output/flyers/<shortcode>.webp`; events get an `image`
+path. Flyers no upcoming event uses are deleted. `output/flyers` is kept between
+runs in its own Actions cache (restored on site-only redeploys too) and published
+with the site, so images are same-origin. `sharp` needs Node 20.3+ (`.nvmrc` pins
+22, as in CI); on older Node the scrape finishes without new flyers.
+
+Add `?dev` to the board's URL, or press `` ` ``, for sliders that tune the motion.

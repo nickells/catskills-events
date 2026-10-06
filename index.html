@@ -668,9 +668,12 @@
     /* ─ Masthead ─ */
     .poster-header { position: relative; margin: 0 calc(-1 * var(--gutter)) var(--space-6); padding: 0 var(--gutter); overflow-x: clip; }
     /* Above the headline, whose tight line-height reaches up over this row and took its clicks. */
-    .poster-top { position: relative; z-index: 1; display: flex; justify-content: space-between; }
+    .poster-top { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2) var(--space-4); }
     .poster-top a { color: var(--text); text-decoration: none; border-bottom: var(--rule) solid var(--accent); }
     .poster-top a:hover { background: var(--riso-yellow); }
+    .poster-links { display: flex; gap: var(--space-4); }
+    /* A small pink tag, like the section counts */
+    .poster-top .beta { margin-left: var(--space-1); padding: 1px var(--space-1); font: var(--micro); letter-spacing: 1px; color: #fff; background: var(--accent); }
     .halftone {
       position: absolute;
       top: var(--space-4);
@@ -1160,7 +1163,7 @@
   <div class="container">
     <header class="poster-header">
       <div class="halftone" aria-hidden="true"></div>
-      <div class="poster-top"><span id="issue">Vol. 1</span><a href="sources.html">Sources ↗</a></div>
+      <div class="poster-top"><span id="issue">Vol. 1</span><span class="poster-links"><a href="board.html">Flyer board <span class="beta">beta</span></a><a href="sources.html">Sources ↗</a></span></div>
       <h1><span class="l1">Catskills</span><span class="l2">Events</span></h1>
       <p class="poster-sub">Scraped every morning from local Instagrams, newsletters &amp; calendars.</p>
       <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span></div></div>

@@ -15,6 +15,7 @@ import { mentionsForPosts, resolveTaggedPlaces, taggedPlaceLines } from "./lib/t
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
 import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
+import { attachFlyers, postImages } from "./lib/flyers.mjs";
 import {
   createMetaProfileLookup,
   fetchInstagramProfiles,
@@ -640,6 +641,14 @@ async function main() {
   // Output
   const markdown = formatEvents(deduped);
   const json = formatJSON(deduped);
+
+  // Flyer images for the flyer board, kept in output/flyers between runs
+  console.log(`\n--- Flyers ---`);
+  try {
+    await attachFlyers(json, postImages(scrapeCache));
+  } catch (err) {
+    console.error(`  ✗ Error attaching flyers: ${err.message}`);
+  }
 
   writeFileSync(`${OUTPUT_DIR}/events.md`, markdown);
   writeFileSync(`${OUTPUT_DIR}/events.json`, JSON.stringify(json, null, 2));

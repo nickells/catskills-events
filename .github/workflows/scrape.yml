@@ -45,6 +45,15 @@ jobs:
           path: output/scrape-cache.json
           key: scrape-cache-${{ github.run_id }}
           restore-keys: scrape-cache-
+      # Flyer images live in their own cache entry: adding a path to the scrape cache would change
+      # its version and lose the cached extractions. Restored on site-only redeploys too, since the
+      # published events link to them.
+      - name: Restore flyers
+        uses: actions/cache/restore@v4
+        with:
+          path: output/flyers
+          key: flyers-${{ github.run_id }}
+          restore-keys: flyers-
       - run: node run.mjs
         if: env.SKIP_SCRAPE != 'true'
         env:
@@ -72,6 +81,12 @@ jobs:
         with:
           path: output/scrape-cache.json
           key: scrape-cache-${{ github.run_id }}
+      - name: Save flyers
+        if: env.SKIP_SCRAPE != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: output/flyers
+          key: flyers-${{ github.run_id }}
       - name: Fetch published events
         if: env.SKIP_SCRAPE == 'true'
         env:
@@ -86,7 +101,7 @@ jobs:
       - name: Prepare site
         run: |
           mkdir _site
-          cp index.html sources.html _site/
+          cp index.html sources.html board.html _site/
           cp -r output _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

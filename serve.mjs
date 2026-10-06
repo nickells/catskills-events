@@ -11,6 +11,7 @@ const MIME = {
   ".mjs": "application/javascript",
   ".json": "application/json",
   ".css": "text/css",
+  ".webp": "image/webp",
 };
 
 createServer((req, res) => {
