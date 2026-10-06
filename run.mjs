@@ -12,10 +12,12 @@ import { locateEvents } from "./lib/locate.mjs";
 import { cleanEvent, townCase } from "./lib/clean.mjs";
 import { extractJsonLdEvents } from "./lib/jsonld.mjs";
 import { mentionsForPosts, resolveTaggedPlaces, taggedPlaceLines } from "./lib/tagged.mjs";
-import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
+import { WEB_SOURCES, INSTAGRAM_SOURCES, VENUE_CALENDARS } from "./lib/sources.mjs";
 import { clearUnanchoredDates, findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
 import { detectTextAtUrl } from "./lib/google-vision.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
+import { findOrganizerLeads, organizerSite } from "./lib/leads.mjs";
+import { discoverCalendars, readCalendar } from "./lib/calendars.mjs";
 import { attachFlyers, postImages } from "./lib/flyers.mjs";
 import {
   createMetaProfileLookup,
@@ -187,6 +189,20 @@ async function handleNewsletterArchive(source) {
   }
 
   return allEvents;
+}
+
+async function handleVenueCalendar(source) {
+  const cacheKey = `calendar:${source.url}`;
+  const cached = getCached(cacheKey);
+  if (cached) {
+    console.log(`\n[${source.name}] ✓ ${cached.length} events (cached)`);
+    return cached;
+  }
+  console.log(`\n[${source.name}] Reading ${source.calendar} calendar`);
+  const events = (await readCalendar(source, { fetchPage })).map((e) => ({ ...e, source: source.name, sourceUrl: source.url }));
+  console.log(`  ✓ ${events.length} events`);
+  setCache(cacheKey, events);
+  return events;
 }
 
 async function handleCalendar(source) {
@@ -397,9 +413,9 @@ async function handleInstagram(profiles, tagging) {
       continue;
     }
 
-    const tagged = (await withTaggedPlaces(profile, tagging))
+    const placed = (await withTaggedPlaces(profile, tagging))
       .map((post) => (profile.venue ? { ...post, accountVenue: profile.venue } : post));
-    const posts = await withFlyerText(tagged, { ocr: (url) => detectTextAtUrl(url), cache: scrapeCache, log: console.log });
+    const posts = await withFlyerText(placed, { ocr: (url) => detectTextAtUrl(url), cache: scrapeCache, log: console.log });
     const { events, extracted, failed } = await extractPostEvents(
       posts,
       (text) => extractEvents(text, `Instagram @${profile.handle}`, { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }),
@@ -525,10 +541,24 @@ async function main() {
     }
   }
 
+  // Venue website calendars: hand-picked, then ones discovery found on earlier runs.
+  discovered.calendars ??= [];
+  const calendarUrls = new Set(VENUE_CALENDARS.map((c) => c.url));
+  for (const source of [...VENUE_CALENDARS, ...discovered.calendars.filter((c) => !calendarUrls.has(c.url))]) {
+    try {
+      allEvents.push(...await handleVenueCalendar(source));
+    } catch (err) {
+      console.error(`  ✗ Error processing ${source.name}: ${err.message}`);
+    }
+  }
+  // Listings link to organizers' own sites, which discovery follows below.
+  const listedEvents = [...allEvents];
+
   // Collect Instagram results; on failure every profile falls back to its cached events.
   let igEvents = null;
+  let profiles = null;
   try {
-    const profiles = await instagramFetch;
+    profiles = await instagramFetch;
     if (profiles) {
       igEvents = await handleInstagram(profiles, {
         lookupProfile: await createMetaProfileLookup().catch((err) => {
@@ -552,9 +582,13 @@ async function main() {
 
   // Vet accounts that sources @mention; accepted ones are fetched from the next run on.
   console.log(`\n--- Instagram Discovery ---`);
+  let organizerSites = [];
   try {
+    const organizers = await findOrganizerLeads(listedEvents, { cache: scrapeCache, fetchPage });
+    organizerSites = organizers.sites;
     await discoverInstagramSources({
       sources: instagramSources,
+      leads: organizers.leads,
       cache: scrapeCache,
       registry: discovered,
       lookupProfile: await createMetaProfileLookup(),
@@ -562,6 +596,23 @@ async function main() {
     saveDiscoveredSources(discovered);
   } catch (err) {
     console.error(`  ✗ Error discovering Instagram sources: ${err.message}`);
+  }
+
+  // Look for calendars on Instagram accounts' websites and organizers' sites.
+  console.log(`\n--- Calendar Discovery ---`);
+  try {
+    const hostOf = (url) => new URL(url).hostname.replace(/^www\./, "");
+    const skipHosts = [...WEB_SOURCES.flatMap((source) => source.urls || []), ...VENUE_CALENDARS.map((c) => c.url)].map(hostOf);
+    const sites = [
+      ...(profiles || []).filter((p) => p.website && organizerSite(p.website)).map((p) => ({
+        site: organizerSite(p.website), venue: p.venue, town: p.town, via: `@${p.handle}`,
+      })),
+      ...organizerSites.map(({ site, town }) => ({ site, town, via: "event link" })),
+    ];
+    await discoverCalendars({ sites, registry: discovered, cache: scrapeCache, fetchPage, skipHosts });
+    saveDiscoveredSources(discovered);
+  } catch (err) {
+    console.error(`  ✗ Error discovering calendars: ${err.message}`);
   }
 
   // Cached web-source events predate the cleanup in extractEvents.

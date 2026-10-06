@@ -62,6 +62,26 @@ which CI commits, and are fetched from the next run on. Rejections are kept in t
 scrape cache and rechecked after 90 days. Discovery stops adding at 175 sources to
 stay inside Meta's hourly rate limit. Remove a bad addition by deleting its entry.
 
+Listings from the calendars and newsletters also feed discovery: each event's link
+to the organizer's own site (not a ticketing, social or listing platform) is followed
+to the Instagram account that site links to most. Those accounts go to the front of
+the vetting queue, recorded as found via `site:<domain>`. Up to 60 new sites are
+fetched a run; each site's answer is cached for 30 days.
+
+## Venue calendars
+
+Venues often list events on their website that they never post. `VENUE_CALENDARS` in
+`lib/sources.mjs` reads those sites without an LLM, in three shapes: Squarespace event
+collections (`?format=json`), The Events Calendar's WordPress API, and schema.org
+JSON-LD. A calendar's `venue` and `town` fill what its listings leave out. Venue pages
+with none of these go in `WEB_SOURCES` as LLM-read calendars instead.
+
+Discovery looks for more: Instagram accounts' websites (from Meta) and organizer sites
+from listings are checked for an events page in one of those shapes with at least two
+upcoming events. Up to 40 sites are checked a run, finds are appended to `calendars` in
+`lib/discovered-sources.json` and read from the next run on, and sites without one are
+rechecked after 60 days. Remove a bad addition by deleting its entry.
+
 Instagram captions with relative dates such as `this Wednesday`, `next Friday`,
 `tomorrow`, and `tonight` get a second date pass. Jev reads the named day and week
 qualifier from the matching caption; calendar code resolves it from that post's

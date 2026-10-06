@@ -237,6 +237,10 @@
     <p class="section-note">Regional calendars and newsletters, with how many current events each lists.</p>
     <div class="aggregators" id="aggregators"></div>
 
+    <h2 class="section-header">Venue websites<span class="count" id="venues-count"></span></h2>
+    <p class="section-note">Calendars on venues' and organizers' own sites, for events they list but don't post.</p>
+    <ul class="accounts" id="venues"></ul>
+
     <h2 class="section-header">Instagram<span class="count" id="instagram-count"></span></h2>
     <p class="section-note">Venue, town and tourism accounts. Events are read from post captions and flyer text.</p>
     <ul class="accounts" id="instagram"></ul>
@@ -305,8 +309,20 @@
           .map(([s, n]) => [s.slice('Instagram @'.length), n])
           .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
+        // Every other source is a venue's own calendar (hand-picked or found by discovery).
+        const aggregatorNames = new Set(AGGREGATORS.map(s => s.name));
+        const venues = Object.entries(bySource)
+          .filter(([s]) => !s.startsWith('Instagram @') && !aggregatorNames.has(s))
+          .map(([s, n]) => [s, n, [...(pagesBySource[s] || [])][0]])
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
         document.getElementById('tally').textContent =
-          `Where ${plural(events.length, 'event')} come from: ${AGGREGATORS.length} calendars & newsletters, ${accounts.length} Instagram accounts.`;
+          `Where ${plural(events.length, 'event')} come from: ${AGGREGATORS.length} calendars & newsletters, ${plural(venues.length, 'venue website')}, ${accounts.length} Instagram accounts.`;
+
+        document.getElementById('venues-count').textContent = venues.length;
+        document.getElementById('venues').innerHTML = venues.map(([name, n, url]) =>
+          `<li>${url ? `<a href="${esc(url)}" target="_blank">${esc(name)}</a>` : esc(name)}<span class="n">${n}</span></li>`
+        ).join('');
 
         document.getElementById('aggregators-count').textContent = AGGREGATORS.length;
         document.getElementById('aggregators').innerHTML = AGGREGATORS.map(s => `
