@@ -300,6 +300,9 @@
     }
 
     .where {
+      /* Above the sticky results bar (z-index 30), so the town list opens over it. */
+      position: relative;
+      z-index: 40;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -394,6 +397,13 @@
     #place-options li.hint {
       color: var(--text-muted);
       cursor: default;
+    }
+
+    .where-range {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1 1 260px;
     }
 
     .where input[type="range"] {
@@ -702,8 +712,24 @@
     }
     .filter-btn:hover { border-color: var(--text); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--text); }
     .filter-btn.active { background: var(--accent); border-color: var(--text); color: var(--text); transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--text); }
-    .filter-btn[data-category].active { color: #fff; }
-    .filter-btn[data-category].active { border-color: var(--text); }
+    /* What chips look like the category tags on the cards, in their own ink: a wash when off,
+       full color and pressed in when on. */
+    .filter-btn[data-category] {
+      border-radius: 0;
+      font: 700 12px/1.2 "Space Mono", monospace;
+      letter-spacing: 0.5px;
+      background: color-mix(in srgb, var(--chip) 16%, var(--card-bg));
+      box-shadow: 2px 2px 0 var(--chip);
+    }
+    .filter-btn[data-category]:hover { box-shadow: 3px 3px 0 var(--chip); }
+    .filter-btn[data-category].active { color: #fff; background: var(--chip); border-color: var(--text); box-shadow: 1px 1px 0 var(--text); }
+    .filter-btn[data-category="music"] { --chip: var(--tag-music); }
+    .filter-btn[data-category="food"] { --chip: var(--tag-food); }
+    .filter-btn[data-category="culture"] { --chip: var(--tag-culture); }
+    .filter-btn[data-category="nature"] { --chip: var(--tag-nature); }
+    .filter-btn[data-category="community"] { --chip: var(--tag-community); }
+    .filter-btn[data-category="nightlife"] { --chip: var(--tag-nightlife); }
+    .filter-btn[data-category="wellness"] { --chip: var(--tag-wellness); }
 
     #zip-input { border: 2px solid var(--text); border-radius: 0; font-family: "Space Mono", monospace; }
     #zip-input:focus { border-color: var(--text); box-shadow: 3px 3px 0 var(--accent); }
@@ -835,6 +861,8 @@
         flex-wrap: nowrap;
         overflow-x: auto;
         scrollbar-width: none;
+        /* Bleed to both screen edges so chips scroll off the edge, not short of it. */
+        width: calc(100% + 32px);
         margin: 0 -16px 6px;
         padding: 2px 16px 6px;
       }
@@ -878,9 +906,12 @@
         <ul id="place-options" role="listbox" hidden></ul>
       </div>
       <span id="location-label"></span>
-      <span class="where-word">within</span>
-      <input type="range" id="distance-slider" min="0" max="120" value="120" step="5" disabled aria-label="Distance" />
-      <span id="distance-label">any distance</span>
+      <!-- Kept together so "within" never wraps away from its slider. -->
+      <div class="where-range">
+        <span class="where-word">within</span>
+        <input type="range" id="distance-slider" min="0" max="120" value="120" step="5" disabled aria-label="Distance" />
+        <span id="distance-label">any distance</span>
+      </div>
     </div>
 
     <div class="filters">
