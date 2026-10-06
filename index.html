@@ -132,7 +132,7 @@
       border-radius: 10px;
       font-size: 14px;
       background: var(--card-bg);
-      margin-bottom: 24px;
+      margin-bottom: 12px;
       outline: none;
       transition: border-color 0.15s;
     }
@@ -299,9 +299,22 @@
       line-height: 1;
     }
 
-    .distance-slider-wrap {
-      width: 100%;
-      margin-bottom: 16px;
+    .where {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 10px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    #controls { scroll-margin-top: 12px; }
+
+    #distance-label {
+      min-width: 82px;
+      font-weight: 600;
+      color: var(--text);
     }
 
     .place-picker {
@@ -383,20 +396,13 @@
       cursor: default;
     }
 
-    .distance-slider-wrap label {
-      font-size: 13px;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .distance-slider-wrap input[type="range"] {
-      width: 100%;
+    .where input[type="range"] {
+      flex: 1 1 120px;
+      min-width: 100px;
       accent-color: var(--accent);
     }
 
-    .distance-slider-wrap input[type="range"]:disabled {
+    .where input[type="range"]:disabled {
       opacity: 0.4;
     }
 
@@ -704,8 +710,9 @@
     #place-options { border: 2px solid var(--text); border-radius: 0; box-shadow: 5px 5px 0 var(--text); }
     #place-options li { border-radius: 0; }
     #place-options li.active, #place-options li[data-i]:hover { background: var(--riso-yellow); }
-    .distance-slider-wrap label { font-family: "Space Mono", monospace; color: var(--text); }
-    .distance-slider-wrap input[type="range"] { accent-color: var(--accent); }
+    .where { font-family: "Space Mono", monospace; color: var(--text); }
+    .where-word { font-weight: 700; text-transform: uppercase; font-size: 12px; }
+    .where input[type="range"] { accent-color: var(--accent); }
     .stats { font: 700 12px "Space Mono", monospace; color: var(--text); text-transform: uppercase; }
 
     .view-btn { border: 2px solid var(--text); border-radius: 0; font-weight: 800; text-transform: uppercase; color: var(--text); }
@@ -793,6 +800,60 @@
 
     .tooltip { border-radius: 0; background: var(--text); box-shadow: 5px 5px 0 var(--accent); font-family: "Space Mono", monospace; }
     .tooltip .tt-name { font-family: "Archivo", sans-serif; font-weight: 800; color: var(--riso-yellow); }
+
+    /* Results bar: count and active filters, pinned while scrolling through results. */
+    .results-bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 0 -16px 8px;
+      padding: 10px 16px;
+      background: var(--bg);
+      border-bottom: 2px solid var(--text);
+    }
+    .results-bar .stats { margin: 0; line-height: 1.5; }
+    .results-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+    .clear-filters, .jump-filters {
+      padding: 2px 8px;
+      border: 2px solid var(--text);
+      background: var(--riso-yellow);
+      font: 700 11px/1.4 "Space Mono", monospace;
+      text-transform: uppercase;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .clear-filters { margin-left: 4px; vertical-align: 1px; }
+    .jump-filters { background: var(--accent); box-shadow: 2px 2px 0 var(--text); }
+
+    @media (max-width: 600px) {
+      /* One sideways-scrolling row per filter group instead of five wrapped rows. */
+      .filter-group {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        margin: 0 -16px 6px;
+        padding: 2px 16px 6px;
+      }
+      .filter-group::-webkit-scrollbar { display: none; }
+      .filter-group-label { width: auto; flex: none; align-self: center; margin: 0 4px 0 0; }
+      .filter-btn { flex: none; }
+      .filter-btn[data-toggle] { margin-left: 0; }
+      .filters { margin-bottom: 12px; }
+
+      /* A smaller poster so the first events fit on the first screen. */
+      .poster-header { margin-bottom: 20px; }
+      .poster-header h1 { margin-top: 10px; font-size: 15vw; }
+      .halftone { width: 150px; height: 150px; top: 12px; right: -20px; }
+      .poster-sub { margin-top: 10px; font-size: 11px; }
+      .ticker { margin-top: 14px; }
+      .ticker-track { font-size: 16px; padding: 5px 0; }
+      .section-header { font-size: 36px; margin-top: 28px; }
+      .view-btn { padding: 4px 8px; }
+    }
   </style>
 </head>
 <body>
@@ -805,7 +866,22 @@
       <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span></div></div>
     </header>
 
-    <input class="search-box" type="text" placeholder="Search events, venues, towns..." id="search" />
+    <!-- Location first: distance is the main way people narrow the list. -->
+    <div class="where" id="controls">
+      <span class="where-word">Near</span>
+      <div class="place-picker">
+        <input type="text" id="zip-input" placeholder="Town or zip" value="" autocomplete="off"
+          role="combobox" aria-expanded="false" aria-controls="place-options" aria-label="Your town or zip code" />
+        <button type="button" id="place-toggle" tabindex="-1" aria-label="Show towns">
+          <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <ul id="place-options" role="listbox" hidden></ul>
+      </div>
+      <span id="location-label"></span>
+      <span class="where-word">within</span>
+      <input type="range" id="distance-slider" min="0" max="120" value="120" step="5" disabled aria-label="Distance" />
+      <span id="distance-label">any distance</span>
+    </div>
 
     <div class="filters">
       <div class="filter-group">
@@ -828,29 +904,18 @@
       </div>
     </div>
 
-    <div class="distance-slider-wrap">
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">
-        <div class="place-picker">
-          <input type="text" id="zip-input" placeholder="Town or zip" value="" autocomplete="off"
-            role="combobox" aria-expanded="false" aria-controls="place-options" aria-label="Your town or zip code" />
-          <button type="button" id="place-toggle" tabindex="-1" aria-label="Show towns">
-            <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <ul id="place-options" role="listbox" hidden></ul>
-        </div>
-        <label style="flex:1;display:flex;justify-content:space-between;margin:0">
-          <span id="location-label">Set your town for distances</span>
-          <span id="distance-label">Any distance</span>
-        </label>
-      </div>
-      <input type="range" id="distance-slider" min="0" max="120" value="120" step="5" disabled />
-    </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <!-- Search sits right above the results it filters, so typing shows the list change. -->
+    <input class="search-box" type="text" placeholder="Search events, venues, towns..." id="search" />
+
+    <div class="results-bar">
       <div class="stats" id="stats"></div>
-      <div class="view-toggle">
-        <button class="view-btn active" data-view="list">List</button>
-        <button class="view-btn" data-view="calendar">Calendar</button>
+      <div class="results-actions">
+        <button type="button" class="jump-filters" id="jump-filters" hidden>Filters ↑</button>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="list">List</button>
+          <button class="view-btn" data-view="calendar">Calendar</button>
+        </div>
       </div>
     </div>
     <div id="events"></div>
@@ -897,6 +962,8 @@
     let hideStarted = false;
     let searchQuery = '';
     let maxDistance = 120;
+    let homeName = '';
+    const distanceText = () => (maxDistance >= 120 ? 'any distance' : `${maxDistance} mi`);
     let activeView = 'list';
     let calWeekOffset = 0;
     let calEventMap = {};
@@ -966,7 +1033,7 @@
       hideStarted = p.get('started') === 'hide';
       if (p.has('cat')) p.get('cat').split(',').forEach(c => activeCategories.add(c));
       if (p.has('q')) { searchQuery = p.get('q'); document.getElementById('search').value = searchQuery; }
-      if (p.has('dist')) { maxDistance = parseInt(p.get('dist')); document.getElementById('distance-slider').value = maxDistance; document.getElementById('distance-label').textContent = `Within ${maxDistance} mi`; }
+      if (p.has('dist')) { maxDistance = parseInt(p.get('dist')); document.getElementById('distance-slider').value = maxDistance; document.getElementById('distance-label').textContent = distanceText(); }
       if (p.has('week')) calWeekOffset = parseInt(p.get('week'));
       // A shared link's place wins for this visit without replacing your saved one.
       const place = p.get('zip') || p.get('near') || savedPlace();
@@ -976,7 +1043,10 @@
         applyPlace(place);
       }
 
-      // Sync button states
+      syncButtons();
+    }
+
+    function syncButtons() {
       document.querySelectorAll('.filter-btn[data-time]').forEach(b => {
         b.classList.toggle('active', b.dataset.time === activeTime);
       });
@@ -1017,6 +1087,7 @@
     }
 
     function setHome(lat, lng, name) {
+      homeName = name;
       homeLat = lat;
       homeLng = lng;
       // A zip shows the town it resolved to; a picked town is already in the box.
@@ -1029,7 +1100,7 @@
 
     function clearHome() {
       homeLat = homeLng = null;
-      document.getElementById('location-label').textContent = 'Set your town for distances';
+      document.getElementById('location-label').textContent = '';
       document.getElementById('distance-slider').disabled = true;
       computeDistances();
       render();
@@ -1119,7 +1190,7 @@
       const distLabel = document.getElementById('distance-label');
       slider.addEventListener('input', () => {
         maxDistance = parseInt(slider.value);
-        distLabel.textContent = maxDistance >= 120 ? 'Any distance' : `Within ${maxDistance} mi`;
+        distLabel.textContent = distanceText();
         render();
       });
 
@@ -1135,6 +1206,17 @@
       });
 
       bindPlacePicker();
+
+      document.getElementById('stats').addEventListener('click', e => {
+        if (e.target.id === 'clear-filters') clearFilters();
+      });
+
+      // Once the controls scroll away, the sticky results bar offers a way back to them.
+      const jump = document.getElementById('jump-filters');
+      jump.addEventListener('click', () => document.getElementById('controls').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      new IntersectionObserver(([entry]) => {
+        jump.hidden = entry.isIntersecting || entry.boundingClientRect.top > 0;
+      }).observe(document.getElementById('search'));
     }
 
     // One field for both: pick a common town from the list, or type a zip.
@@ -1289,11 +1371,39 @@
       return true;
     }
 
+    const TIME_LABELS = { tonight: 'Tonight', week: 'This week', month: 'This month' };
+
+    // "12 events · Music · within 25 mi of Woodstock", so you can see what's applied, plus Clear.
+    function statsLine(count) {
+      const parts = [];
+      if (activeTime !== 'all') parts.push(TIME_LABELS[activeTime] || activeTime);
+      if (hideStarted) parts.push('Not started yet');
+      for (const c of activeCategories) parts.push(CATEGORY_LABELS[c] || c);
+      if (searchQuery) parts.push(`“${searchQuery}”`);
+      if (maxDistance < 120 && homeLat != null) parts.push(`within ${maxDistance} mi of ${homeName}`);
+      const text = [`${count} event${count !== 1 ? 's' : ''}`, ...parts].map(esc).join(' · ');
+      return parts.length ? `${text} <button type="button" class="clear-filters" id="clear-filters">Clear</button>` : text;
+    }
+
+    // Clears filters but keeps your place, which is a setting rather than a filter.
+    function clearFilters() {
+      activeTime = 'all';
+      activeCategories.clear();
+      hideStarted = false;
+      searchQuery = '';
+      document.getElementById('search').value = '';
+      maxDistance = 120;
+      document.getElementById('distance-slider').value = 120;
+      document.getElementById('distance-label').textContent = distanceText();
+      syncButtons();
+      render();
+    }
+
     function render() {
       syncToUrl();
       const filtered = allEvents.filter(matchesFilters);
       const container = document.getElementById('events');
-      document.getElementById('stats').textContent = `${filtered.length} events`;
+      document.getElementById('stats').innerHTML = statsLine(filtered.length);
 
       if (!filtered.length) {
         container.innerHTML = '<div class="empty-state">No events match your filters</div>';
