@@ -53,7 +53,8 @@ keeps its cached events for up to eight days.
 
 After each scrape, gpt-5.4-mini reads new captions for the accounts they mention
 (Meta's API strips the `@`). A running tally ranks mentioned accounts by how many
-sources mention them. Up to 25 a run are vetted: Meta Business Discovery fetches the
+sources mention them. Each run vets as many as Meta's hourly rate limit leaves room for
+after fetching every source (about 200 minus the source count, up to 60): Meta Business Discovery fetches the
 bio and recent posts (personal and nonexistent accounts are rejected), and Jev
 decides whether it's a Catskills/Hudson Valley event host and in which town.
 Accepted hosts (confidence ≥ 0.7) are appended to `lib/discovered-sources.json`,
