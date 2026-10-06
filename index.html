@@ -621,6 +621,7 @@
       --h-chip: 32px;
       --h-button-s: 24px;
       --h-tag: 20px;
+      --thumb: 22px;
 
       --rule: 2px;
       --rule-thin: 1px;
@@ -756,9 +757,48 @@
       text-box: trim-both cap alphabetic;
     }
     .where-range { flex: 1 0 100%; gap: var(--space-2); }
-    .where input[type="range"] { flex: 1; accent-color: var(--accent); }
+    /* The distance slider: a 4px track filled in pink up to a round sticker of a thumb. The fill
+       (--fill) is set from the value on every render. */
+    .where input[type="range"] {
+      --fill: 100%;
+      flex: 1;
+      height: var(--h-input);
+      margin: 0;
+      background: transparent;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .where input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: linear-gradient(to right, var(--accent) var(--fill), var(--text) var(--fill));
+    }
+    .where input[type="range"]::-moz-range-track { height: 4px; background: var(--text); }
+    .where input[type="range"]::-moz-range-progress { height: 4px; background: var(--accent); }
+    .where input[type="range"]::-webkit-slider-thumb {
+      width: var(--thumb);
+      height: var(--thumb);
+      margin-top: calc((4px - var(--thumb)) / 2);
+      border: var(--rule) solid var(--text);
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .where input[type="range"]::-moz-range-thumb {
+      box-sizing: border-box;
+      width: var(--thumb);
+      height: var(--thumb);
+      border: var(--rule) solid var(--text);
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+    }
+    .where input[type="range"]:disabled { cursor: default; }
     #location-label { color: var(--text-muted); }
-    #distance-label { flex: none; min-width: 0; width: auto; white-space: nowrap; font: var(--meta); font-weight: 700; color: var(--text); text-align: right; }
+    /* As wide as "any distance" (12 monospace characters), so the slider keeps its length. */
+    #distance-label { flex: none; min-width: 0; width: 12ch; white-space: nowrap; font: var(--meta); font-weight: 700; color: var(--text); text-align: right; }
     .filters { display: block; margin: 0; }
     /* The label holds the label column, so chips that wrap stay on the control line. */
     .filter-group {
@@ -1051,6 +1091,20 @@
     .tooltip .tt-name { font: var(--title-s); color: var(--riso-yellow); }
     .tooltip .tt-meta, .tooltip .tt-desc { font: var(--meta-s); }
 
+    /* Touch screens: every target at or near the 44px a fingertip needs. The rows keep their
+       even rhythm, just on a bigger box. */
+    @media (pointer: coarse) {
+      :root {
+        --h-input: 48px;
+        --h-chip: 44px;
+        --h-button-s: 40px;
+        --thumb: 32px;
+      }
+      #place-toggle { width: var(--h-input); }
+      #zip-input { padding-right: var(--h-input); }
+      #place-options li { min-height: 44px; align-items: center; }
+    }
+
     @media (max-width: 600px) {
       :root {
         --label-col: 56px;
@@ -1066,7 +1120,8 @@
         /* Bleed to both screen edges so chips scroll off the edge, not short of it. */
         width: calc(100% + 2 * var(--gutter));
         margin: 0 calc(-1 * var(--gutter)) var(--space-3);
-        padding: var(--space-1) var(--gutter); /* 4 + 32 + 4: the same 40px row, with room for chip shadows */
+        /* The same row box as everywhere else, chips centered, room left for their shadows. */
+        padding: calc((var(--h-input) - var(--h-chip)) / 2) var(--gutter);
       }
       .filter-group::-webkit-scrollbar { display: none; }
       /* Fade out whichever end has more chips scrolled out of view. */
@@ -1641,6 +1696,12 @@
     }
 
     // Clears filters but keeps your place, which is a setting rather than a filter.
+    // Pink fill up to the thumb (Firefox draws it natively with ::-moz-range-progress).
+    function paintSlider() {
+      const slider = document.getElementById('distance-slider');
+      slider.style.setProperty('--fill', `${(slider.value - slider.min) / (slider.max - slider.min) * 100}%`);
+    }
+
     function clearFilters() {
       activeTime = 'all';
       activeCategories.clear();
@@ -1656,6 +1717,7 @@
 
     function render() {
       syncToUrl();
+      paintSlider();
       const filtered = allEvents.filter(e => matchesFilters(e));
       // Tonight's events that would show but have already started, hidden or not.
       const startedTonight = allEvents.filter(e =>
