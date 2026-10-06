@@ -1,6 +1,8 @@
 name: Review
 
 # Reviews each PR when it opens or leaves draft. Comment "/review" on a PR for a fresh review.
+# Fork PRs get no secrets, so they're only reviewed when a collaborator comments "/review". The
+# action reads the diff through the API and never runs the PR's code.
 on:
   pull_request:
     types: [opened, reopened, ready_for_review]
@@ -18,7 +20,8 @@ concurrency:
 jobs:
   review:
     if: >-
-      (github.event_name == 'pull_request' && !github.event.pull_request.draft) ||
+      (github.event_name == 'pull_request' && !github.event.pull_request.draft &&
+       github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
        startsWith(github.event.comment.body, '/review') &&
        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
