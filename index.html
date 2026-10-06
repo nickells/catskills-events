@@ -753,6 +753,9 @@
       flex: none;
       width: var(--label-col);
       margin: 0 var(--space-1) 0 0;
+      /* Trim the box to the capitals, so centering it centers the letters, not a line box
+         that includes room for descenders. */
+      text-box: trim-both cap alphabetic;
     }
     .where-range { flex: 1 0 100%; gap: var(--space-2); }
     .where input[type="range"] { flex: 1; accent-color: var(--accent); }
@@ -763,12 +766,15 @@
     .filter-group {
       position: relative;
       flex-wrap: wrap;
+      align-content: flex-start;
       width: auto;
-      padding-left: calc(var(--label-col) + var(--space-1) + var(--space-2));
+      /* 4 + 32 + 4: the first line of chips is centered in the 40px row even when they wrap. */
+      padding: calc((var(--h-input) - var(--h-chip)) / 2) 0 calc((var(--h-input) - var(--h-chip)) / 2)
+        calc(var(--label-col) + var(--space-1) + var(--space-2));
     }
     .filter-group .filter-group-label {
       position: absolute;
-      top: calc(var(--h-chip) / 2);
+      top: calc(var(--h-input) / 2);
       left: 0;
       transform: translateY(-50%);
     }
