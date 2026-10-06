@@ -1254,8 +1254,8 @@
       if (searchQuery) p.set('q', searchQuery);
       if (maxDistance < 120) p.set('dist', maxDistance);
       if (calWeekOffset) p.set('week', calWeekOffset);
-      // Only a shared link's place goes in the URL; your own lives in localStorage.
-      if (currentPlace && currentPlace !== savedPlace()) p.set(/^\d{5}$/.test(currentPlace) ? 'zip' : 'near', currentPlace);
+      // The place always rides in the URL, so any link carries it.
+      if (currentPlace) p.set(/^\d{5}$/.test(currentPlace) ? 'zip' : 'near', currentPlace);
       const str = p.toString();
       history.replaceState(null, '', str ? '?' + str : location.pathname);
     }
@@ -1269,8 +1269,10 @@
       if (p.has('q')) { searchQuery = p.get('q'); document.getElementById('search').value = searchQuery; }
       if (p.has('dist')) { maxDistance = parseInt(p.get('dist')); document.getElementById('distance-slider').value = maxDistance; document.getElementById('distance-label').textContent = distanceText(); }
       if (p.has('week')) calWeekOffset = parseInt(p.get('week'));
-      // A shared link's place wins for this visit without replacing your saved one.
-      const place = p.get('zip') || p.get('near') || savedPlace();
+      // A place in the URL wins and becomes your saved place; otherwise use the saved one.
+      const urlPlace = p.get('zip') || p.get('near');
+      if (urlPlace) savePlace(urlPlace);
+      const place = urlPlace || savedPlace();
       if (place) {
         currentPlace = place;
         document.getElementById('zip-input').value = place;
