@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catskills Events</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" />
   <style>
     :root {
       --bg: #faf9f6;
@@ -568,16 +571,238 @@
       }
       .cal-day { min-height: auto; }
     }
+
+    /* ── Gig poster theme: a risograph show flyer (misregistered ink, halftones, hard
+       shadows), layered over the base styles above. ── */
+    :root {
+      --bg: #f4efe4;
+      --card-bg: #fffdf7;
+      --text: #121212;
+      --text-muted: #474440;
+      --border: #121212;
+      --accent: #ff3fa4;
+      --accent-light: #ffd8ec;
+      --riso-blue: #0078bf;
+      --riso-yellow: #ffd900;
+      --tag-music: #ff3fa4;
+      --tag-food: #ff6c2f;
+      --tag-culture: #0078bf;
+      --tag-nature: #00a95c;
+      --tag-community: #e8322b;
+      --tag-nightlife: #765ba7;
+      --tag-wellness: #00a6b8;
+      --tag-other: #5f5b55;
+    }
+
+    body {
+      font-family: "Archivo", system-ui, sans-serif;
+      background-color: var(--bg);
+      /* Paper grain */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .container { padding-top: 20px; }
+
+    /* The flyer header */
+    .poster-header { position: relative; margin: 0 -16px 34px; padding: 0 16px; overflow-x: clip; }
+    .poster-top {
+      display: flex;
+      justify-content: space-between;
+      font: 700 12px/1 "Space Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .poster-top a { color: var(--text); text-decoration: none; border-bottom: 2px solid var(--accent); }
+    .poster-top a:hover { background: var(--riso-yellow); }
+    .halftone {
+      position: absolute;
+      top: 18px;
+      right: -30px;
+      width: 230px;
+      height: 230px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--riso-yellow) 2.6px, transparent 3px) 0 0 / 9px 9px;
+      -webkit-mask: radial-gradient(circle, #000 35%, transparent 71%);
+      mask: radial-gradient(circle, #000 35%, transparent 71%);
+      pointer-events: none;
+    }
+    .poster-header h1 {
+      position: relative;
+      margin-top: 14px;
+      font: 400 clamp(64px, 17vw, 132px)/0.84 "Anton", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .poster-header h1 span { display: block; mix-blend-mode: multiply; }
+    .poster-header h1 .l1 { color: var(--text); text-shadow: 5px 4px 0 var(--accent); }
+    .poster-header h1 .l2 { color: var(--riso-blue); text-shadow: -4px 3px 0 var(--accent); margin-left: 0.6em; }
+    .poster-sub {
+      position: relative;
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 10px;
+      font: 700 13px/1.3 "Space Mono", monospace;
+      text-transform: uppercase;
+      background: var(--riso-yellow);
+      transform: rotate(-1.5deg);
+      box-shadow: 3px 3px 0 var(--text);
+    }
+    .ticker {
+      margin: 22px -16px 0;
+      overflow: hidden;
+      border-block: 2px solid var(--text);
+      background: var(--text);
+      transform: rotate(-1deg);
+    }
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      gap: 22px;
+      padding: 7px 0;
+      font: 400 20px/1 "Anton", sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--riso-yellow);
+      animation: ticker 28s linear infinite;
+    }
+    .ticker-track .star { color: var(--accent); }
+    .ticker-track em {
+      margin-left: 4px;
+      font: italic 700 13px/1 "Space Mono", monospace;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #f4efe4;
+      opacity: 0.75;
+    }
+    @keyframes ticker { to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
+
+    /* Controls: chunky stickers */
+    .search-box {
+      border: 2px solid var(--text);
+      border-radius: 0;
+      box-shadow: 5px 5px 0 var(--riso-blue);
+      font: 400 14px "Space Mono", monospace;
+    }
+    .search-box:focus { border-color: var(--text); box-shadow: 5px 5px 0 var(--accent); }
+    .filter-group-label { font: 700 11px/1 "Space Mono", monospace; letter-spacing: 1.5px; color: var(--text); }
+    .filter-btn {
+      border: 2px solid var(--text);
+      border-radius: 999px;
+      font: 800 12px/1.2 "Archivo", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 2px 2px 0 var(--text);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .filter-btn:hover { border-color: var(--text); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--text); }
+    .filter-btn.active { background: var(--accent); border-color: var(--text); color: var(--text); transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--text); }
+    .filter-btn[data-category].active { color: #fff; }
+    .filter-btn[data-category].active { border-color: var(--text); }
+
+    #zip-input { border: 2px solid var(--text); border-radius: 0; font-family: "Space Mono", monospace; }
+    #zip-input:focus { border-color: var(--text); box-shadow: 3px 3px 0 var(--accent); }
+    #place-options { border: 2px solid var(--text); border-radius: 0; box-shadow: 5px 5px 0 var(--text); }
+    #place-options li { border-radius: 0; }
+    #place-options li.active, #place-options li[data-i]:hover { background: var(--riso-yellow); }
+    .distance-slider-wrap label { font-family: "Space Mono", monospace; color: var(--text); }
+    .distance-slider-wrap input[type="range"] { accent-color: var(--accent); }
+    .stats { font: 700 12px "Space Mono", monospace; color: var(--text); text-transform: uppercase; }
+
+    .view-btn { border: 2px solid var(--text); border-radius: 0; font-weight: 800; text-transform: uppercase; color: var(--text); }
+    .view-btn.active { background: var(--text); color: var(--riso-yellow); }
+
+    /* Section headers: highlighter over big type */
+    .section-header {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      margin: 40px 0 18px;
+      padding: 0 8px;
+      border: none;
+      font: 400 46px/1 "Anton", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: linear-gradient(transparent 55%, var(--riso-yellow) 55% 92%, transparent 92%);
+    }
+    .section-header .event-count {
+      margin-left: 12px;
+      padding: 3px 7px;
+      font: 700 13px/1 "Space Mono", monospace;
+      color: #fff;
+      background: var(--accent);
+      transform: rotate(4deg);
+    }
+
+    /* Cards: flyers pinned up slightly crooked, shadowed in their category's ink */
+    .event-card {
+      --ink: var(--riso-blue);
+      position: relative;
+      margin: 0 8px 18px 0;
+      padding: 14px;
+      border: 2px solid var(--text);
+      background: var(--card-bg);
+      box-shadow: 6px 6px 0 var(--ink);
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .event-card:last-child { border-bottom: 2px solid var(--text); }
+    .event-card:nth-child(3n) { --tilt: -0.7deg; }
+    .event-card:nth-child(3n + 1) { --tilt: 0.45deg; }
+    .event-card:nth-child(3n + 2) { --tilt: -0.2deg; }
+    .event-card:hover { transform: rotate(0deg) translate(-2px, -2px); box-shadow: 9px 9px 0 var(--ink); }
+    .event-card:has(.tag-music) { --ink: var(--tag-music); }
+    .event-card:has(.tag-food) { --ink: var(--tag-food); }
+    .event-card:has(.tag-culture) { --ink: var(--tag-culture); }
+    .event-card:has(.tag-nature) { --ink: var(--tag-nature); }
+    .event-card:has(.tag-community) { --ink: var(--tag-community); }
+    .event-card:has(.tag-nightlife) { --ink: var(--tag-nightlife); }
+    .event-card:has(.tag-wellness) { --ink: var(--tag-wellness); }
+    .event-date-col { width: 58px; }
+    .event-date-col .day-name {
+      display: inline-block;
+      padding: 1px 4px;
+      font: 700 11px/1.2 "Space Mono", monospace;
+      color: var(--text);
+      background: var(--riso-yellow);
+    }
+    .event-date-col .day-num { font: 400 40px/1 "Anton", sans-serif; margin-top: 3px; }
+    .event-name { font: 800 17px/1.2 "Archivo", sans-serif; }
+    .event-meta { font: 400 12px/1.4 "Space Mono", monospace; color: var(--text); }
+    .event-desc { color: var(--text-muted); }
+    .event-link:hover { text-decoration: none; background: var(--riso-yellow); }
+    .event-tag {
+      border: 1.5px solid var(--text);
+      border-radius: 0;
+      font: 700 10px/1.4 "Space Mono", monospace;
+      letter-spacing: 0.5px;
+    }
+    .event-sources a { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
+    .distance-badge { border: 1.5px solid var(--text); border-radius: 0; font-family: "Space Mono", monospace; color: var(--text); }
+    .distance-close { background: #7ee2a8; }
+    .distance-medium { background: var(--riso-yellow); }
+    .distance-far { background: #ff9bc9; }
+
+    .cal-day { border: 2px solid var(--text); border-radius: 0; }
+    .cal-day.today { border-color: var(--text); background: #fff6b8; box-shadow: 4px 4px 0 var(--accent); }
+    .cal-day-header { font-family: "Space Mono", monospace; color: var(--text); text-transform: uppercase; }
+    .cal-day-header .cal-day-num { font: 400 24px "Anton", sans-serif; }
+    .cal-event { border-radius: 0; background: #f2ede2; border-left: 4px solid var(--accent); }
+    .cal-event:hover { background: var(--riso-yellow); }
+    .cal-week-nav button { border: 2px solid var(--text); border-radius: 0; font-weight: 800; box-shadow: 2px 2px 0 var(--text); }
+    .cal-week-label { font: 400 22px "Anton", sans-serif; text-transform: uppercase; }
+
+    .tooltip { border-radius: 0; background: var(--text); box-shadow: 5px 5px 0 var(--accent); font-family: "Space Mono", monospace; }
+    .tooltip .tt-name { font-family: "Archivo", sans-serif; font-weight: 800; color: var(--riso-yellow); }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <h1>Catskills Events</h1>
-        <a href="sources.html" style="font-size:13px;font-weight:500;color:var(--accent);text-decoration:none">Sources</a>
-      </div>
-      <p>Aggregated from local newsletters, tourism boards, and venue sites</p>
+    <header class="poster-header">
+      <div class="halftone" aria-hidden="true"></div>
+      <div class="poster-top"><span id="issue">Vol. 1</span><a href="sources.html">Sources ↗</a></div>
+      <h1><span class="l1">Catskills</span><span class="l2">Events</span></h1>
+      <p class="poster-sub">Scraped every morning from local Instagrams, newsletters &amp; calendars.</p>
+      <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span></div></div>
     </header>
 
     <input class="search-box" type="text" placeholder="Search events, venues, towns..." id="search" />
@@ -820,6 +1045,7 @@
     }
 
     async function init() {
+      showIssueNumber();
       const res = await fetch('./output/events.json');
       allEvents = await res.json();
       buildTownIndex();
@@ -827,6 +1053,35 @@
       computeDistances();
       render();
       bindFilters();
+      fillTicker();
+    }
+
+    // Volume and issue: years and days since the first scrape on June 29, 2026.
+    function showIssueNumber() {
+      const launch = new Date(2026, 5, 29);
+      const now = new Date();
+      const issue = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - launch) / 864e5) + 1;
+      let vol = now.getFullYear() - launch.getFullYear();
+      if (now.getMonth() > 5 || (now.getMonth() === 5 && now.getDate() >= 29)) vol++;
+      document.getElementById('issue').textContent = `Vol. ${vol} · No. ${issue}`;
+    }
+
+    // The ticker scrolls through what's actually on in the next week; with too few events
+    // it keeps its generic list.
+    function fillTicker() {
+      const today = new Date().toISOString().slice(0, 10);
+      const week = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+      const seen = new Set();
+      const picks = allEvents
+        .filter(e => e.date >= today && e.date <= week && e.name && e.name.length <= 42)
+        .filter(e => { const k = e.name.toLowerCase(); return !seen.has(k) && seen.add(k); })
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 16);
+      if (picks.length < 6) return;
+      const run = picks.map(e => `<span>${esc(e.name)}${e.town ? ` <em>${esc(e.town)}</em>` : ''}</span><span class="star">★</span>`).join('');
+      const track = document.getElementById('ticker');
+      track.innerHTML = run + run;
+      track.style.animationDuration = `${picks.length * 5}s`;
     }
 
     function bindFilters() {
