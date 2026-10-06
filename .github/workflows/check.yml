@@ -1,0 +1,24 @@
+name: Check
+
+# Syntax-checks every script and runs the tests on each PR and push to main. The scrape
+# workflow can't catch a broken run.mjs: pushes only redeploy the site and never run it.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Syntax-check scripts
+        run: for f in *.mjs lib/*.mjs; do node --check "$f" || exit 1; done
+      - run: npm test
+        env:
+          # lib/openai.mjs builds its client on import; no test calls the API.
+          OPENAI_API_KEY: placeholder
