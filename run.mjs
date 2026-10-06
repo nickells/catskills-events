@@ -2,7 +2,7 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import * as cheerio from "cheerio";
 import { fetchPage, fetchPageWithBrowser, closeBrowser } from "./lib/fetch.mjs";
-import { extractEvents, resolveVenueTowns, ocrEventImage, locateFromPage, locateFromKnowledge } from "./lib/openai.mjs";
+import { extractEvents, resolveVenueTowns, ocrEventImage, locateFromPage, locateFromKnowledge, locateAccounts, extractMentionedUsernames } from "./lib/openai.mjs";
 import { deduplicateEvents } from "./lib/dedup.mjs";
 import { filterOutsideNewYork } from "./lib/location.mjs";
 import { categorizeEvents } from "./lib/categorize.mjs";
@@ -10,6 +10,7 @@ import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { locateEvents } from "./lib/locate.mjs";
 import { cleanEvent } from "./lib/clean.mjs";
+import { mentionsForPosts, resolveTaggedPlaces, taggedPlaceLines } from "./lib/tagged.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
 import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
@@ -332,7 +333,29 @@ function withAccountTown(events, source) {
   return events;
 }
 
-async function handleInstagram(profiles) {
+// New tagged-account lookups per run, on top of the daily profile fetches, within Meta's rate limit.
+const TAGGED_LOOKUPS_PER_RUN = 80;
+
+// Attaches where each post's tagged venues are ("@crcinarkville = Catskill Recreation Center,
+// Arkville, NY") so extraction places an event at the tagged venue, not this account's town.
+async function withTaggedPlaces(profile, { lookupProfile, known, budget }) {
+  try {
+    const mentions = await mentionsForPosts(profile.posts, { extractMentions: extractMentionedUsernames, cache: scrapeCache });
+    const handles = [...new Set([...mentions.values()].flat())].filter((h) => h !== profile.handle.toLowerCase());
+    const places = await resolveTaggedPlaces(handles, {
+      known, lookupProfile, askPlaces: locateAccounts, cache: scrapeCache, budget, log: console.log,
+    });
+    return profile.posts.map((post) => {
+      const lines = taggedPlaceLines(mentions.get(post) || [], places);
+      return lines.length ? { ...post, taggedPlaces: lines } : post;
+    });
+  } catch (err) {
+    console.log(`    ✗ Tagged places for @${profile.handle}: ${err.message.slice(0, 80)}`);
+    return profile.posts;
+  }
+}
+
+async function handleInstagram(profiles, tagging) {
   console.log(`\n[Instagram] ${profiles.filter((p) => p.available).length}/${profiles.length} profiles fetched`);
   const allEvents = [];
 
@@ -361,8 +384,9 @@ async function handleInstagram(profiles) {
       continue;
     }
 
+    const posts = await withTaggedPlaces(profile, tagging);
     const { events, extracted, failed } = await extractPostEvents(
-      profile.posts,
+      posts,
       (text) => extractEvents(text, `Instagram @${profile.handle}`, { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }),
       scrapeCache
     );
@@ -489,7 +513,16 @@ async function main() {
   let igEvents = null;
   try {
     const profiles = await instagramFetch;
-    if (profiles) igEvents = await handleInstagram(profiles);
+    if (profiles) {
+      igEvents = await handleInstagram(profiles, {
+        lookupProfile: await createMetaProfileLookup().catch((err) => {
+          console.error(`  ✗ Tagged places disabled: ${err.message}`);
+          return null;
+        }),
+        known: Object.fromEntries(instagramSources.filter((s) => s.town).map((s) => [s.handle.toLowerCase(), s.town])),
+        budget: { remaining: TAGGED_LOOKUPS_PER_RUN },
+      });
+    }
   } catch (err) {
     console.error(`  ✗ Error processing Instagram: ${err.message}`);
   }
