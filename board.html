@@ -254,7 +254,8 @@ fetch("output/events.json").then((r) => r.json()).then((events) => {
   // One flyer often advertises several events, so group events by image and tape each image up once, on its first upcoming date.
   const byImg = new Map();
   for (const e of events) {
-    if (!e.image || !e.date || e.date < today) continue;
+    // Only flyers the scraper hosts: WebGL can't draw images from other sites without CORS.
+    if (!e.image?.startsWith("output/flyers/") || !e.date || e.date < today) continue;
     if (!byImg.has(e.image)) byImg.set(e.image, { img: e.image, by: postedBy(e), events: [] });
     byImg.get(e.image).events.push(e);
   }
