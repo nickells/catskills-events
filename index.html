@@ -103,9 +103,6 @@
       color: var(--text);
     }
 
-    .filter-btn[data-toggle] {
-      margin-left: auto;
-    }
 
     .filter-btn:hover {
       border-color: var(--accent);
@@ -853,6 +850,19 @@
       cursor: pointer;
     }
     .clear-filters { margin-left: 4px; vertical-align: 1px; }
+    .started-toggle {
+      margin-left: 12px;
+      padding: 3px 8px;
+      border: 2px solid var(--text);
+      background: var(--card-bg);
+      box-shadow: 2px 2px 0 var(--text);
+      font: 700 11px/1.3 "Space Mono", monospace;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .started-toggle[aria-pressed="true"] { background: var(--riso-yellow); transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--text); }
     .jump-filters { background: var(--accent); box-shadow: 2px 2px 0 var(--text); }
 
     @media (max-width: 600px) {
@@ -869,7 +879,6 @@
       .filter-group::-webkit-scrollbar { display: none; }
       .filter-group-label { width: auto; flex: none; align-self: center; margin: 0 4px 0 0; }
       .filter-btn { flex: none; }
-      .filter-btn[data-toggle] { margin-left: 0; }
       .filters { margin-bottom: 12px; }
 
       /* A smaller poster so the first events fit on the first screen. */
@@ -921,7 +930,6 @@
         <button class="filter-btn" data-time="tonight">Tonight</button>
         <button class="filter-btn" data-time="week">This Week</button>
         <button class="filter-btn" data-time="month">This Month</button>
-        <button class="filter-btn" data-toggle="hide-started" title="Hide events that have already started today">Hide started</button>
       </div>
       <div class="filter-group">
         <div class="filter-group-label">What</div>
@@ -1084,7 +1092,6 @@
       document.querySelectorAll('.filter-btn[data-category]').forEach(b => {
         b.classList.toggle('active', activeCategories.has(b.dataset.category));
       });
-      document.querySelector('.filter-btn[data-toggle="hide-started"]').classList.toggle('active', hideStarted);
       document.querySelectorAll('.view-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.view === activeView);
       });
@@ -1196,9 +1203,10 @@
         });
       });
 
-      document.querySelector('.filter-btn[data-toggle="hide-started"]').addEventListener('click', e => {
+      // The hide-started toggle lives in the Tonight heading, which is redrawn on every render.
+      document.getElementById('events').addEventListener('click', e => {
+        if (!e.target.closest('[data-toggle="hide-started"]')) return;
         hideStarted = !hideStarted;
-        e.currentTarget.classList.toggle('active', hideStarted);
         render();
       });
 
@@ -1379,10 +1387,10 @@
       return start < now.getHours() * 60 + now.getMinutes();
     }
 
-    function matchesFilters(event) {
+    function matchesFilters(event, { ignoreStarted = false } = {}) {
       const timeBucket = classifyTime(event);
       if (timeBucket === 'past') return false;
-      if (hideStarted && timeBucket === 'tonight' && hasStarted(event)) return false;
+      if (hideStarted && !ignoreStarted && timeBucket === 'tonight' && hasStarted(event)) return false;
 
       if (activeTime === 'tonight' && timeBucket !== 'tonight') return false;
       if (activeTime === 'week' && timeBucket !== 'tonight' && timeBucket !== 'week') return false;
@@ -1432,11 +1440,14 @@
 
     function render() {
       syncToUrl();
-      const filtered = allEvents.filter(matchesFilters);
+      const filtered = allEvents.filter(e => matchesFilters(e));
+      // Tonight's events that would show but have already started, hidden or not.
+      const startedTonight = allEvents.filter(e =>
+        classifyTime(e) === 'tonight' && hasStarted(e) && matchesFilters(e, { ignoreStarted: true })).length;
       const container = document.getElementById('events');
       document.getElementById('stats').innerHTML = statsLine(filtered.length);
 
-      if (!filtered.length) {
+      if (!filtered.length && !(hideStarted && startedTonight && activeView === 'list')) {
         container.innerHTML = '<div class="empty-state">No events match your filters</div>';
         return;
       }
@@ -1444,11 +1455,11 @@
       if (activeView === 'calendar') {
         renderCalendar(filtered, container);
       } else {
-        renderList(filtered, container);
+        renderList(filtered, container, startedTonight);
       }
     }
 
-    function renderList(filtered, container) {
+    function renderList(filtered, container, startedTonight = 0) {
       const bucketOrder = ['tonight', 'week', 'month', 'later'];
       const bucketLabels = { tonight: 'Tonight', week: 'This Week', month: 'This Month', later: 'Coming Up' };
       const grouped = {};
@@ -1460,12 +1471,18 @@
 
       let html = '';
       for (const bucket of bucketOrder) {
-        const events = grouped[bucket];
-        if (!events || !events.length) continue;
+        const events = grouped[bucket] || [];
+        // Tonight stays when everything started was hidden, so its toggle can bring it back.
+        const keepTonight = bucket === 'tonight' && hideStarted && startedTonight;
+        if (!events.length && !keepTonight) continue;
 
         events.sort((a, b) => (a.date || '').localeCompare(b.date || '') || parseTime(a.time) - parseTime(b.time));
 
-        html += `<div class="section-header">${bucketLabels[bucket]}<span class="event-count">${events.length}</span></div>`;
+        // Hiding what's already started only applies to today, so its toggle sits on Tonight.
+        const toggle = bucket === 'tonight' && startedTonight
+          ? `<button type="button" class="started-toggle" data-toggle="hide-started" aria-pressed="${hideStarted}">${hideStarted ? `Show ${startedTonight} started` : `Hide ${startedTonight} started`}</button>`
+          : '';
+        html += `<div class="section-header">${bucketLabels[bucket]}<span class="event-count">${events.length}</span>${toggle}</div>`;
 
         const showMonth = bucket === 'month' || bucket === 'later';
         for (const e of events) {
