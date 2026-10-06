@@ -67,7 +67,8 @@
 
     /* ─ Masthead: the home page's, one size down ─ */
     .poster-header { position: relative; margin: 0 calc(-1 * var(--gutter)) var(--space-6); padding: 0 var(--gutter); overflow-x: clip; }
-    .poster-top { display: flex; justify-content: space-between; }
+    /* Above the headline, whose tight line-height reaches up over this row and took its clicks. */
+    .poster-top { position: relative; z-index: 1; display: flex; justify-content: space-between; }
     .poster-top a { text-decoration: none; border-bottom: var(--rule) solid var(--accent); }
     .poster-top a:hover { background: var(--riso-yellow); }
     .halftone {
