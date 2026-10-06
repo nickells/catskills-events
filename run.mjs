@@ -582,7 +582,10 @@ async function main() {
   loadGeoCache();
   console.log(`\n--- Geocoding ---`);
   await geocodeEvents(deduped, townCoords);
-  for (const e of deduped) delete e._state;
+  for (const e of deduped) {
+    delete e._state;
+    delete e._landmark;
+  }
 
   // Classify only publishable events, after merging evidence from duplicate sources.
   console.log(`\n--- Event Categorization ---`);
