@@ -41,13 +41,11 @@
       padding: 24px 16px 120px;
     }
 
+    /* The calendar breaks out of the page column: the column's width or 90% of the window,
+       whichever is larger, overhanging both sides equally. */
     #events.wide {
-      max-width: 90vw;
-      margin: 0 auto;
-      position: relative;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90vw;
+      width: max(100%, 90vw);
+      margin-left: calc((100% - max(100%, 90vw)) / 2);
     }
 
     header {
