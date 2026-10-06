@@ -919,6 +919,15 @@
         padding: 2px 16px 6px;
       }
       .filter-group::-webkit-scrollbar { display: none; }
+      /* Fade out whichever end has more chips scrolled out of view. */
+      .filter-group {
+        --fade-l: 0px;
+        --fade-r: 0px;
+        -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+        mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+      }
+      .filter-group.more-left { --fade-l: 36px; }
+      .filter-group.more-right { --fade-r: 56px; }
       .filter-group-label { width: auto; flex: none; align-self: center; margin: 0 4px 0 0; }
       .filter-btn { flex: none; }
       .filters { margin-bottom: 12px; }
@@ -1287,6 +1296,17 @@
       });
 
       bindPlacePicker();
+
+      // Chip rows scroll sideways on phones; mark which ends have more so they can fade out.
+      document.querySelectorAll('.filter-group').forEach(row => {
+        const update = () => {
+          row.classList.toggle('more-left', row.scrollLeft > 2);
+          row.classList.toggle('more-right', row.scrollLeft + row.clientWidth < row.scrollWidth - 2);
+        };
+        row.addEventListener('scroll', update, { passive: true });
+        addEventListener('resize', update);
+        update();
+      });
 
       document.getElementById('stats').addEventListener('click', e => {
         if (e.target.id === 'clear-filters') clearFilters();
