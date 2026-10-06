@@ -581,7 +581,15 @@
     }
 
     /* ── Gig poster theme: a risograph show flyer (misregistered ink, halftones, hard
-       shadows), layered over the base styles above. ── */
+       shadows), layered over the base styles above.
+
+       Everything below is built from these tokens; nothing sets its own size or spacing.
+       Space   4px steps: rows in a group 12 apart, groups 24, sections 48.
+       Grid    a 64px label column (Near, Within, When, What, Find) with controls on one line.
+       Type    Anton for display, Archivo for content, Space Mono for data, each a few fixed roles.
+       Weight  2px rules for structure; 1px only on the smallest calendar tags.
+       Depth   hard shadows at three offsets: small (chips, buttons), medium (inputs, popovers),
+               large (cards). Hover lifts one step; pressed sinks to 1px. ── */
     :root {
       --bg: #f4efe4;
       --card-bg: #fffdf7;
@@ -600,33 +608,75 @@
       --tag-nightlife: #765ba7;
       --tag-wellness: #00a6b8;
       --tag-other: #5f5b55;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 48px;
+      --gutter: var(--space-4);
+      --label-col: 64px;
+
+      --h-input: 40px;
+      --h-chip: 32px;
+      --h-button-s: 24px;
+      --h-tag: 20px;
+
+      --rule: 2px;
+      --rule-thin: 1px;
+      --shadow-s: 2px;
+      --shadow-m: 4px;
+      --shadow-l: 6px;
+      --shadow-pressed: 1px;
+
+      --display-l: 400 48px/1 "Anton", sans-serif;
+      --display-m: 400 32px/1 "Anton", sans-serif;
+      --display-s: 400 24px/1 "Anton", sans-serif;
+      --display-xs: 400 20px/1 "Anton", sans-serif;
+      --title: 800 18px/1.2 "Archivo", sans-serif;
+      --title-s: 700 13px/1.25 "Archivo", sans-serif;
+      --body: 400 14px/1.5 "Archivo", sans-serif;
+      --ui: 800 13px/1 "Archivo", sans-serif;
+      --meta: 400 13px/1.45 "Space Mono", monospace;
+      --meta-s: 400 11px/1.4 "Space Mono", monospace;
+      --label: 700 11px/1.2 "Space Mono", monospace;
+      --micro: 700 10px/1.2 "Space Mono", monospace;
     }
 
+    /* Components below set display, which would otherwise override the hidden attribute. */
+    [hidden] { display: none !important; }
+
     body {
-      font-family: "Archivo", system-ui, sans-serif;
+      font: var(--body);
       background-color: var(--bg);
       /* Paper grain */
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
     }
-    .container { padding-top: 20px; }
+    /* 736px: wide enough for the full What row on one line, and a multiple of 16. */
+    .container { max-width: 736px; padding: var(--space-5) var(--gutter) 120px; }
 
-    /* The flyer header */
-    .poster-header { position: relative; margin: 0 -16px 34px; padding: 0 16px; overflow-x: clip; }
-    .poster-top {
-      display: flex;
-      justify-content: space-between;
-      font: 700 12px/1 "Space Mono", monospace;
-      text-transform: uppercase;
+    /* Every label in the system: mono, uppercase, tracked. */
+    .poster-top, .where-word, .filter-group-label, .find-word, .stats,
+    .clear-filters, .jump-filters, .started-toggle, .section-header .event-count {
+      font: var(--label);
       letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text);
     }
-    .poster-top a { color: var(--text); text-decoration: none; border-bottom: 2px solid var(--accent); }
+
+    /* ─ Masthead ─ */
+    .poster-header { position: relative; margin: 0 calc(-1 * var(--gutter)) var(--space-6); padding: 0 var(--gutter); overflow-x: clip; }
+    .poster-top { display: flex; justify-content: space-between; }
+    .poster-top a { color: var(--text); text-decoration: none; border-bottom: var(--rule) solid var(--accent); }
     .poster-top a:hover { background: var(--riso-yellow); }
     .halftone {
       position: absolute;
-      top: 18px;
-      right: -30px;
-      width: 230px;
-      height: 230px;
+      top: var(--space-4);
+      right: calc(-1 * var(--space-6));
+      width: 224px;
+      height: 224px;
       border-radius: 50%;
       background: radial-gradient(circle, var(--riso-yellow) 2.6px, transparent 3px) 0 0 / 9px 9px;
       -webkit-mask: radial-gradient(circle, #000 35%, transparent 71%);
@@ -635,8 +685,8 @@
     }
     .poster-header h1 {
       position: relative;
-      margin-top: 14px;
-      font: 400 clamp(64px, 17vw, 132px)/0.84 "Anton", sans-serif;
+      margin-top: var(--space-3);
+      font: 400 clamp(64px, 17vw, 128px)/0.84 "Anton", sans-serif;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -646,27 +696,29 @@
     .poster-sub {
       position: relative;
       display: inline-block;
-      margin-top: 16px;
-      padding: 4px 10px;
-      font: 700 13px/1.3 "Space Mono", monospace;
+      margin-top: var(--space-4);
+      padding: var(--space-1) var(--space-2);
+      font: var(--label);
+      letter-spacing: 1px;
       text-transform: uppercase;
       background: var(--riso-yellow);
       transform: rotate(-1.5deg);
-      box-shadow: 3px 3px 0 var(--text);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
     }
     .ticker {
-      margin: 22px -16px 0;
+      margin: var(--space-5) calc(-1 * var(--gutter)) 0;
       overflow: hidden;
-      border-block: 2px solid var(--text);
+      border-block: var(--rule) solid var(--text);
       background: var(--text);
       transform: rotate(-1deg);
     }
     .ticker-track {
       display: flex;
+      align-items: baseline;
       width: max-content;
-      gap: 22px;
-      padding: 7px 0;
-      font: 400 20px/1 "Anton", sans-serif;
+      gap: var(--space-5);
+      padding: var(--space-2) 0;
+      font: var(--display-xs);
       letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--riso-yellow);
@@ -674,47 +726,103 @@
     }
     .ticker-track .star { color: var(--accent); }
     .ticker-track em {
-      margin-left: 4px;
-      font: italic 700 13px/1 "Space Mono", monospace;
+      margin-left: var(--space-1);
+      font: italic var(--label);
       text-transform: none;
-      letter-spacing: 0;
-      color: #f4efe4;
+      color: var(--bg);
       opacity: 0.75;
     }
     @keyframes ticker { to { transform: translateX(-50%); } }
     @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
 
-    /* Controls: chunky stickers */
-    .search-box {
-      border: 2px solid var(--text);
-      border-radius: 0;
-      box-shadow: 5px 5px 0 var(--riso-blue);
-      font: 400 14px "Space Mono", monospace;
+    /* ─ Controls: one label column, controls on a shared line ─ */
+    .where, .filter-group, .find {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin: 0 0 var(--space-3);
+      font: var(--meta);
+      color: var(--text);
     }
-    .search-box:focus { border-color: var(--text); box-shadow: 5px 5px 0 var(--accent); }
-    .filter-group-label { font: 700 11px/1 "Space Mono", monospace; letter-spacing: 1.5px; color: var(--text); }
+    .where { flex-wrap: wrap; row-gap: var(--space-3); }
+    .where-word, .filter-group-label, .find-word {
+      flex: none;
+      width: var(--label-col);
+      margin: 0 var(--space-1) 0 0;
+    }
+    .where-range { flex: 1 0 100%; gap: var(--space-2); }
+    .where input[type="range"] { flex: 1; accent-color: var(--accent); }
+    #location-label { color: var(--text-muted); }
+    #distance-label { min-width: 0; width: 88px; font: var(--meta); font-weight: 700; color: var(--text); text-align: right; }
+    .filters { margin: var(--space-5) 0 0; }
+    /* The label holds the label column, so chips that wrap stay on the control line. */
+    .filter-group {
+      position: relative;
+      flex-wrap: wrap;
+      width: auto;
+      padding-left: calc(var(--label-col) + var(--space-1) + var(--space-2));
+    }
+    .filter-group .filter-group-label {
+      position: absolute;
+      top: calc(var(--h-chip) / 2);
+      left: 0;
+      transform: translateY(-50%);
+    }
+    .find { margin: var(--space-5) 0 var(--space-4); }
+
+    #zip-input, .search-box {
+      height: var(--h-input);
+      padding: 0 var(--space-3);
+      border: var(--rule) solid var(--text);
+      border-radius: 0;
+      background: var(--card-bg);
+      box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--riso-blue);
+      font: var(--meta);
+      color: var(--text);
+    }
+    #zip-input { width: 200px; padding-right: var(--space-6); }
+    .search-box { flex: 1; min-width: 0; margin: 0; }
+    #zip-input:focus, .search-box:focus { outline: none; border-color: var(--text); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--accent); }
+    #place-toggle { width: var(--space-6); }
+    #place-options {
+      top: calc(100% + var(--space-2));
+      width: 240px;
+      padding: var(--space-1);
+      border: var(--rule) solid var(--text);
+      border-radius: 0;
+      box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--text);
+    }
+    #place-options li { padding: var(--space-2) var(--space-3); border-radius: 0; font: var(--meta); }
+    #place-options li .count { font: var(--meta); color: var(--text-muted); }
+    #place-options li.active, #place-options li[data-i]:hover { background: var(--riso-yellow); }
+
+    /* Chips: When are pills in Archivo; What are the category tags, in their own ink. */
     .filter-btn {
-      border: 2px solid var(--text);
+      display: inline-flex;
+      align-items: center;
+      height: var(--h-chip);
+      padding: 0 var(--space-3);
+      border: var(--rule) solid var(--text);
       border-radius: 999px;
-      font: 800 12px/1.2 "Archivo", sans-serif;
-      text-transform: uppercase;
+      background: var(--card-bg);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+      font: var(--ui);
       letter-spacing: 0.5px;
-      box-shadow: 2px 2px 0 var(--text);
+      text-transform: uppercase;
+      color: var(--text);
       transition: transform 0.1s, box-shadow 0.1s;
     }
-    .filter-btn:hover { border-color: var(--text); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--text); }
-    .filter-btn.active { background: var(--accent); border-color: var(--text); color: var(--text); transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--text); }
-    /* What chips look like the category tags on the cards, in their own ink: a wash when off,
-       full color and pressed in when on. */
+    .filter-btn:hover { border-color: var(--text); transform: translate(-1px, -1px); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--text); }
+    .filter-btn.active { background: var(--accent); border-color: var(--text); color: var(--text); transform: translate(1px, 1px); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
     .filter-btn[data-category] {
       border-radius: 0;
-      font: 700 12px/1.2 "Space Mono", monospace;
-      letter-spacing: 0.5px;
+      font: var(--label);
+      letter-spacing: 1px;
       background: color-mix(in srgb, var(--chip) 16%, var(--card-bg));
-      box-shadow: 2px 2px 0 var(--chip);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--chip);
     }
-    .filter-btn[data-category]:hover { box-shadow: 3px 3px 0 var(--chip); }
-    .filter-btn[data-category].active { color: #fff; background: var(--chip); border-color: var(--text); box-shadow: 1px 1px 0 var(--text); }
+    .filter-btn[data-category]:hover { box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--chip); }
+    .filter-btn[data-category].active { color: #fff; background: var(--chip); border-color: var(--text); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
     .filter-btn[data-category="music"] { --chip: var(--tag-music); }
     .filter-btn[data-category="food"] { --chip: var(--tag-food); }
     .filter-btn[data-category="culture"] { --chip: var(--tag-culture); }
@@ -723,148 +831,37 @@
     .filter-btn[data-category="nightlife"] { --chip: var(--tag-nightlife); }
     .filter-btn[data-category="wellness"] { --chip: var(--tag-wellness); }
 
-    #zip-input { border: 2px solid var(--text); border-radius: 0; font-family: "Space Mono", monospace; }
-    #zip-input:focus { border-color: var(--text); box-shadow: 3px 3px 0 var(--accent); }
-    #place-options { border: 2px solid var(--text); border-radius: 0; box-shadow: 5px 5px 0 var(--text); }
-    #place-options li { border-radius: 0; }
-    #place-options li.active, #place-options li[data-i]:hover { background: var(--riso-yellow); }
-    .where { font-family: "Space Mono", monospace; color: var(--text); }
-    .where-word { font-weight: 700; text-transform: uppercase; font-size: 12px; }
-    .where input[type="range"] { accent-color: var(--accent); }
-    .stats { font: 700 12px "Space Mono", monospace; color: var(--text); text-transform: uppercase; }
-
-    .view-btn { border: 2px solid var(--text); border-radius: 0; font-weight: 800; text-transform: uppercase; color: var(--text); }
-    .view-btn.active { background: var(--text); color: var(--riso-yellow); }
-
-    /* Section headers: highlighter over big type */
-    .section-header {
-      display: flex;
+    /* Small buttons: Clear, Filters, Hide started */
+    .clear-filters, .jump-filters, .started-toggle {
+      display: inline-flex;
       align-items: center;
-      width: fit-content;
-      margin: 40px 0 18px;
-      padding: 0 8px;
-      border: none;
-      font: 400 46px/1 "Anton", sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: linear-gradient(transparent 55%, var(--riso-yellow) 55% 92%, transparent 92%);
-    }
-    .section-header .event-count {
-      margin-left: 12px;
-      padding: 3px 7px;
-      font: 700 13px/1 "Space Mono", monospace;
-      color: #fff;
-      background: var(--accent);
-      transform: rotate(4deg);
-    }
-
-    /* Cards: flyers pinned up slightly crooked, shadowed in their category's ink */
-    .event-card {
-      --ink: var(--riso-blue);
-      position: relative;
-      margin: 0 8px 18px 0;
-      padding: 14px;
-      border: 2px solid var(--text);
-      background: var(--card-bg);
-      box-shadow: 6px 6px 0 var(--ink);
-      transform: rotate(var(--tilt, 0deg));
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .event-card:last-child { border-bottom: 2px solid var(--text); }
-    .event-card:nth-child(3n) { --tilt: -0.7deg; }
-    .event-card:nth-child(3n + 1) { --tilt: 0.45deg; }
-    .event-card:nth-child(3n + 2) { --tilt: -0.2deg; }
-    .event-card:hover { transform: rotate(0deg) translate(-2px, -2px); box-shadow: 9px 9px 0 var(--ink); }
-    .event-card:has(.tag-music) { --ink: var(--tag-music); }
-    .event-card:has(.tag-food) { --ink: var(--tag-food); }
-    .event-card:has(.tag-culture) { --ink: var(--tag-culture); }
-    .event-card:has(.tag-nature) { --ink: var(--tag-nature); }
-    .event-card:has(.tag-community) { --ink: var(--tag-community); }
-    .event-card:has(.tag-nightlife) { --ink: var(--tag-nightlife); }
-    .event-card:has(.tag-wellness) { --ink: var(--tag-wellness); }
-    .event-date-col { width: 58px; }
-    .event-date-col .day-name {
-      display: inline-block;
-      padding: 1px 4px;
-      font: 700 11px/1.2 "Space Mono", monospace;
-      color: var(--text);
+      height: var(--h-button-s);
+      padding: 0 var(--space-2);
+      border: var(--rule) solid var(--text);
       background: var(--riso-yellow);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+      cursor: pointer;
     }
-    .event-date-col .day-num { font: 400 40px/1 "Anton", sans-serif; margin-top: 3px; }
-    .event-name { font: 800 17px/1.2 "Archivo", sans-serif; }
-    .event-meta { font: 400 12px/1.4 "Space Mono", monospace; color: var(--text); }
-    .event-desc { color: var(--text-muted); }
-    .event-link:hover { text-decoration: none; background: var(--riso-yellow); }
-    .event-tag {
-      border: 1.5px solid var(--text);
+
+    .jump-filters { background: var(--accent); }
+    .started-toggle { margin-left: var(--space-3); background: var(--card-bg); }
+    .started-toggle[aria-pressed="true"] { background: var(--riso-yellow); transform: translate(1px, 1px); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
+
+    .view-toggle { gap: var(--space-1); }
+    .view-btn {
+      height: var(--h-chip);
+      padding: 0 var(--space-3);
+      border: var(--rule) solid var(--text);
       border-radius: 0;
-      font: 700 10px/1.4 "Space Mono", monospace;
+      background: var(--card-bg);
+      font: var(--ui);
       letter-spacing: 0.5px;
-    }
-    .event-sources a { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
-    .distance-badge { border: 1.5px solid var(--text); border-radius: 0; font-family: "Space Mono", monospace; color: var(--text); }
-    .distance-close { background: #7ee2a8; }
-    .distance-medium { background: var(--riso-yellow); }
-    .distance-far { background: #ff9bc9; }
-
-    /* Calendar: columns of plain type, each event marked by a stripe in its category's ink. */
-    .cal-day { padding: 10px 10px 4px; border: 2px solid var(--text); border-radius: 0; }
-    .cal-day.today { border-color: var(--text); background: #fff6b8; box-shadow: 4px 4px 0 var(--accent); }
-    .cal-day-header {
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: 2px solid var(--text);
-      font-family: "Space Mono", monospace;
-      color: var(--text);
       text-transform: uppercase;
+      color: var(--text);
     }
-    .cal-day-header .cal-day-num { font: 400 24px "Anton", sans-serif; }
-    .cal-event {
-      margin-bottom: 12px;
-      padding: 1px 0 1px 8px;
-      border-left: 3px solid var(--ink, var(--text));
-      border-radius: 0;
-      background: none;
-    }
-    .cal-event:hover { background: var(--riso-yellow); }
-    .cal-event-meta {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      font: 700 10px/1.5 "Space Mono", monospace;
-      white-space: nowrap;
-    }
-    .cal-event-time { color: var(--text); font-weight: 700; }
-    .cal-event-dist { font-weight: 400; color: var(--text-muted); }
-    .cal-event-dist .direction-arrow { margin-right: 2px; font-size: 10px; }
-    .cal-event-name {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      font: 700 13px/1.25 "Archivo", sans-serif;
-    }
-    .cal-event-venue {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .cal-event .event-tag {
-      margin-top: 4px;
-      padding: 0 4px;
-      border-width: 1px;
-      font-size: 9px;
-      line-height: 1.5;
-    }
-    .cal-week-nav button { border: 2px solid var(--text); border-radius: 0; font-weight: 800; box-shadow: 2px 2px 0 var(--text); }
-    .cal-week-label { font: 400 22px "Anton", sans-serif; text-transform: uppercase; }
+    .view-btn.active { background: var(--text); border-color: var(--text); color: var(--riso-yellow); }
 
-    .tooltip { border-radius: 0; background: var(--text); box-shadow: 5px 5px 0 var(--accent); font-family: "Space Mono", monospace; }
-    .tooltip .tt-name { font-family: "Archivo", sans-serif; font-weight: 800; color: var(--riso-yellow); }
-
-    /* Results bar: count and active filters, pinned while scrolling through results. */
+    /* ─ Results bar: count and active filters, pinned while scrolling through results ─ */
     .results-bar {
       position: sticky;
       top: 0;
@@ -872,51 +869,195 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      margin: 0 -16px 8px;
-      padding: 10px 16px;
+      gap: var(--space-3);
+      margin: 0 calc(-1 * var(--gutter)) var(--space-2);
+      padding: var(--space-3) var(--gutter);
       /* Background and rule painted out to the browser's edges (border-image outset doesn't
          widen the page), so the bar also spans the wider calendar beneath it. */
-      border-bottom: 2px solid transparent;
+      border-bottom: var(--rule) solid transparent;
       border-image: linear-gradient(to top, var(--text) 2px, var(--bg) 2px) fill 0 / 0 0 2px / 0 100vmax;
     }
-    .results-bar .stats { margin: 0; line-height: 1.5; }
-    .results-actions { display: flex; align-items: center; gap: 8px; flex: none; }
-    .clear-filters, .jump-filters {
-      padding: 2px 8px;
-      border: 2px solid var(--text);
-      background: var(--riso-yellow);
-      font: 700 11px/1.4 "Space Mono", monospace;
+    .results-bar { flex-wrap: wrap; }
+    .results-bar .stats { flex: 1 1 240px; margin: 0; line-height: var(--h-button-s); }
+    .results-actions { margin-left: auto; }
+    .results-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; }
+
+    /* ─ Section headings: highlighter over big type ─ */
+    .section-header {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      margin: var(--space-7) 0 var(--space-4);
+      padding: 0 var(--space-2) 0 0;
+      border: none;
+      font: var(--display-l);
       text-transform: uppercase;
-      color: var(--text);
-      cursor: pointer;
+      letter-spacing: 0.5px;
+      background: linear-gradient(transparent 55%, var(--riso-yellow) 55% 92%, transparent 92%);
     }
-    .clear-filters { margin-left: 4px; vertical-align: 1px; }
-    .started-toggle {
-      margin-left: 12px;
-      padding: 3px 8px;
-      border: 2px solid var(--text);
+    .section-header:first-of-type { margin-top: var(--space-5); }
+    .section-header .event-count {
+      margin-left: var(--space-3);
+      padding: var(--space-1) var(--space-2);
+      color: #fff;
+      background: var(--accent);
+      transform: rotate(4deg);
+    }
+
+    /* ─ Cards: flyers pinned up slightly crooked, shadowed in their category's ink ─ */
+    .event-card {
+      --ink: var(--riso-blue);
+      position: relative;
+      gap: var(--space-4);
+      margin: 0 var(--shadow-l) var(--space-5) 0;
+      padding: var(--space-4);
+      border: var(--rule) solid var(--text);
       background: var(--card-bg);
-      box-shadow: 2px 2px 0 var(--text);
-      font: 700 11px/1.3 "Space Mono", monospace;
-      letter-spacing: 0;
+      box-shadow: var(--shadow-l) var(--shadow-l) 0 var(--ink);
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .event-card:last-child { border-bottom: var(--rule) solid var(--text); }
+    .event-card:nth-child(3n) { --tilt: -0.7deg; }
+    .event-card:nth-child(3n + 1) { --tilt: 0.45deg; }
+    .event-card:nth-child(3n + 2) { --tilt: -0.2deg; }
+    .event-card:hover { transform: rotate(0deg) translate(-2px, -2px); box-shadow: calc(var(--shadow-l) + 2px) calc(var(--shadow-l) + 2px) 0 var(--ink); }
+    .event-card:has(.tag-music) { --ink: var(--tag-music); }
+    .event-card:has(.tag-food) { --ink: var(--tag-food); }
+    .event-card:has(.tag-culture) { --ink: var(--tag-culture); }
+    .event-card:has(.tag-nature) { --ink: var(--tag-nature); }
+    .event-card:has(.tag-community) { --ink: var(--tag-community); }
+    .event-card:has(.tag-nightlife) { --ink: var(--tag-nightlife); }
+    .event-card:has(.tag-wellness) { --ink: var(--tag-wellness); }
+    .event-date-col { width: 56px; padding: 0; }
+    .event-date-col .day-name {
+      display: inline-block;
+      padding: 2px var(--space-1);
+      font: var(--label);
+      letter-spacing: 1px;
+      color: var(--text);
+      background: var(--riso-yellow);
+    }
+    .event-date-col .day-num { margin-top: var(--space-1); font: var(--display-m); }
+    .event-name { font: var(--title); }
+    .event-meta { margin-top: var(--space-1); font: var(--meta); color: var(--text); }
+    .event-desc { margin-top: var(--space-2); font: var(--body); color: var(--text-muted); }
+    .event-link:hover { text-decoration: none; background: var(--riso-yellow); }
+    .link-icon { font-size: 12px; }
+    .event-tag, .distance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      height: var(--h-tag);
+      margin: var(--space-3) var(--space-1) 0 0;
+      padding: 0 var(--space-2);
+      border: var(--rule) solid var(--text);
+      border-radius: 0;
+      font: var(--micro);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      vertical-align: top;
+    }
+    .event-tag { color: #fff; }
+    .distance-badge { color: var(--text); }
+    .distance-close { background: #7ee2a8; }
+    .distance-medium { background: var(--riso-yellow); }
+    .distance-far { background: #ff9bc9; }
+    .event-sources { margin-top: var(--space-3); font: var(--meta-s); color: var(--text-muted); }
+    .event-sources a { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: var(--rule); }
+
+    /* ─ Calendar: columns of plain type; rules run across, not down ─ */
+    .cal-week-nav { margin: var(--space-4) 0 var(--space-3); }
+    .cal-week-nav button {
+      height: var(--h-chip);
+      padding: 0 var(--space-3);
+      border: var(--rule) solid var(--text);
+      border-radius: 0;
+      background: var(--card-bg);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+      font: var(--ui);
+      text-transform: uppercase;
+    }
+    .cal-week-label { font: var(--display-s); text-transform: uppercase; }
+    .cal-grid { gap: var(--space-2); }
+    .cal-day { padding: var(--space-3); border: var(--rule) solid var(--text); border-radius: 0; background: var(--card-bg); }
+    .cal-day.today { border-color: var(--text); background: #fff6b8; box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--accent); }
+    .cal-day-header {
+      margin-bottom: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: var(--rule) solid var(--text);
+      font: var(--label);
+      letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--text);
-      cursor: pointer;
     }
-    .started-toggle[aria-pressed="true"] { background: var(--riso-yellow); transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--text); }
-    .jump-filters { background: var(--accent); box-shadow: 2px 2px 0 var(--text); }
+    .cal-day-header .cal-day-num { margin-left: var(--space-1); font: var(--display-s); }
+    .cal-event {
+      margin: 0;
+      padding: var(--space-3) 0;
+      border: none;
+      border-top: var(--rule-thin) solid color-mix(in srgb, var(--text) 18%, transparent);
+      border-radius: 0;
+      background: none;
+    }
+    .cal-day-header + .cal-event { border-top: none; padding-top: 0; }
+    .cal-event:hover { background: var(--riso-yellow); }
+    .cal-event-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font: var(--micro);
+      white-space: nowrap;
+    }
+    .cal-event-time { color: var(--text); }
+    .cal-event-dist { font-weight: 400; color: var(--text-muted); }
+    .cal-event-dist .direction-arrow { margin-right: 2px; font-size: 10px; }
+    .cal-event-name {
+      display: -webkit-box;
+      margin-top: var(--space-1);
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font: var(--title-s);
+    }
+    .cal-event-venue {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font: var(--meta-s);
+      color: var(--text-muted);
+    }
+    .cal-event .event-tag {
+      max-width: 100%;
+      height: 16px;
+      margin: var(--space-2) 0 0;
+      padding: 0 var(--space-1);
+      border-width: var(--rule-thin);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .tooltip { padding: var(--space-3); border-radius: 0; background: var(--text); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--accent); font: var(--meta); }
+    .tooltip .tt-name { font: var(--title-s); color: var(--riso-yellow); }
+    .tooltip .tt-meta, .tooltip .tt-desc { font: var(--meta-s); }
 
     @media (max-width: 600px) {
+      :root {
+        --label-col: 56px;
+        --display-l: 400 36px/1 "Anton", sans-serif;
+        --display-xs: 400 16px/1 "Anton", sans-serif;
+      }
+
       /* One sideways-scrolling row per filter group instead of five wrapped rows. */
       .filter-group {
         flex-wrap: nowrap;
         overflow-x: auto;
         scrollbar-width: none;
         /* Bleed to both screen edges so chips scroll off the edge, not short of it. */
-        width: calc(100% + 32px);
-        margin: 0 -16px 6px;
-        padding: 2px 16px 6px;
+        width: calc(100% + 2 * var(--gutter));
+        margin: 0 calc(-1 * var(--gutter)) var(--space-1);
+        padding: var(--space-1) var(--gutter) var(--space-2);
       }
       .filter-group::-webkit-scrollbar { display: none; }
       /* Fade out whichever end has more chips scrolled out of view. */
@@ -928,19 +1069,18 @@
       }
       .filter-group.more-left { --fade-l: 36px; }
       .filter-group.more-right { --fade-r: 56px; }
-      .filter-group-label { width: auto; flex: none; align-self: center; margin: 0 4px 0 0; }
       .filter-btn { flex: none; }
-      .filters { margin-bottom: 12px; }
+      .filter-group .filter-group-label { position: static; transform: none; }
+      #zip-input { width: 100%; }
+      .place-picker { flex: 1; }
 
       /* A smaller poster so the first events fit on the first screen. */
-      .poster-header { margin-bottom: 20px; }
-      .poster-header h1 { margin-top: 10px; font-size: 15vw; }
-      .halftone { width: 150px; height: 150px; top: 12px; right: -20px; }
-      .poster-sub { margin-top: 10px; font-size: 11px; }
-      .ticker { margin-top: 14px; }
-      .ticker-track { font-size: 16px; padding: 5px 0; }
-      .section-header { font-size: 36px; margin-top: 28px; }
-      .view-btn { padding: 4px 8px; }
+      .poster-header { margin-bottom: var(--space-5); }
+      .poster-header h1 { font-size: 15vw; }
+      .halftone { width: 152px; height: 152px; top: var(--space-3); right: calc(-1 * var(--space-5)); }
+      .ticker { margin-top: var(--space-4); }
+      .ticker-track { padding: var(--space-1) 0; }
+      .view-btn { padding: 0 var(--space-2); }
     }
   </style>
 </head>
@@ -996,11 +1136,15 @@
 
 
     <!-- Search sits right above the results it filters, so typing shows the list change. -->
-    <input class="search-box" type="text" placeholder="Search events, venues, towns..." id="search" />
+    <div class="find">
+      <label class="find-word" for="search">Find</label>
+      <input class="search-box" type="text" placeholder="Search events, venues, towns..." id="search" />
+    </div>
 
     <div class="results-bar">
       <div class="stats" id="stats"></div>
       <div class="results-actions">
+        <button type="button" class="clear-filters" id="clear-filters" hidden>Clear</button>
         <button type="button" class="jump-filters" id="jump-filters" hidden>Filters ↑</button>
         <div class="view-toggle">
           <button class="view-btn active" data-view="list">List</button>
@@ -1308,9 +1452,7 @@
         update();
       });
 
-      document.getElementById('stats').addEventListener('click', e => {
-        if (e.target.id === 'clear-filters') clearFilters();
-      });
+      document.getElementById('clear-filters').addEventListener('click', clearFilters);
 
       // Once the controls scroll away, the sticky results bar offers a way back to them.
       const jump = document.getElementById('jump-filters');
@@ -1474,7 +1616,8 @@
 
     const TIME_LABELS = { tonight: 'Tonight', week: 'This week', month: 'This month' };
 
-    // "12 events · Music · within 25 mi of Woodstock", so you can see what's applied, plus Clear.
+    // "12 events · Music · within 25 mi of Woodstock", so you can see what's applied; Clear shows
+    // whenever anything is.
     function statsLine(count) {
       const parts = [];
       if (activeTime !== 'all') parts.push(TIME_LABELS[activeTime] || activeTime);
@@ -1482,8 +1625,8 @@
       for (const c of activeCategories) parts.push(CATEGORY_LABELS[c] || c);
       if (searchQuery) parts.push(`“${searchQuery}”`);
       if (maxDistance < 120 && homeLat != null) parts.push(`within ${maxDistance} mi of ${homeName}`);
-      const text = [`${count} event${count !== 1 ? 's' : ''}`, ...parts].map(esc).join(' · ');
-      return parts.length ? `${text} <button type="button" class="clear-filters" id="clear-filters">Clear</button>` : text;
+      document.getElementById('clear-filters').hidden = !parts.length;
+      return [`${count} event${count !== 1 ? 's' : ''}`, ...parts].map(esc).join(' · ');
     }
 
     // Clears filters but keeps your place, which is a setting rather than a filter.
