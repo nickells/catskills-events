@@ -795,7 +795,22 @@
       background: var(--accent);
       box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
     }
-    .where input[type="range"]:disabled { cursor: default; }
+    /* Disabled (no place set yet) is drawn muted rather than with opacity: opacity puts the input
+       on its own layer, which iOS clips to the input's box, cutting off the thumb at the end. */
+    .where input[type="range"]:disabled { cursor: default; opacity: 1; }
+    .where input[type="range"]:disabled::-webkit-slider-runnable-track { background: color-mix(in srgb, var(--text) 25%, transparent); }
+    .where input[type="range"]:disabled::-moz-range-track { background: color-mix(in srgb, var(--text) 25%, transparent); }
+    .where input[type="range"]:disabled::-moz-range-progress { background: transparent; }
+    .where input[type="range"]:disabled::-webkit-slider-thumb {
+      border-color: color-mix(in srgb, var(--text) 35%, transparent);
+      background: var(--card-bg);
+      box-shadow: none;
+    }
+    .where input[type="range"]:disabled::-moz-range-thumb {
+      border-color: color-mix(in srgb, var(--text) 35%, transparent);
+      background: var(--card-bg);
+      box-shadow: none;
+    }
     #location-label { color: var(--text-muted); }
     /* As wide as "any distance" (12 monospace characters), so the slider keeps its length. */
     #distance-label { flex: none; min-width: 0; width: 12ch; white-space: nowrap; font: var(--meta); font-weight: 700; color: var(--text); text-align: right; }
