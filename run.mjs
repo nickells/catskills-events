@@ -298,7 +298,9 @@ async function handleTockify(source) {
         venue,
         town,
         description: c.description?.text?.slice(0, 200) || null,
-        url: c.customButtonLink || `https://tockify.com/${source.tockifyCalendar}/detail/${e.eid?.uid}`,
+        // A Tockify event page needs the occurrence (tid, its start in ms) as well as the event's
+        // uid: recurring events share a uid, and /detail/<uid> alone is "We couldn't find that page".
+        url: c.customButtonLink || `https://tockify.com/${source.tockifyCalendar}/detail/${e.eid?.uid}/${e.eid?.tid ?? start}`,
         category: tockifyCategory(tags),
         source: source.name,
         sourceUrl: `https://greatwesterncatskills.com/events/`,
