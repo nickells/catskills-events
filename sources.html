@@ -4,285 +4,241 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sources – Catskills Events</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
+    /* Same tokens as index.html's gig poster theme; keep the two in step. */
     :root {
-      --bg: #faf9f6;
-      --card-bg: #ffffff;
-      --text: #1a1a1a;
-      --text-muted: #6b6b6b;
-      --border: #e5e2dc;
-      --accent: #2d5a27;
-      --accent-light: #e8f0e6;
+      --bg: #f4efe4;
+      --card-bg: #fffdf7;
+      --text: #121212;
+      --text-muted: #474440;
+      --accent: #ff3fa4;
+      --riso-blue: #0078bf;
+      --riso-yellow: #ffd900;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 48px;
+      --gutter: var(--space-4);
+
+      --h-tag: 20px;
+      --rule: 2px;
+      --rule-thin: 1px;
+      --shadow-s: 2px;
+      --shadow-m: 4px;
+      --shadow-l: 6px;
+
+      --display-l: 400 48px/1 "Anton", sans-serif;
+      --title: 800 18px/1.2 "Archivo", sans-serif;
+      --body: 400 14px/1.5 "Archivo", sans-serif;
+      --meta: 400 13px/1.45 "Space Mono", monospace;
+      --meta-s: 400 11px/1.4 "Space Mono", monospace;
+      --label: 700 11px/1.2 "Space Mono", monospace;
+      --micro: 700 10px/1.2 "Space Mono", monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
+      font: var(--body);
       color: var(--text);
-      line-height: 1.5;
+      background-color: var(--bg);
+      /* Paper grain */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 24px 16px 120px;
-    }
+    a { color: inherit; }
 
-    header {
-      margin-bottom: 32px;
-    }
+    .container { max-width: 736px; margin: 0 auto; padding: var(--space-5) var(--gutter) 120px; }
 
-    header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    header h1 a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    header h1 a:hover {
-      text-decoration: underline;
-    }
-
-    header p {
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-top: 4px;
-    }
-
-    .header-nav {
-      display: flex;
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .header-nav a {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .header-nav a:hover {
-      text-decoration: underline;
-    }
-
-    h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin: 32px 0 16px 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--text);
-    }
-
-    h2:first-of-type {
-      margin-top: 0;
-    }
-
-    .source-card {
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .source-card:last-child {
-      border-bottom: none;
-    }
-
-    .source-name {
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .source-name a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .source-name a:hover {
-      text-decoration: underline;
-    }
-
-    .source-type {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
+    .label, .poster-top, .section-header .count, .source-type {
+      font: var(--label);
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      background: var(--accent-light);
-      color: var(--accent);
-      margin-left: 8px;
     }
 
-    .source-url {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 2px;
-      word-break: break-all;
+    /* ─ Masthead: the home page's, one size down ─ */
+    .poster-header { position: relative; margin: 0 calc(-1 * var(--gutter)) var(--space-6); padding: 0 var(--gutter); overflow-x: clip; }
+    /* Above the headline, whose tight line-height reaches up over this row and took its clicks. */
+    .poster-top { position: relative; z-index: 1; display: flex; justify-content: space-between; }
+    .poster-top a { text-decoration: none; border-bottom: var(--rule) solid var(--accent); }
+    .poster-top a:hover { background: var(--riso-yellow); }
+    .halftone {
+      position: absolute;
+      top: var(--space-4);
+      right: calc(-1 * var(--space-6));
+      width: 176px;
+      height: 176px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--riso-yellow) 2.6px, transparent 3px) 0 0 / 9px 9px;
+      -webkit-mask: radial-gradient(circle, #000 35%, transparent 71%);
+      mask: radial-gradient(circle, #000 35%, transparent 71%);
+      pointer-events: none;
+    }
+    .poster-header h1 {
+      position: relative;
+      margin-top: var(--space-3);
+      font: 400 clamp(64px, 15vw, 112px)/0.84 "Anton", sans-serif;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--riso-blue);
+      text-shadow: -4px 3px 0 var(--accent);
+      mix-blend-mode: multiply;
+    }
+    .poster-sub {
+      position: relative;
+      display: inline-block;
+      margin-top: var(--space-4);
+      padding: var(--space-1) var(--space-2);
+      font: var(--label);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: var(--riso-yellow);
+      transform: rotate(-1.5deg);
+      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
     }
 
-    .source-url a {
-      color: var(--accent);
-      text-decoration: none;
-    }
+    .intro { max-width: 60ch; color: var(--text-muted); }
 
-    .source-url a:hover {
-      text-decoration: underline;
+    /* ─ Section headings: highlighter over big type ─ */
+    .section-header {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      margin: var(--space-7) 0 var(--space-2);
+      padding-right: var(--space-2);
+      font: var(--display-l);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: linear-gradient(transparent 55%, var(--riso-yellow) 55% 92%, transparent 92%);
     }
-
-    .venue-count {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-left: 4px;
+    .section-header .count {
+      margin-left: var(--space-3);
+      padding: var(--space-1) var(--space-2);
+      color: #fff;
+      background: var(--accent);
+      transform: rotate(4deg);
     }
+    .section-note { margin-bottom: var(--space-4); color: var(--text-muted); }
 
-    .intro {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
-
+    /* ─ Map ─ */
     #town-map {
-      height: 340px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--accent-light);
+      height: 360px;
+      margin-right: var(--shadow-l);
+      border: var(--rule) solid var(--text);
+      background: var(--card-bg);
+      box-shadow: var(--shadow-l) var(--shadow-l) 0 var(--riso-blue);
     }
+    #town-map .leaflet-tile-pane { filter: grayscale(0.85) contrast(0.9) brightness(1.05); }
+    #town-map .leaflet-interactive:focus { outline: none; }
+    #town-map .leaflet-popup-content-wrapper { border: var(--rule) solid var(--text); border-radius: 0; box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--text); }
+    #town-map .leaflet-popup-tip { border: var(--rule) solid var(--text); }
+    #town-map .leaflet-container, #town-map .leaflet-tooltip { font: var(--meta); }
+    .town-popup h3 { font: var(--title); }
+    .town-popup .town-meta { margin: var(--space-1) 0 var(--space-2); font: var(--label); letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+    .town-popup ul { max-height: 180px; overflow-y: auto; list-style: none; font: var(--meta); }
+    .town-popup li { display: flex; justify-content: space-between; gap: var(--space-3); }
+    .town-popup a { color: var(--text); text-decoration-color: var(--accent); }
 
-    #town-map .leaflet-tile-pane {
-      filter: grayscale(0.85) contrast(0.9) brightness(1.05);
+    /* ─ Calendars & newsletters: cards ─ */
+    .aggregators {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-4);
+      margin-right: var(--shadow-m);
     }
-
-    #town-map .leaflet-interactive:focus {
-      outline: none;
+    .source-card {
+      min-width: 0;
+      padding: var(--space-4);
+      border: var(--rule) solid var(--text);
+      background: var(--card-bg);
+      box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--ink, var(--riso-blue));
     }
-
-    .town-popup h3 {
-      font-size: 14px;
-      margin-bottom: 2px;
+    .source-card.newsletter { --ink: var(--accent); }
+    .source-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+    .source-name { font: var(--title); }
+    .source-name a { text-decoration: none; }
+    .source-name a:hover { background: var(--riso-yellow); }
+    .source-events { flex: none; font: var(--meta); font-weight: 700; }
+    .source-type {
+      display: inline-flex;
+      align-items: center;
+      height: var(--h-tag);
+      margin-top: var(--space-2);
+      padding: 0 var(--space-2);
+      border: var(--rule) solid var(--text);
+      font: var(--micro);
+      letter-spacing: 1px;
+      color: #fff;
+      background: var(--ink, var(--riso-blue));
     }
-
-    .town-popup .town-meta {
-      font-size: 12px;
+    .source-url {
+      margin-top: var(--space-2);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font: var(--meta-s);
       color: var(--text-muted);
-      margin-bottom: 6px;
     }
+    .source-url a { text-decoration: none; }
+    .source-url a:hover { text-decoration: underline; }
 
-    .town-popup ul {
-      list-style: none;
-      max-height: 180px;
-      overflow-y: auto;
-      font-size: 13px;
-    }
-
-    .town-popup li {
+    /* ─ Instagram: a ruled list in columns ─ */
+    .accounts { columns: 3 200px; column-gap: var(--space-5); list-style: none; }
+    .accounts li {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      padding: 1px 0;
+      gap: var(--space-3);
+      padding: var(--space-2) 0;
+      border-top: var(--rule-thin) solid color-mix(in srgb, var(--text) 18%, transparent);
+      break-inside: avoid;
+      font: var(--meta);
     }
+    .accounts a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+    .accounts a:hover { background: var(--riso-yellow); }
+    .accounts .n { flex: none; color: var(--text-muted); }
 
-    .town-popup a {
-      color: var(--accent);
-      text-decoration: none;
+    @media (max-width: 600px) {
+      :root { --display-l: 400 36px/1 "Anton", sans-serif; }
+      .halftone { width: 120px; height: 120px; top: var(--space-3); right: calc(-1 * var(--space-5)); }
+      #town-map { height: 300px; }
+      .aggregators { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1><a href="index.html">Catskills Events</a></h1>
-      <div class="header-nav">
-        <a href="index.html">&larr; Back to events</a>
-      </div>
+    <header class="poster-header">
+      <div class="halftone" aria-hidden="true"></div>
+      <div class="poster-top"><a href="index.html">← Events</a><span id="issue">Vol. 1</span></div>
+      <h1>Sources</h1>
+      <p class="poster-sub" id="tally">Where the events come from.</p>
     </header>
 
     <p class="intro">
-      Events are aggregated from the following sources. Each event links back
-      to its original listing. If you run a local venue or calendar and would
-      like to be included, open an issue on the project.
+      Every morning a script reads these calendars, newsletters and Instagram accounts, pulls
+      out the events, and links each one back to where it was posted.
     </p>
 
-    <h2>By Town</h2>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
-      Instagram accounts with current events, by town. Larger circles have
-      more accounts; tap a town to see them.
-    </p>
+    <h2 class="section-header">By Town<span class="count" id="towns-count"></span></h2>
+    <p class="section-note">Instagram accounts with current events. Bigger circles have more accounts; tap a town to see them.</p>
     <div id="town-map"></div>
-    <script>
-      // Built from events.json alone: each event carries its town's coordinates.
-      document.addEventListener('DOMContentLoaded', () => {
-        if (!window.L) return;
-        const map = L.map('town-map', { scrollWheelZoom: false }).setView([42.1, -74.4], 8);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-          maxZoom: 14,
-        }).addTo(map);
 
-        // Skip towns geocoded far outside the region (e.g. a same-named town abroad).
-        const region = L.latLngBounds([40.4, -76.5], [43.6, -72.8]);
-        // Frame the Catskills core; outlying towns (Brooklyn, the Mohawk Valley) stay a pan away.
-        const core = L.latLngBounds([41.45, -75.3], [42.6, -73.55]);
+    <h2 class="section-header">Calendars &amp; Newsletters<span class="count" id="aggregators-count"></span></h2>
+    <p class="section-note">Regional calendars and newsletters, with how many current events each lists.</p>
+    <div class="aggregators" id="aggregators"></div>
 
-        fetch('./output/events.json')
-          .then(r => r.json())
-          .then(events => {
-            const towns = new Map();
-            for (const e of events) {
-              if (!e.town || e._lat == null || e._lng == null) continue;
-              if (!region.contains([e._lat, e._lng])) continue;
-              const handles = (e.sources || (e.source ? [e.source] : []))
-                .filter(s => s.startsWith('Instagram @'))
-                .map(s => s.slice('Instagram @'.length));
-              if (!handles.length) continue;
-              let t = towns.get(e.town);
-              if (!t) towns.set(e.town, t = { name: e.town, lat: e._lat, lng: e._lng, events: 0, accounts: {} });
-              t.events++;
-              for (const h of handles) t.accounts[h] = (t.accounts[h] || 0) + 1;
-            }
-
-            const bounds = [];
-            for (const t of towns.values()) {
-              const accounts = Object.entries(t.accounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-              if (core.contains([t.lat, t.lng])) bounds.push([t.lat, t.lng]);
-              L.circleMarker([t.lat, t.lng], {
-                radius: 5 + 3 * Math.sqrt(accounts.length),
-                color: '#2d5a27',
-                weight: 1.5,
-                fillColor: '#2d5a27',
-                fillOpacity: 0.35,
-              })
-                .bindTooltip(t.name)
-                .bindPopup(`<div class="town-popup">
-                  <h3>${esc(t.name)}</h3>
-                  <div class="town-meta">${t.events} event${t.events !== 1 ? 's' : ''} · ${accounts.length} account${accounts.length !== 1 ? 's' : ''}</div>
-                  <ul>${accounts.map(([h, n]) => `<li><a href="https://instagram.com/${esc(h)}/" target="_blank">@${esc(h)}</a><span class="venue-count">${n}</span></li>`).join('')}</ul>
-                </div>`, { maxWidth: 240, autoPanPadding: [16, 16] })
-                .addTo(map);
-            }
-            if (bounds.length > 1) map.fitBounds(bounds, { padding: [20, 20] });
-          });
-      });
-    </script>
-
-    <h2>Aggregator Sources</h2>
-    <div id="aggregators"></div>
-
-    <h2>Instagram</h2>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
-      Local town and tourism Instagram accounts. Event details are extracted
-      from post captions and image text using AI.
-    </p>
-    <div id="instagram"></div>
+    <h2 class="section-header">Instagram<span class="count" id="instagram-count"></span></h2>
+    <p class="section-note">Venue, town and tourism accounts. Events are read from post captions and flyer text.</p>
+    <ul class="accounts" id="instagram"></ul>
   </div>
 
   <script>
@@ -296,11 +252,8 @@
       { name: "Great Western Catskills", url: "https://greatwesterncatskills.com/events/", type: "calendar" },
       { name: "AllEvents.in", url: "https://allevents.in/catskill/all", type: "calendar" },
     ];
-
-    // Instagram sources are populated dynamically from event data
-    let INSTAGRAM = [];
-
-    const TYPE_LABELS = { newsletter: "Newsletter", calendar: "Event Calendar" };
+    const TYPE_LABELS = { newsletter: "Newsletter", calendar: "Calendar" };
+    const plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
 
     function esc(s) {
       const el = document.createElement('span');
@@ -308,42 +261,101 @@
       return el.innerHTML;
     }
 
-    const aggContainer = document.getElementById('aggregators');
-    // Instagram section is populated from events.json below
-
-    aggContainer.innerHTML = AGGREGATORS.map(s => `
-      <div class="source-card">
-        <span class="source-name"><a href="${esc(s.url)}" target="_blank">${esc(s.name)}</a></span>
-        <span class="source-type">${TYPE_LABELS[s.type] || s.type}</span>
-        <div class="source-url"><a href="${esc(s.url)}" target="_blank">${esc(s.url)}</a></div>
-      </div>
-    `).join('');
+    // Volume and issue: years and days since the first scrape on June 29, 2026.
+    (() => {
+      const launch = new Date(2026, 5, 29);
+      const now = new Date();
+      const issue = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - launch) / 864e5) + 1;
+      let vol = now.getFullYear() - launch.getFullYear();
+      if (now.getMonth() > 5 || (now.getMonth() === 5 && now.getDate() >= 29)) vol++;
+      document.getElementById('issue').textContent = `Vol. ${vol} · No. ${issue}`;
+    })();
 
     fetch('./output/events.json')
       .then(r => r.json())
       .then(events => {
-        const igAccounts = {};
-
+        const bySource = {};
         for (const e of events) {
-          const sources = e.sources || (e.source ? [e.source] : []);
-          for (const s of sources) {
-            if (s.startsWith('Instagram @')) {
-              const handle = s.replace('Instagram @', '');
-              igAccounts[handle] = (igAccounts[handle] || 0) + 1;
-            }
-          }
+          for (const s of e.sources || (e.source ? [e.source] : [])) bySource[s] = (bySource[s] || 0) + 1;
         }
+        const accounts = Object.entries(bySource)
+          .filter(([s]) => s.startsWith('Instagram @'))
+          .map(([s, n]) => [s.slice('Instagram @'.length), n])
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
-        // Render Instagram accounts sorted by event count
-        const igSorted = Object.entries(igAccounts).sort((a, b) => b[1] - a[1]);
-        document.getElementById('instagram').innerHTML = igSorted.map(([handle, count]) =>
-          `<div class="source-card">
-            <span class="source-name"><a href="https://instagram.com/${esc(handle)}/" target="_blank">@${esc(handle)}</a></span>
-            <span class="source-type">Instagram</span>
-            <span class="venue-count" style="margin-left:8px">${count} event${count !== 1 ? 's' : ''}</span>
-          </div>`
+        document.getElementById('tally').textContent =
+          `Where ${plural(events.length, 'event')} come from: ${AGGREGATORS.length} calendars & newsletters, ${accounts.length} Instagram accounts.`;
+
+        document.getElementById('aggregators-count').textContent = AGGREGATORS.length;
+        document.getElementById('aggregators').innerHTML = AGGREGATORS.map(s => `
+          <div class="source-card ${s.type}">
+            <div class="source-head">
+              <span class="source-name"><a href="${esc(s.url)}" target="_blank">${esc(s.name)}</a></span>
+              <span class="source-events">${plural(bySource[s.name] || 0, 'event')}</span>
+            </div>
+            <span class="source-type">${TYPE_LABELS[s.type] || s.type}</span>
+            <div class="source-url"><a href="${esc(s.url)}" target="_blank">${esc(s.url.replace(/^https?:\/\/(www\.)?/, ''))}</a></div>
+          </div>`).join('');
+
+        document.getElementById('instagram-count').textContent = accounts.length;
+        document.getElementById('instagram').innerHTML = accounts.map(([handle, n]) =>
+          `<li><a href="https://instagram.com/${esc(handle)}/" target="_blank">@${esc(handle)}</a><span class="n">${n}</span></li>`
         ).join('');
+
+        drawTownMap(events);
       });
+
+    // Instagram accounts with current events, by town. Built from events.json alone: each
+    // event carries its town's coordinates.
+    function drawTownMap(events) {
+      if (!window.L) return;
+      const map = L.map('town-map', { scrollWheelZoom: false }).setView([42.1, -74.4], 8);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 14,
+      }).addTo(map);
+
+      // Skip towns geocoded far outside the region (e.g. a same-named town abroad).
+      const region = L.latLngBounds([40.4, -76.5], [43.6, -72.8]);
+      // Frame the Catskills core; outlying towns (Brooklyn, the Mohawk Valley) stay a pan away.
+      const core = L.latLngBounds([41.45, -75.3], [42.6, -73.55]);
+
+      const towns = new Map();
+      for (const e of events) {
+        if (!e.town || e._lat == null || e._lng == null) continue;
+        if (!region.contains([e._lat, e._lng])) continue;
+        const handles = (e.sources || (e.source ? [e.source] : []))
+          .filter(s => s.startsWith('Instagram @'))
+          .map(s => s.slice('Instagram @'.length));
+        if (!handles.length) continue;
+        let t = towns.get(e.town);
+        if (!t) towns.set(e.town, t = { name: e.town, lat: e._lat, lng: e._lng, events: 0, accounts: {} });
+        t.events++;
+        for (const h of handles) t.accounts[h] = (t.accounts[h] || 0) + 1;
+      }
+      document.getElementById('towns-count').textContent = towns.size;
+
+      const bounds = [];
+      for (const t of towns.values()) {
+        const accounts = Object.entries(t.accounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        if (core.contains([t.lat, t.lng])) bounds.push([t.lat, t.lng]);
+        L.circleMarker([t.lat, t.lng], {
+          radius: 5 + 3 * Math.sqrt(accounts.length),
+          color: '#121212',
+          weight: 2,
+          fillColor: '#ff3fa4',
+          fillOpacity: 0.55,
+        })
+          .bindTooltip(t.name)
+          .bindPopup(`<div class="town-popup">
+            <h3>${esc(t.name)}</h3>
+            <div class="town-meta">${plural(t.events, 'event')} · ${plural(accounts.length, 'account')}</div>
+            <ul>${accounts.map(([h, n]) => `<li><a href="https://instagram.com/${esc(h)}/" target="_blank">@${esc(h)}</a><span>${n}</span></li>`).join('')}</ul>
+          </div>`, { maxWidth: 240, autoPanPadding: [16, 16] })
+          .addTo(map);
+      }
+      if (bounds.length > 1) map.fitBounds(bounds, { padding: [20, 20] });
+    }
   </script>
 </body>
 </html>
