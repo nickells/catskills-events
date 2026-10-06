@@ -9,11 +9,12 @@ import { categorizeEvents } from "./lib/categorize.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { locateEvents } from "./lib/locate.mjs";
-import { cleanEvent } from "./lib/clean.mjs";
+import { cleanEvent, townCase } from "./lib/clean.mjs";
 import { extractJsonLdEvents } from "./lib/jsonld.mjs";
 import { mentionsForPosts, resolveTaggedPlaces, taggedPlaceLines } from "./lib/tagged.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
-import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
+import { clearUnanchoredDates, findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
+import { detectTextAtUrl } from "./lib/google-vision.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
 import { attachFlyers, postImages } from "./lib/flyers.mjs";
 import {
@@ -23,6 +24,7 @@ import {
   recordInstagramPoll,
   extractPostEvents,
   prunePostEvents,
+  withFlyerText,
 } from "./lib/instagram.mjs";
 
 const KNOWN_TOWNS = new Set(
@@ -395,7 +397,9 @@ async function handleInstagram(profiles, tagging) {
       continue;
     }
 
-    const posts = await withTaggedPlaces(profile, tagging);
+    const tagged = (await withTaggedPlaces(profile, tagging))
+      .map((post) => (profile.venue ? { ...post, accountVenue: profile.venue } : post));
+    const posts = await withFlyerText(tagged, { ocr: (url) => detectTextAtUrl(url), cache: scrapeCache, log: console.log });
     const { events, extracted, failed } = await extractPostEvents(
       posts,
       (text) => extractEvents(text, `Instagram @${profile.handle}`, { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }),
@@ -405,15 +409,16 @@ async function handleInstagram(profiles, tagging) {
     console.log(`  @${profile.handle} — ${events.length} events from ${profile.posts.length} posts (${extracted} extracted${failed ? `, ${failed} failed` : ""})`);
 
     // Interpret relative phrases against the post timestamp, then do calendar math in code.
-    await resolveInstagramRelativeDates(events, profile.posts, scrapeCache);
+    const { anchored } = await resolveInstagramRelativeDates(events, posts, scrapeCache);
+    clearUnanchoredDates(events, posts, anchored);
 
-    // OCR flyer images for events missing date or venue
-    const needsOcr = events.filter((e) => !e.date || !e.venue);
+    // OCR flyer images for events missing date or venue, unless extraction already saw the flyer
+    const needsOcr = events.filter((e) => (!e.date || !e.venue) && findPostForEvent(e, posts)?.flyerText == null);
     if (needsOcr.length) {
       console.log(`    → OCR pass for ${needsOcr.length} incomplete event(s)`);
       for (const e of needsOcr) {
         try {
-          const post = findPostForEvent(e, profile.posts);
+          const post = findPostForEvent(e, posts);
           if (!post?.displayUrl) continue;
           const patched = await ocrEventImage(post.displayUrl, e);
           for (const [key, val] of Object.entries(patched)) {
@@ -433,7 +438,7 @@ async function handleInstagram(profiles, tagging) {
     if (stillIncomplete.length) {
       for (const e of stillIncomplete) {
         try {
-          const post = findPostForEvent(e, profile.posts);
+          const post = findPostForEvent(e, posts);
           if (!post?.caption) continue;
           const urlMatch = post.caption.match(/https?:\/\/[^\s)]+|(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s)]*)?/i);
           if (!urlMatch) continue;
@@ -595,10 +600,10 @@ async function main() {
     console.log(`  Resolved ${filled}/${needsTown.length} events`);
   }
 
-  // Normalize town names: strip state suffixes like ", NY" or " New York"
+  // Normalize town names: strip state suffixes like ", NY" or " New York", and fix all-caps casing
   for (const e of deduped) {
     if (e.town) {
-      e.town = e.town.replace(/,?\s*(NY|New York|USA)$/i, "").trim();
+      e.town = townCase(e.town.replace(/,?\s*(NY|New York|USA)$/i, "").trim());
     }
   }
 
