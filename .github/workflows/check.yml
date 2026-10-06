@@ -17,7 +17,7 @@ jobs:
           node-version: 22
       - run: npm ci
       - name: Syntax-check scripts
-        run: for f in *.mjs lib/*.mjs; do node --check "$f" || exit 1; done
+        run: for f in *.mjs lib/*.mjs lib/readers/*.mjs; do node --check "$f" || exit 1; done
       - run: npm test
         env:
           # lib/openai.mjs builds its client on import; no test calls the API.
