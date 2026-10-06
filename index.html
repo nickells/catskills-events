@@ -517,11 +517,6 @@
       font-size: 10px;
     }
 
-    .cal-event .event-tag {
-      font-size: 9px;
-      padding: 0 5px;
-      margin-top: 2px;
-    }
 
     .cal-week-nav {
       display: flex;
@@ -812,12 +807,57 @@
     .distance-medium { background: var(--riso-yellow); }
     .distance-far { background: #ff9bc9; }
 
-    .cal-day { border: 2px solid var(--text); border-radius: 0; }
+    /* Calendar: columns of plain type, each event marked by a stripe in its category's ink. */
+    .cal-day { padding: 10px 10px 4px; border: 2px solid var(--text); border-radius: 0; }
     .cal-day.today { border-color: var(--text); background: #fff6b8; box-shadow: 4px 4px 0 var(--accent); }
-    .cal-day-header { font-family: "Space Mono", monospace; color: var(--text); text-transform: uppercase; }
+    .cal-day-header {
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--text);
+      font-family: "Space Mono", monospace;
+      color: var(--text);
+      text-transform: uppercase;
+    }
     .cal-day-header .cal-day-num { font: 400 24px "Anton", sans-serif; }
-    .cal-event { border-radius: 0; background: #f2ede2; border-left: 4px solid var(--accent); }
+    .cal-event {
+      margin-bottom: 12px;
+      padding: 1px 0 1px 8px;
+      border-left: 3px solid var(--ink, var(--text));
+      border-radius: 0;
+      background: none;
+    }
     .cal-event:hover { background: var(--riso-yellow); }
+    .cal-event-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      font: 700 10px/1.5 "Space Mono", monospace;
+      white-space: nowrap;
+    }
+    .cal-event-time { color: var(--text); font-weight: 700; }
+    .cal-event-dist { font-weight: 400; color: var(--text-muted); }
+    .cal-event-dist .direction-arrow { margin-right: 2px; font-size: 10px; }
+    .cal-event-name {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font: 700 13px/1.25 "Archivo", sans-serif;
+    }
+    .cal-event-venue {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .cal-event .event-tag {
+      margin-top: 4px;
+      padding: 0 4px;
+      border-width: 1px;
+      font-size: 9px;
+      line-height: 1.5;
+    }
     .cal-week-nav button { border: 2px solid var(--text); border-radius: 0; font-weight: 800; box-shadow: 2px 2px 0 var(--text); }
     .cal-week-label { font: 400 22px "Anton", sans-serif; text-transform: uppercase; }
 
@@ -835,8 +875,10 @@
       gap: 10px;
       margin: 0 -16px 8px;
       padding: 10px 16px;
-      background: var(--bg);
-      border-bottom: 2px solid var(--text);
+      /* Background and rule painted out to the browser's edges (border-image outset doesn't
+         widen the page), so the bar also spans the wider calendar beneath it. */
+      border-bottom: 2px solid transparent;
+      border-image: linear-gradient(to top, var(--text) 2px, var(--bg) 2px) fill 0 / 0 0 2px / 0 100vmax;
     }
     .results-bar .stats { margin: 0; line-height: 1.5; }
     .results-actions { display: flex; align-items: center; gap: 8px; flex: none; }
@@ -1568,15 +1610,17 @@
 
         for (let ei = 0; ei < dayEvents.length; ei++) {
           const e = dayEvents[ei];
-          const timePart = e.time && e.time !== 'null' ? `<span class="cal-event-time">${esc(e.time)}</span> ` : '';
-          const catCls = `tag-${e.category || 'other'}`;
           const eid = `${dateStr}-${ei}`;
           calEventMap[eid] = e;
-          html += `<div class="cal-event" data-eid="${eid}">
-            ${timePart}<span class="cal-event-name">${e.url ? `<a href="${esc(e.url)}" target="_blank" class="event-link">${esc(e.name)}</a>` : esc(e.name)}</span>
-            ${e.venue ? `<div class="cal-event-venue">${esc(e.venue)}</div>` : ''}
-            <span class="event-tag ${catCls}">${CATEGORY_LABELS[e.category] || e.category || 'other'}</span>
-            ${distanceBadge(e)}
+          // Compact: time and distance on one line, name, one line of venue, then the category tag;
+          // the stripe repeats the category's color.
+          const time = e.time && e.time !== 'null' ? esc(e.time) : '';
+          const venue = (e.venue || '').split(',')[0];
+          html += `<div class="cal-event" data-eid="${eid}" style="--ink: var(--tag-${e.category || 'other'})">
+            ${time || e._miles != null ? `<div class="cal-event-meta"><span class="cal-event-time">${time}</span>${calDistance(e)}</div>` : ''}
+            <span class="cal-event-name">${e.url ? `<a href="${esc(e.url)}" target="_blank" class="event-link">${esc(e.name)}</a>` : esc(e.name)}</span>
+            ${venue ? `<div class="cal-event-venue">${esc(venue)}</div>` : ''}
+            <span class="event-tag tag-${e.category || 'other'}">${CATEGORY_LABELS[e.category] || e.category || 'Other'}</span>
           </div>`;
         }
 
@@ -1589,6 +1633,12 @@
 
       html += '</div>';
       container.innerHTML = html;
+    }
+
+    function calDistance(e) {
+      if (e._miles == null) return '';
+      const deg = e._bearing != null ? Math.round(e._bearing) : 0;
+      return `<span class="cal-event-dist"><span class="direction-arrow" style="transform:rotate(${deg}deg)">↑</span>${e._miles} mi</span>`;
     }
 
     function distanceBadge(e) {
