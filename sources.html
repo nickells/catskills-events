@@ -189,6 +189,7 @@
       color: var(--text-muted);
     }
     .source-url a { text-decoration: none; }
+    .source-pages { margin-top: var(--space-2); font: var(--meta-s); color: var(--text-muted); }
     .source-url a:hover { text-decoration: underline; }
 
     /* ─ Instagram: a ruled list in columns ─ */
@@ -251,9 +252,27 @@
       { name: "Catskill Mountain Foundation", url: "https://www.catskillmtn.org/performances/", type: "calendar" },
       { name: "Great Western Catskills", url: "https://greatwesterncatskills.com/events/", type: "calendar" },
       { name: "AllEvents.in", url: "https://allevents.in/catskill/all", type: "calendar" },
+      { name: "Eventbrite", url: "https://www.eventbrite.com/d/ny--kingston/all-events/", type: "calendar" },
     ];
     const TYPE_LABELS = { newsletter: "Newsletter", calendar: "Calendar" };
     const plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
+
+    // "allevents.in/kingston-ny/all" → "Kingston"; "eventbrite.com/d/ny--livingston-manor/all-events/?page=2" → "Livingston Manor 2".
+    function pageLabel(url) {
+      const m = url.match(/allevents\.in\/([^/]+)\/all/) || url.match(/eventbrite\.com\/d\/[a-z]{2}--([^/]+)\//);
+      if (!m) return url.replace(/^https?:\/\/(www\.)?/, '');
+      const town = m[1].replace(/-ny$/, '').split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+      const page = url.match(/[?&]page=(\d+)/)?.[1];
+      return page ? `${town} ${page}` : town;
+    }
+
+    // Only for town-page sources (AllEvents, Eventbrite); a newsletter's issues aren't "pages".
+    function pagesLine(urls) {
+      const towns = [...(urls || [])].filter(u => /allevents\.in\/[^/]+\/all|eventbrite\.com\/d\//.test(u));
+      if (towns.length < 2) return '';
+      const labels = [...new Set(towns.map(pageLabel))].sort();
+      return `<div class="source-pages">${labels.length} pages: ${labels.map(esc).join(' · ')}</div>`;
+    }
 
     function esc(s) {
       const el = document.createElement('span');
@@ -275,8 +294,11 @@
       .then(r => r.json())
       .then(events => {
         const bySource = {};
+        const pagesBySource = {}; // which of a source's pages (e.g. AllEvents towns) have current events
         for (const e of events) {
           for (const s of e.sources || (e.source ? [e.source] : [])) bySource[s] = (bySource[s] || 0) + 1;
+          const pages = e.sourceUrls ? Object.entries(e.sourceUrls) : e.source && e.sourceUrl ? [[e.source, e.sourceUrl]] : [];
+          for (const [s, url] of pages) (pagesBySource[s] ??= new Set()).add(url);
         }
         const accounts = Object.entries(bySource)
           .filter(([s]) => s.startsWith('Instagram @'))
@@ -295,6 +317,7 @@
             </div>
             <span class="source-type">${TYPE_LABELS[s.type] || s.type}</span>
             <div class="source-url"><a href="${esc(s.url)}" target="_blank">${esc(s.url.replace(/^https?:\/\/(www\.)?/, ''))}</a></div>
+            ${pagesLine(pagesBySource[s.name])}
           </div>`).join('');
 
         document.getElementById('instagram-count').textContent = accounts.length;

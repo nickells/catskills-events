@@ -10,6 +10,7 @@ import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { locateEvents } from "./lib/locate.mjs";
 import { cleanEvent } from "./lib/clean.mjs";
+import { extractJsonLdEvents } from "./lib/jsonld.mjs";
 import { mentionsForPosts, resolveTaggedPlaces, taggedPlaceLines } from "./lib/tagged.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
 import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
@@ -187,6 +188,7 @@ async function handleNewsletterArchive(source) {
 
 async function handleCalendar(source) {
   const allEvents = [];
+  let fetchedFromSource = 0;
 
   for (const url of source.urls) {
     const cached = getCached(url);
@@ -196,6 +198,8 @@ async function handleCalendar(source) {
       continue;
     }
 
+    // Pace requests to sites that ask for a crawl delay.
+    if (source.delayMs && fetchedFromSource++) await new Promise((r) => setTimeout(r, source.delayMs));
     console.log(`\n[${source.name}] Fetching ${url}`);
     const html = await fetchPage(url);
     if (!html) {
@@ -205,7 +209,11 @@ async function handleCalendar(source) {
 
     let { pageTitle, h1, body } = parseHtml(html, url);
     const townHint = extractTownFromUrl(url);
-    let events = await extractEvents(body, source.name, { pageTitle, h1 });
+    // Listing sites publish their events as schema.org JSON-LD; read that when the source has
+    // it, and fall back to the LLM only for a page that doesn't.
+    let events = source.structured ? extractJsonLdEvents(html) : [];
+    if (events.length) console.log(`  → ${events.length} events from structured data`);
+    else events = await extractEvents(body, source.name, { pageTitle, h1 });
 
     // Fallback: if 0 events, the page may be JS-rendered — retry with Playwright
     if (!events.length) {
