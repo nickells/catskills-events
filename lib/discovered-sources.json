@@ -27,6 +27,14 @@
       ]
     },
     {
+      "handle": "catskills.visitor.center",
+      "town": "Arkville",
+      "addedAt": "2026-10-06",
+      "foundVia": [
+        "catskillcenter"
+      ]
+    },
+    {
       "handle": "gaagallery",
       "town": "Catskill",
       "addedAt": "2026-10-03",
@@ -72,6 +80,15 @@
       "addedAt": "2026-10-02",
       "foundVia": [
         "visitmargaretvilleny"
+      ]
+    },
+    {
+      "handle": "nysefbelleayre",
+      "town": "Highmount",
+      "addedAt": "2026-10-06",
+      "foundVia": [
+        "visitmargaretvilleny",
+        "belleayre"
       ]
     },
     {
