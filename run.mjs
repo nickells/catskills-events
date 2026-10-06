@@ -396,9 +396,9 @@ async function handleInstagram(profiles, tagging) {
       continue;
     }
 
-    const tagged = (await withTaggedPlaces(profile, tagging))
+    const placed = (await withTaggedPlaces(profile, tagging))
       .map((post) => (profile.venue ? { ...post, accountVenue: profile.venue } : post));
-    const posts = await withFlyerText(tagged, { ocr: (url) => detectTextAtUrl(url), cache: scrapeCache, log: console.log });
+    const posts = await withFlyerText(placed, { ocr: (url) => detectTextAtUrl(url), cache: scrapeCache, log: console.log });
     const { events, extracted, failed } = await extractPostEvents(
       posts,
       (text) => extractEvents(text, `Instagram @${profile.handle}`, { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }),
