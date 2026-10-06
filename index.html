@@ -1091,18 +1091,11 @@
     .tooltip .tt-name { font: var(--title-s); color: var(--riso-yellow); }
     .tooltip .tt-meta, .tooltip .tt-desc { font: var(--meta-s); }
 
-    /* Touch screens: every target at or near the 44px a fingertip needs. The rows keep their
-       even rhythm, just on a bigger box. */
+    /* Touch screens: a thumb-sized slider handle, and 16px text in the text fields, below which
+       iOS Safari zooms the page in when one is tapped. */
     @media (pointer: coarse) {
-      :root {
-        --h-input: 48px;
-        --h-chip: 44px;
-        --h-button-s: 40px;
-        --thumb: 32px;
-      }
-      #place-toggle { width: var(--h-input); }
-      #zip-input { padding-right: var(--h-input); }
-      #place-options li { min-height: 44px; align-items: center; }
+      :root { --thumb: 32px; }
+      #zip-input, .search-box { font-size: 16px; }
     }
 
     @media (max-width: 600px) {
@@ -1202,7 +1195,7 @@
     <!-- Search sits right above the results it filters, so typing shows the list change. -->
     <div class="find">
       <label class="find-word" for="search">Find</label>
-      <input class="search-box" type="text" placeholder="Search events, venues, towns..." id="search" />
+      <input class="search-box" type="text" placeholder="Events, venues, towns…" id="search" />
     </div>
 
     <div class="results-bar">
