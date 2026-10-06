@@ -9,7 +9,7 @@ import { categorizeEvents } from "./lib/categorize.mjs";
 import { formatEvents, formatJSON } from "./lib/format.mjs";
 import { loadGeoCache, geocodeEvents } from "./lib/geocode.mjs";
 import { locateEvents } from "./lib/locate.mjs";
-import { cleanEvent } from "./lib/clean.mjs";
+import { cleanEvent, townCase } from "./lib/clean.mjs";
 import { extractJsonLdEvents } from "./lib/jsonld.mjs";
 import { mentionsForPosts, resolveTaggedPlaces, taggedPlaceLines } from "./lib/tagged.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
@@ -599,10 +599,10 @@ async function main() {
     console.log(`  Resolved ${filled}/${needsTown.length} events`);
   }
 
-  // Normalize town names: strip state suffixes like ", NY" or " New York"
+  // Normalize town names: strip state suffixes like ", NY" or " New York", and fix all-caps casing
   for (const e of deduped) {
     if (e.town) {
-      e.town = e.town.replace(/,?\s*(NY|New York|USA)$/i, "").trim();
+      e.town = townCase(e.town.replace(/,?\s*(NY|New York|USA)$/i, "").trim());
     }
   }
 
