@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catskills Flyer Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  /* Tokens copied from the gig poster theme in index.html. */
+  :root {
+    --bg: #f4efe4;
+    --card-bg: #fffdf7;
+    --text: #121212;
+    --text-muted: #474440;
+    --accent: #ff3fa4;
+    --riso-blue: #0078bf;
+    --riso-yellow: #ffd900;
+    --tag-music: #ff3fa4;
+    --tag-food: #ff6c2f;
+    --tag-culture: #0078bf;
+    --tag-nature: #00a95c;
+    --tag-community: #e8322b;
+    --tag-nightlife: #765ba7;
+    --tag-wellness: #00a6b8;
+    --tag-other: #5f5b55;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --gutter: var(--space-4);
+    --label-col: 64px;
+    --h-input: 40px;
+    --h-chip: 32px;
+    --h-tag: 20px;
+    --rule: 2px;
+    --shadow-s: 2px;
+    --shadow-m: 4px;
+    --shadow-l: 6px;
+    --shadow-pressed: 1px;
+
+    --display-l: 400 48px/1 "Anton", sans-serif;
+    --display-m: 400 32px/1 "Anton", sans-serif;
+    --title: 800 18px/1.2 "Archivo", sans-serif;
+    --title-s: 700 13px/1.25 "Archivo", sans-serif;
+    --body: 400 14px/1.5 "Archivo", sans-serif;
+    --ui: 800 13px/1 "Archivo", sans-serif;
+    --meta: 400 13px/1.45 "Space Mono", monospace;
+    --meta-s: 400 11px/1.4 "Space Mono", monospace;
+    --label: 700 11px/1.2 "Space Mono", monospace;
+    --micro: 700 10px/1.2 "Space Mono", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font: var(--body);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .container { max-width: 736px; margin: 0 auto; padding: var(--space-5) var(--gutter) 0; }
+  /* Tape on the outermost sheets reaches past the page edge; trim it rather than scroll sideways.
+     (On a full-width wrapper: clip on the root or body would apply to the viewport as hidden.) */
+  .wall-clip { overflow-x: clip; }
+  .wall { width: min(1280px, 100%); margin: 0 auto; padding: 0 var(--gutter) 120px; }
+
+  .poster-top, .filter-group-label, .stats {
+    font: var(--label); letter-spacing: 1px; text-transform: uppercase; color: var(--text);
+  }
+
+  /* ─ Masthead, as on the main page ─ */
+  .poster-header { position: relative; margin: 0 calc(-1 * var(--gutter)) var(--space-6); padding: 0 var(--gutter); overflow-x: clip; }
+  .poster-top { position: relative; z-index: 1; display: flex; justify-content: space-between; }
+  .poster-top a { color: var(--text); text-decoration: none; border-bottom: var(--rule) solid var(--accent); }
+  .poster-top a:hover { background: var(--riso-yellow); }
+  .halftone {
+    position: absolute; top: var(--space-4); right: calc(-1 * var(--space-6)); width: 224px; height: 224px; border-radius: 50%;
+    background: radial-gradient(circle, var(--riso-yellow) 2.6px, transparent 3px) 0 0 / 9px 9px;
+    -webkit-mask: radial-gradient(circle, #000 35%, transparent 71%);
+    mask: radial-gradient(circle, #000 35%, transparent 71%);
+    pointer-events: none;
+  }
+  .poster-header h1 {
+    position: relative; margin-top: var(--space-3);
+    font: 400 clamp(64px, 17vw, 128px)/0.84 "Anton", sans-serif; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .poster-header h1 span { display: block; mix-blend-mode: multiply; }
+  .poster-header h1 .l1 { color: var(--text); text-shadow: 5px 4px 0 var(--accent); }
+  .poster-header h1 .l2 { color: var(--riso-blue); text-shadow: -4px 3px 0 var(--accent); margin-left: 0.6em; }
+  .poster-sub {
+    position: relative; display: inline-block; margin-top: var(--space-4); padding: var(--space-1) var(--space-2);
+    font: var(--label); letter-spacing: 1px; text-transform: uppercase;
+    background: var(--riso-yellow); transform: rotate(-1.5deg); box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+  }
+
+  /* ─ What: category chips in their own ink ─ */
+  .filter-group {
+    position: relative; display: flex; flex-wrap: wrap; gap: var(--space-2); min-height: var(--h-input);
+    padding: calc((var(--h-input) - var(--h-chip)) / 2) 0 calc((var(--h-input) - var(--h-chip)) / 2) calc(var(--label-col) + var(--space-3));
+  }
+  .filter-group-label { position: absolute; top: calc(var(--h-input) / 2); left: 0; transform: translateY(-50%); }
+  .filter-btn {
+    --chip: var(--text);
+    display: inline-flex; align-items: center; height: var(--h-chip); padding: 0 var(--space-3);
+    border: var(--rule) solid var(--text); cursor: pointer;
+    font: var(--label); letter-spacing: 1px; text-transform: uppercase; color: var(--text);
+    background: color-mix(in srgb, var(--chip) 16%, var(--card-bg));
+    box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--chip);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .filter-btn[data-c="all"] { border-radius: 999px; font: var(--ui); letter-spacing: 0.5px; background: var(--card-bg); }
+  .filter-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--chip); }
+  .filter-btn[aria-pressed="true"] { color: #fff; background: var(--chip); transform: translate(1px, 1px); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
+  .filter-btn[data-c="all"][aria-pressed="true"] { color: var(--text); background: var(--accent); }
+
+  .results-bar {
+    margin: var(--space-5) calc(-1 * var(--gutter)) 0; padding: var(--space-3) var(--gutter);
+    border-bottom: var(--rule) solid var(--text);
+  }
+
+  /* ─ The wall: one masonry flow. Each day's heading sits in the flow ahead of its flyers, so
+     a short day doesn't leave a gap before the next. ─ */
+  .board { display: flex; align-items: flex-start; gap: var(--space-6); }
+  .board .col { flex: 1; min-width: 0; }
+  .day-start { break-inside: avoid; }
+  .day-mark {
+    display: flex; align-items: center; width: fit-content; break-inside: avoid;
+    margin: var(--space-2) 0 var(--space-6); padding: 0 var(--space-2) 0 0;
+    font: var(--display-m); text-transform: uppercase; letter-spacing: 0.5px;
+    background: linear-gradient(transparent 55%, var(--riso-yellow) 55% 92%, transparent 92%);
+  }
+  .day-mark .event-count { margin-left: var(--space-3); padding: var(--space-1) var(--space-2); font: var(--label); color: #fff; background: var(--accent); transform: rotate(4deg); }
+
+  /* ─ Flyers: real paper, pinned or taped up crooked ─ */
+  .flyer {
+    position: relative; display: block; width: 100%; margin: 0 0 var(--space-7); padding: 0;
+    border: 0; background: #fff; break-inside: avoid; cursor: pointer; text-align: left; font: inherit; color: inherit;
+    box-shadow: 0 1px 1px rgba(0,0,0,.12), 2px 6px 10px rgba(40,25,10,.22), 6px 16px 28px rgba(40,25,10,.16);
+    transform: rotate(var(--tilt));
+  }
+  /* Paper sheen: a faint fold of light across the sheet */
+  .flyer::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(115deg, rgba(255,255,255,.18) 0 30%, transparent 45%, rgba(0,0,0,.05) 100%);
+  }
+  .flyer:focus-visible { outline: var(--rule) solid var(--accent); outline-offset: 4px; }
+  .flyer img { display: block; width: 100%; height: auto; min-height: 120px; background: #eee; }
+  .flyer .cap { padding: var(--space-2) var(--space-3) var(--space-3); }
+  .flyer .name { font: var(--title-s); }
+  .flyer .meta { margin-top: 2px; font: var(--meta-s); color: var(--text-muted); }
+  .flyer .meta .more { color: var(--text); font-weight: 700; }
+
+  /* Pushpin, in the flyer's category ink */
+  .pin::before {
+    content: ""; position: absolute; top: -8px; left: calc(50% - 9px); width: 18px; height: 18px; border-radius: 50%; z-index: 3;
+    background: radial-gradient(circle at 35% 32%, rgba(255,255,255,.85) 0 2px, transparent 4px), var(--ink);
+    box-shadow: inset -2px -3px 4px rgba(0,0,0,.35), 2px 4px 3px rgba(0,0,0,.35);
+  }
+  /* Masking tape on two corners, with torn ends */
+  .tape .t1, .tape .t2 {
+    position: absolute; top: -10px; width: 64px; height: 22px; z-index: 3; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,.25), transparent 60%), rgba(226, 212, 168, .88);
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    -webkit-mask: linear-gradient(90deg, transparent 0 1px, #000 1px calc(100% - 1px), transparent 0),
+      conic-gradient(from 135deg at left, transparent 90deg, #000 0) left / 3px 5px repeat-y;
+  }
+  .tape .t1 { left: -16px; transform: rotate(-38deg); }
+  .tape .t2 { right: -16px; transform: rotate(38deg); }
+
+  /* ─ WebGL papers: once a flyer's mesh is drawn, the card keeps its place, shadow, pin and
+     tape, and the canvas behind it draws the paper. ─ */
+  /* The canvas lives in the page and scrolls with it; this layer clips its overscan to the page. */
+  body { position: relative; }
+  #paper-clip { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+  #paper-gl { position: absolute; top: 0; left: 0; will-change: transform; }
+  .lil-gui.root { position: fixed; top: var(--space-3); right: var(--space-3); z-index: 50; }
+  .wall { position: relative; z-index: 1; }
+  .flyer.gl { background: transparent; box-shadow: none; }
+  .flyer.gl > img, .flyer.gl .cap { visibility: hidden; }
+  .flyer.gl::after { display: none; }
+
+  /* ─ Detail: the flyer full size beside its listings ─ */
+  dialog {
+    width: min(920px, calc(100vw - 2 * var(--gutter))); max-height: 90vh; margin: auto; padding: 0;
+    border: var(--rule) solid var(--text); background: var(--card-bg); color: var(--text);
+    box-shadow: var(--shadow-l) var(--shadow-l) 0 var(--accent); overflow: hidden;
+  }
+  dialog::backdrop { background: color-mix(in srgb, var(--text) 70%, transparent); }
+  .detail { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); max-height: 90vh; }
+  .detail img { display: block; width: 100%; max-height: 90vh; object-fit: contain; background: var(--text); }
+  .detail .info { padding: var(--space-5); overflow: auto; }
+  .detail h2 { font: var(--display-m); text-transform: uppercase; margin: 0 var(--space-7) var(--space-4) 0; overflow-wrap: anywhere; }
+  .listing { padding: var(--space-3) 0; border-top: var(--rule) solid var(--text); }
+  .listing .day-name { display: inline-block; padding: 2px var(--space-1); font: var(--label); letter-spacing: 1px; text-transform: uppercase; background: var(--riso-yellow); }
+  .listing .name { margin-top: var(--space-2); font: var(--title); }
+  .listing .meta { margin-top: var(--space-1); font: var(--meta); }
+  .post-link {
+    display: inline-flex; align-items: center; height: var(--h-chip); margin-top: var(--space-4); padding: 0 var(--space-3);
+    border: var(--rule) solid var(--text); background: var(--accent); color: var(--text); text-decoration: none;
+    font: var(--ui); letter-spacing: 0.5px; text-transform: uppercase; box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+  }
+  .post-link:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--text); }
+  .close {
+    position: absolute; top: var(--space-3); right: var(--space-3); z-index: 1; width: var(--h-chip); height: var(--h-chip);
+    border: var(--rule) solid var(--text); background: var(--riso-yellow); box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+    font: var(--ui); font-size: 18px; cursor: pointer;
+  }
+  .empty { margin-top: var(--space-6); font: var(--meta); }
+
+  @media (max-width: 640px) {
+    .board { gap: var(--space-5); }
+    .day-start { break-inside: avoid; }
+  .day-mark { font: var(--display-s, 400 24px/1 "Anton", sans-serif); }
+    .detail { grid-template-columns: 1fr; overflow: auto; }
+    .detail img { max-height: 60vh; }
+  }
+  @media (prefers-reduced-motion: reduce) { .filter-btn { transition: none; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="poster-header">
+    <div class="halftone" aria-hidden="true"></div>
+    <div class="poster-top"><a href="index.html">← List</a><a href="sources.html">Sources ↗</a></div>
+    <h1><span class="l1">Flyer</span><span class="l2">Board</span></h1>
+    <p class="poster-sub">Every flyer posted to a local Instagram, pinned up by date.</p>
+  </header>
+  <div class="filter-group" id="filters"><span class="filter-group-label">What</span></div>
+  <div class="results-bar"><p class="stats" id="stats"></p></div>
+</div>
+<div class="wall-clip"><main class="wall" id="main"></main></div>
+<dialog id="dlg"><button class="close" aria-label="Close" onclick="dlg.close()">×</button><div class="detail" id="detail"></div></dialog>
+<script>
+const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+const asDate = (d) => new Date(d + "T12:00");
+const dayName = (d) => asDate(d).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+// Some sources store a missing time as the string "null".
+const timeOf = (e) => (e.time && e.time !== "null" ? e.time : "");
+const shortDay = (d) => d === today ? "Tonight" : asDate(d).toLocaleDateString("en-US", { weekday: "short" });
+const fmtDay = (d) => d === today ? "Tonight" : dayName(d);
+const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+// "Instagram @colonywoodstockny" -> "@colonywoodstockny"; other sources by venue or name.
+const postedBy = (e) => (e.source || "").match(/@[\w.]+/)?.[0] || e.venue || e.source || "";
+const ink = (cat) => `var(--tag-${cat || "other"})`;
+let flyers = [], filter = "all";
+
+// The scraper sets `image` on events whose Instagram post has a flyer (lib/flyers.mjs).
+fetch("output/events.json").then((r) => r.json()).then((events) => {
+  // One flyer often advertises several events, so group events by image and tape each image up once, on its first upcoming date.
+  const byImg = new Map();
+  for (const e of events) {
+    // Only flyers the scraper hosts: WebGL can't draw images from other sites without CORS.
+    if (!e.image?.startsWith("output/flyers/") || !e.date || e.date < today) continue;
+    if (!byImg.has(e.image)) byImg.set(e.image, { img: e.image, by: postedBy(e), events: [] });
+    byImg.get(e.image).events.push(e);
+  }
+  flyers = [...byImg.values()].map((f) => {
+    f.events.sort((a, b) => (a.date + timeOf(a)).localeCompare(b.date + timeOf(b)));
+    f.date = f.events[0].date;
+    f.seed = Math.abs(hash(f.img));
+    return f;
+  }).sort((a, b) => a.date.localeCompare(b.date));
+  const cats = [...new Set(flyers.flatMap((f) => f.events.map((e) => e.category)))].sort();
+  document.getElementById("filters").insertAdjacentHTML("beforeend", ["all", ...cats].map((c) =>
+    `<button class="filter-btn" data-c="${c}" style="${c === "all" ? "" : `--chip:${ink(c)}`}" aria-pressed="${c === filter}">${c}</button>`).join(""));
+  render();
+});
+
+document.getElementById("filters").addEventListener("click", (ev) => {
+  const c = ev.target.dataset?.c;
+  if (!c) return;
+  filter = c;
+  document.querySelectorAll("#filters button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.c === c));
+  render();
+});
+
+function render() {
+  const shown = flyers.filter((f) => filter === "all" || f.events.some((e) => e.category === filter));
+  const days = shown.reduce((m, f) => m.set(f.date, [...(m.get(f.date) || []), f]), new Map());
+  document.getElementById("stats").textContent = `${shown.length} flyers · ${days.size} days`;
+  document.getElementById("main").innerHTML = shown.length ? `<div class="board">${[...days].map(([day, list]) =>
+    list.map((f, i) => {
+      const e = f.events.find((x) => filter === "all" || x.category === filter);
+      const tilt = ((f.seed % 9) - 4) * 0.5;
+      const taped = f.seed % 3 === 0;
+      // A day's heading travels with its first flyer, so it always sits on top of that day.
+      const heading = i ? "" : `<h2 class="day-mark">${fmtDay(day)}<span class="event-count">${list.length}</span></h2>`;
+      return `${heading ? '<div class="day-start">' + heading : ""}<button class="flyer ${taped ? "tape" : "pin"}" style="--tilt:${tilt}deg;--ink:${ink(e.category)}" data-img="${esc(f.img)}">
+        ${taped ? '<span class="t1"></span><span class="t2"></span>' : ""}
+        <img src="${esc(f.img)}" alt="${esc(e.name)} flyer" onerror="this.closest('.flyer').remove()">
+        <div class="cap">
+          <div class="name">${esc(e.name)}</div>
+          <div class="meta">${esc([shortDay(e.date) + (timeOf(e) ? " " + timeOf(e) : ""), e.town].filter(Boolean).join(" · "))}${f.events.length > 1 ? ` · <span class="more">+${f.events.length - 1} more</span>` : ""}</div>
+        </div>
+      </button>${heading ? "</div>" : ""}`;
+    }).join("")).join("")}</div>` : `<div class="container"><p class="empty">Nothing pinned up for that yet.</p></div>`;
+  items = [...document.querySelectorAll(".board > *")];
+  layout();
+  // Images arrive with unknown heights, so settle the columns again as each one loads.
+  items.forEach((el) => el.querySelector("img")?.addEventListener("load", () => { scheduleLayout(); window.paperSync?.(); }, { once: true }));
+  window.paperSync?.();
+}
+
+// Masonry in reading order: each item, in date order, goes to whichever column is shortest,
+// so dates run left to right across the wall and a short day leaves no gap.
+let items = [], pending = 0, lastCols = 0;
+function layout() {
+  const board = document.querySelector(".board");
+  if (!board) return;
+  const n = Math.max(2, Math.floor((board.clientWidth + 32) / 252));
+  const cols = Array.from({ length: n }, () => Object.assign(document.createElement("div"), { className: "col" }));
+  board.replaceChildren(...cols);
+  lastCols = n;
+  for (const el of items) {
+    const shortest = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
+    shortest.append(el);
+  }
+}
+function scheduleLayout() { cancelAnimationFrame(pending); pending = requestAnimationFrame(layout); }
+addEventListener("resize", scheduleLayout);
+
+document.getElementById("main").addEventListener("click", (ev) => {
+  const card = ev.target.closest(".flyer");
+  if (!card) return;
+  const f = flyers.find((x) => x.img === card.dataset.img);
+  document.getElementById("detail").innerHTML = `
+    <img src="${esc(f.img)}" alt="">
+    <div class="info">
+      <h2>${esc(f.by)}</h2>
+      ${f.events.map((e) => `<div class="listing">
+        <span class="day-name">${dayName(e.date)}${timeOf(e) ? ` · ${esc(timeOf(e))}` : ""}</span>
+        <div class="name">${esc(e.name)}</div>
+        <div class="meta">${esc([e.venue, e.town].filter(Boolean).join(", "))}</div>
+      </div>`).join("")}
+      <a class="post-link" href="${esc(f.events[0].url)}" target="_blank" rel="noopener">See the post ↗</a>
+    </div>`;
+  dlg.showModal();
+});
+dlg.addEventListener("click", (ev) => { if (ev.target === dlg) dlg.close(); });
+</script>
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20.0/dist/lil-gui.esm.min.js"
+} }</script>
+<script type="module">
+// Experimental: each flyer is drawn as a sheet of paper in WebGL that flaps in the breeze and
+// lifts as you scroll or hover. The top of the sheet is held still, under the pin or tape.
+import * as THREE from "three";
+
+// Every tunable, with the dev panel's ranges. Values the shaders read are uniforms, shared by all sheets.
+const DEFAULTS = {
+  held: 10,            // px at the top that never move
+  breezeBase: 7, breezeAmp: 5, breezeSpeed: 0.8,
+  gust: 12, gustEvery: 0.31,
+  ripple: 0.15, twist: 5,
+  lean: 0.45, corner: 2, cornerScroll: 0.12,
+  scrollLift: 0.045, scrollLiftMax: 80, scrollSmoothing: 12, liftRise: 12, liftSettle: 0.75, liftWave: 0.35, liftVariety: 0.65,
+  hoverLift: 30, hoverSide: 1.5, hoverSideEase: 8, springK: 40, springDamping: 5,
+  swingBreeze: 0.005, swingScroll: 0.000015, swingMax: 0.025, swingStiffness: 9, swingDamping: 2.2,
+  shade: 0.6, sheen: 0.24,
+  shadowOpacity: 0.30, shadowBlur: 7, shadowX: 2, shadowY: 6, shadowDrift: 0.5,
+  edgeX: 0.7, edgeY: 1, edgeDepth: 1, edgeColor: "#ccc4b5",
+};
+const RANGES = {
+  held: [0, 40, 1],
+  breezeBase: [0, 30, 0.5], breezeAmp: [0, 20, 0.5], breezeSpeed: [0, 3, 0.05],
+  gust: [0, 40, 0.5], gustEvery: [0.05, 1, 0.01],
+  ripple: [0, 0.6, 0.01], twist: [0, 20, 0.5],
+  lean: [0, 1.5, 0.01], corner: [0, 20, 0.5], cornerScroll: [0, 1, 0.01],
+  scrollLift: [0, 0.2, 0.001], scrollLiftMax: [0, 200, 1], scrollSmoothing: [1, 40, 1], liftRise: [1, 60, 0.5], liftSettle: [0.1, 10, 0.05], liftWave: [0, 1.5, 0.01], liftVariety: [0, 1, 0.01],
+  hoverLift: [0, 100, 1], hoverSide: [0, 3, 0.05], hoverSideEase: [1, 30, 0.5], springK: [5, 200, 1], springDamping: [0.5, 30, 0.5],
+  swingBreeze: [0, 0.05, 0.001], swingScroll: [0, 0.0001, 0.000001], swingMax: [0, 0.2, 0.001], swingStiffness: [1, 40, 0.5], swingDamping: [0.2, 10, 0.1],
+  shade: [0, 2, 0.05], sheen: [0, 0.5, 0.01],
+  shadowOpacity: [0, 0.8, 0.01], shadowBlur: [0, 30, 0.5], shadowX: [-20, 20, 0.5], shadowY: [-20, 30, 0.5], shadowDrift: [0, 2, 0.05],
+  edgeX: [-4, 4, 0.1], edgeY: [-4, 4, 0.1], edgeDepth: [0, 6, 0.1],
+};
+const STORE = "flyer-board-tunables";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(STORE)) || {}; } catch {}
+const P = { ...DEFAULTS, ...saved };
+
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let renderer;
+try { if (!reduced) renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); } catch {}
+if (renderer) start();
+
+function start() {
+  const FOV = 30;
+  // The canvas scrolls with the page (the browser moves it with the cards, with no frame of lag) and
+  // reaches PAD px past each edge of the viewport, so a fast scroll doesn't outrun what's drawn.
+  const PAD = 400;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace; // the texture is already in screen colors
+  const clip = Object.assign(document.createElement("div"), { id: "paper-clip" });
+  renderer.domElement.id = "paper-gl";
+  clip.append(renderer.domElement);
+  document.body.prepend(clip);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 10, 10000);
+  let viewW = 0, viewH = 0;
+
+  // A camera placed so the z = 0 plane maps 1:1 onto CSS pixels.
+  function resize() {
+    viewW = document.documentElement.clientWidth;
+    viewH = innerHeight + 2 * PAD;
+    renderer.setSize(viewW, viewH);
+    camera.aspect = viewW / viewH;
+    camera.position.z = (viewH / 2) / Math.tan(THREE.MathUtils.degToRad(FOV / 2));
+    camera.updateProjectionMatrix();
+  }
+  addEventListener("resize", resize);
+  resize();
+
+  // Shader tunables, one uniform per value, shared by reference across every material.
+  const G = { uTime: { value: 0 } };
+  const SHADER_KEYS = ["held", "breezeBase", "breezeAmp", "breezeSpeed", "gust", "gustEvery", "ripple", "twist", "lean", "corner", "cornerScroll",
+    "shade", "sheen", "shadowOpacity", "shadowBlur", "shadowX", "shadowY", "shadowDrift", "edgeX", "edgeY", "edgeDepth"];
+  const uName = (k) => "u_" + k;
+  for (const k of SHADER_KEYS) G[uName(k)] = { value: P[k] };
+  G.u_edgeColor = { value: new THREE.Color(P.edgeColor) };
+  const decl = SHADER_KEYS.map((k) => `uniform float ${uName(k)};`).join("\n") + "\nuniform vec3 u_edgeColor;\nuniform float uTime;";
+
+  // How far (px, toward the viewer) the sheet at this point has lifted. Shared by paper, edge and shadow.
+  const flap = `
+    ${decl}
+    uniform float uW, uH, uPhase, uLift, uSide;
+    float fromTopOf(vec3 p) { return uH * 0.5 - p.y; }
+    float liftAt(vec3 p) {
+      float fromTop = fromTopOf(p);
+      float f = clamp((fromTop - u_held) / max(uH - u_held, 1.0), 0.0, 1.0);
+      float bend = f * f;
+      // An idle breeze with an occasional gust, a travelling ripple, and a sideways twist so corners
+      // don't move in lockstep.
+      float gust = pow(max(0.0, sin(uTime * u_gustEvery + uPhase * 2.3)), 6.0) * u_gust;
+      float breeze = u_breezeBase + u_breezeAmp * sin(uTime * u_breezeSpeed + uPhase) + gust;
+      float ripple = (1.0 - u_ripple) + u_ripple * sin(uTime * 2.3 + uPhase + f * 4.0);
+      float twist = (clamp(p.x, -uW * 0.5, uW * 0.5) / uW) * sin(uTime * 1.1 + uPhase * 1.7) * (0.35 * uLift + u_twist + gust * 0.4);
+      // Each sheet leans its own way: uSide -1 curls from the left, 1 from the right, 0 lifts evenly.
+      float across = clamp(p.x / (uW * 0.5), -1.0, 1.0);
+      float lean = max(0.0, 1.0 + uSide * across * u_lean);
+      float corner = pow(max(0.0, across * sign(uSide)), 2.0) * abs(uSide) * bend * (u_corner + uLift * u_cornerScroll);
+      return max(0.0, bend * ((breeze + uLift) * ripple * lean + twist) + corner);
+    }`;
+  const vertexShader = `
+    ${flap}
+    uniform float uEdge;
+    varying vec2 vUv;
+    varying vec3 vPos;
+    void main() {
+      vUv = uv;
+      vec3 p = position;
+      float z = liftAt(p);
+      p.z += z;
+      // The sheet doesn't stretch: lifting the bottom out pulls it up a little.
+      p.y += z * z / (2.0 * max(fromTopOf(position), 1.0));
+      // The paper's edge: the same sheet just behind, nudged away from the light.
+      p += uEdge * vec3(u_edgeX, -u_edgeY, -u_edgeDepth);
+      vPos = (modelMatrix * vec4(p, 1.0)).xyz;
+      gl_Position = projectionMatrix * viewMatrix * vec4(vPos, 1.0);
+    }`;
+  const lighting = `
+    vec3 normalHere() { return normalize(cross(dFdx(vPos), dFdy(vPos))); }
+    const vec3 LIGHT = normalize(vec3(-0.35, 0.6, 1.0));
+    float diffuseHere(vec3 n) { return 1.0 + u_shade * (dot(n, LIGHT) - LIGHT.z); }`;
+  const fragmentShader = `
+    ${decl}
+    uniform sampler2D uMap;
+    varying vec2 vUv;
+    varying vec3 vPos;
+    ${lighting}
+    void main() {
+      vec3 n = normalHere();
+      float spec = pow(max(dot(reflect(-LIGHT, n), vec3(0.0, 0.0, 1.0)), 0.0), 24.0) * u_sheen * (1.0 - n.z) * 8.0;
+      vec4 c = texture2D(uMap, vUv);
+      gl_FragColor = vec4(c.rgb * diffuseHere(n) + spec, c.a);
+    }`;
+  // The edge is plain paper stock, lit like the sheet.
+  const edgeFragment = `
+    ${decl}
+    varying vec2 vUv;
+    varying vec3 vPos;
+    ${lighting}
+    void main() { gl_FragColor = vec4(u_edgeColor * diffuseHere(normalHere()), 1.0); }`;
+  // The shadow lies on the board: it slides down-right and softens where the sheet above lifts.
+  const shadowVertex = `
+    ${flap}
+    varying vec2 vLocal;
+    varying float vLiftHere;
+    void main() {
+      vLocal = position.xy;
+      vLiftHere = liftAt(position);
+      vec3 p = position;
+      p.xy += vec2(u_shadowX, -u_shadowY) + vec2(0.6, -1.0) * u_shadowDrift * vLiftHere;
+      gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(p, 1.0);
+    }`;
+  const shadowFragment = `
+    ${decl}
+    uniform float uW, uH;
+    varying vec2 vLocal;
+    varying float vLiftHere;
+    void main() {
+      vec2 d = abs(vLocal) - vec2(uW, uH) * 0.5;
+      float dist = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+      float blur = u_shadowBlur + vLiftHere * 0.6;
+      float a = u_shadowOpacity * (1.0 - min(vLiftHere, 80.0) / 120.0) * (1.0 - smoothstep(-blur, blur, dist));
+      gl_FragColor = vec4(0.16, 0.10, 0.04, a);
+    }`;
+
+  const papers = new Map(); // flyer element -> { mesh, shadow, edge, w, h, lift, vel, theta, omega, hover }
+
+  // The card as it looks in the page, painted onto a canvas: white sheet, flyer image, caption.
+  function paint(el, w, h) {
+    const img = el.querySelector("img");
+    const scale = renderer.getPixelRatio() * 1.5;
+    const c = document.createElement("canvas");
+    c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+    const g = c.getContext("2d");
+    g.scale(scale, scale);
+    g.fillStyle = "#fff"; g.fillRect(0, 0, w, h);
+    g.drawImage(img, 0, 0, w, img.offsetHeight);
+    const cap = el.querySelector(".cap");
+    const left = 12, width = w - 24;
+    let y = cap.offsetTop + 8;
+    const runs = (node, font, color) => [...node.childNodes].flatMap((n) =>
+      n.nodeType === 3 ? [{ text: n.textContent, font, color }] : runs(n, n.classList.contains("more") ? font.replace("400", "700") : font, n.classList.contains("more") ? "#121212" : color));
+    const write = (tokens, lineHeight) => {
+      let x = 0;
+      y += lineHeight * 0.78;
+      for (const { text, font, color } of tokens) {
+        g.font = font; g.fillStyle = color;
+        for (const word of text.split(/(\s+)/)) {
+          if (!word) continue;
+          const wWidth = g.measureText(word).width;
+          if (x + wWidth > width && x > 0 && word.trim()) { x = 0; y += lineHeight; }
+          if (x === 0 && !word.trim()) continue;
+          g.fillText(word, left + x, y);
+          x += wWidth;
+        }
+      }
+      y += lineHeight * 0.22;
+    };
+    write([{ text: cap.querySelector(".name").textContent, font: '700 13px "Archivo"', color: "#121212" }], 16.25);
+    y += 2;
+    write(runs(cap.querySelector(".meta"), '400 11px "Space Mono"', "#474440"), 15.4);
+    // Paper sheen, as on the CSS card
+    const sheen = g.createLinearGradient(0, 0, w, h * 0.6);
+    sheen.addColorStop(0, "rgba(255,255,255,.18)"); sheen.addColorStop(0.3, "rgba(255,255,255,.18)");
+    sheen.addColorStop(0.45, "rgba(255,255,255,0)"); sheen.addColorStop(1, "rgba(0,0,0,.05)");
+    g.fillStyle = sheen; g.fillRect(0, 0, w, h);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.NoColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return tex;
+  }
+
+  function dispose(p) {
+    scene.remove(p.mesh);
+    p.mesh.geometry.dispose(); p.shadow.geometry.dispose();
+    p.mesh.material.dispose(); p.shadow.material.dispose(); p.edge.material.dispose();
+    p.mesh.material.uniforms.uMap.value.dispose();
+  }
+
+  // A random lean per sheet: about a third curl from each side, the rest lift more evenly.
+  function sideFor(seed) {
+    const r = ((Math.abs(seed) * 9301 + 49297) % 233280) / 233280;
+    return r < 0.35 ? -(0.6 + r) : r > 0.65 ? 0.6 + (r - 0.65) : (r - 0.5) * 1.5;
+  }
+
+  function build(el) {
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const old = papers.get(el);
+    if (old) dispose(old);
+    const seed = Math.abs([...el.dataset.img].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7));
+    const own = { uMap: { value: paint(el, w, h) }, uW: { value: w }, uH: { value: h }, uPhase: { value: (seed % 628) / 100 }, uLift: { value: 0 }, uSide: { value: sideFor(seed) } };
+    const mat = (vs, fs, extra = {}) => new THREE.ShaderMaterial({ vertexShader: vs, fragmentShader: fs, transparent: true, depthTest: false, uniforms: { ...G, ...own, ...extra } });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h, 12, Math.max(16, Math.round(h / 12))), mat(vertexShader, fragmentShader, { uEdge: { value: 0 } }));
+    const M = 48; // room around the sheet for the shadow to spread into
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(w + 2 * M, h + 2 * M, 12, Math.max(16, Math.round(h / 12))), mat(shadowVertex, shadowFragment));
+    // Same geometry as the sheet, drawn between shadow and sheet.
+    const edge = new THREE.Mesh(mesh.geometry, mat(vertexShader, edgeFragment, { uEdge: { value: 1 } }));
+    for (const m of [mesh, shadow, edge]) m.frustumCulled = false;
+    mesh.add(shadow, edge);
+    scene.add(mesh);
+    // Pinned sheets swing about the pin; taped ones can't. Each swings its own way first.
+    const swing = { pinned: el.classList.contains("pin"), swingDir: Math.sign(sideFor(seed)) || 1 };
+    const side = sideFor(seed);
+    // Per-sheet traits in 0..1, so sheets catch the air by different amounts and at different speeds.
+    const trait = (n) => ((seed * (n * 7919 + 1)) % 1000) / 1000;
+    papers.set(el, { ...(old || { lift: 0, vel: 0, hover: false, theta: 0, omega: 0, side, across: 0, env: 0 }), catchAir: trait(1), riseJitter: trait(2), settleJitter: trait(3), ...swing, mesh, shadow, edge, own, w, h, baseSide: side, kJitter: seed % 30, phase: (seed % 628) / 100 });
+    if (!old) {
+      // Hovering curls the corner nearest the pointer: across runs -1 (left edge) to 1 (right edge).
+      const point = (e) => {
+        const p = papers.get(el), r = el.getBoundingClientRect();
+        if (p) p.across = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+      };
+      el.addEventListener("pointerenter", (e) => { point(e); papers.get(el) && (papers.get(el).hover = true); });
+      el.addEventListener("pointermove", point);
+      el.addEventListener("pointerleave", () => { papers.get(el) && (papers.get(el).hover = false); });
+    }
+    el.classList.add("gl");
+  }
+
+  // Match meshes to the flyers on the page: new ones once their image has loaded, gone ones disposed.
+  function sync() {
+    for (const [el, p] of papers) if (!el.isConnected) { dispose(p); papers.delete(el); }
+    for (const el of document.querySelectorAll(".flyer")) {
+      const img = el.querySelector("img");
+      if (!img.complete || !img.naturalWidth) continue;
+      const p = papers.get(el);
+      if (!p || p.w !== el.offsetWidth || p.h !== el.offsetHeight) build(el);
+    }
+  }
+  window.paperSync = () => document.fonts.ready.then(sync);
+  window.paperSync();
+  addEventListener("resize", () => setTimeout(window.paperSync, 100));
+
+  let lastY = scrollY, lastT = performance.now(), speed = 0, dir = 1;
+  const history = []; // recent { t, goal } samples, so the lift can travel across the screen as a wave
+  renderer.setAnimationLoop((now) => {
+    const dt = Math.min((now - lastT) / 1000, 0.05);
+    lastT = now;
+    const y0 = scrollY;
+    const instant = Math.abs(y0 - lastY) / Math.max(dt, 1e-3);
+    if (y0 !== lastY) dir = Math.sign(y0 - lastY);
+    lastY = y0;
+    speed += (instant - speed) * Math.min(1, dt * P.scrollSmoothing);
+    history.push({ t: now, goal: Math.min(speed * P.scrollLift, P.scrollLiftMax) });
+    while (history.length > 2 && now - history[1].t > P.liftWave * 1000 + 100) history.shift();
+    const goalAt = (delay) => {
+      const t = now - delay * 1000;
+      for (let i = history.length - 1; i >= 0; i--) if (history[i].t <= t) return history[i].goal;
+      return history[0].goal;
+    };
+    // Pin the canvas to this frame's scroll position, in page coordinates.
+    const top = y0 - PAD;
+    renderer.domElement.style.transform = `translate3d(0, ${top}px, 0)`;
+    G.uTime.value = now / 1000;
+    const t = now / 1000;
+    for (const [el, p] of papers) {
+      const r = el.getBoundingClientRect();
+      const onScreen = r.bottom > -PAD && r.top < innerHeight + PAD;
+      p.mesh.visible = onScreen;
+      if (!onScreen) continue;
+      // An underdamped spring toward a lift set by scroll speed and hover, so sheets bob after you stop.
+      // The lift reaches each sheet as a wave: scrolling down, it starts at the top of the screen
+      // and travels down (and the reverse scrolling up). Each sheet then follows it at its own
+      // rate and by its own amount, rising fast and settling slow.
+      const down = Math.min(1, Math.max(0, (r.top + r.height / 2) / innerHeight));
+      const goal = goalAt(P.liftWave * (dir > 0 ? down : 1 - down)) * (1 - P.liftVariety * (1 - p.catchAir));
+      const rate = goal > p.env ? P.liftRise * (0.5 + p.riseJitter) : P.liftSettle * (0.6 + 0.8 * p.settleJitter);
+      p.env += (goal - p.env) * Math.min(1, dt * rate);
+      const target = p.env + (p.hover ? P.hoverLift : 0);
+      p.vel += ((P.springK + p.kJitter) * (target - p.lift) - P.springDamping * p.vel) * dt;
+      p.lift += p.vel * dt;
+      // Follow the card's CSS tilt.
+      const m = new DOMMatrix(getComputedStyle(el).transform);
+      const scale = Math.hypot(m.a, m.b);
+      const tilt = -Math.atan2(m.b, m.a);
+      // Card centre in canvas coordinates (the canvas starts PAD px above the viewport).
+      let cx = r.left + r.width / 2 - viewW / 2, cy = viewH / 2 - (r.top + PAD + r.height / 2);
+      if (p.pinned) {
+        // A slow pendulum: the breeze rocks it, scrolling pushes it aside, and it overshoots as it settles.
+        const swingTarget = p.swingDir * Math.min(speed * P.swingScroll, P.swingMax) + P.swingBreeze * (Math.sin(t * 0.6 + p.phase) + 0.4 * Math.sin(t * 1.7 + p.phase * 3));
+        p.omega += (P.swingStiffness * (swingTarget - p.theta) - P.swingDamping * p.omega) * dt;
+        p.theta += p.omega * dt;
+        // Rotate about the pin at the top centre rather than the sheet's middle.
+        const half = (p.h / 2) * scale;
+        const px = cx - half * Math.sin(tilt), py = cy + half * Math.cos(tilt);
+        cx = px + half * Math.sin(tilt + p.theta);
+        cy = py - half * Math.cos(tilt + p.theta);
+      }
+      p.mesh.rotation.z = tilt + (p.pinned ? p.theta : 0);
+      p.mesh.scale.set(scale, scale, 1);
+      p.mesh.position.set(cx, cy, 0);
+      // All shadows first, then edges and sheets; a hovered sheet last, so it lifts over its neighbours.
+      p.shadow.renderOrder = p.hover ? 1 : 0;
+      p.edge.renderOrder = p.hover ? 2.5 : 1.5;
+      p.mesh.renderOrder = p.hover ? 3 : 2;
+      p.own.uLift.value = Math.max(0, p.lift);
+      // The lean eases toward the pointer while hovered, and back to the sheet's own lean after.
+      const sideGoal = p.hover ? p.across * P.hoverSide : p.baseSide;
+      p.side += (sideGoal - p.side) * Math.min(1, dt * P.hoverSideEase);
+      p.own.uSide.value = p.side;
+    }
+    renderer.render(scene, camera);
+  });
+
+  // The dev panel is for tuning: opened by ?dev in the URL or the ` key, never shown otherwise.
+  let panel = new URLSearchParams(location.search).has("dev") ? devPanel(G) : null;
+  addEventListener("keydown", async (e) => {
+    if (e.key !== "`") return;
+    if (!panel) panel = devPanel(G);
+    else (await panel).show((await panel)._hidden);
+  });
+}
+
+// ─ Dev panel: lil-gui sliders for every tunable. Values persist in this browser. ─
+async function devPanel(G) {
+  const { default: GUI } = await import("lil-gui");
+  const gui = new GUI({ title: "Paper tunables  ( ` to hide )", width: 300 });
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(P)); } catch {} };
+  const apply = (k) => {
+    if (k === "edgeColor") G.u_edgeColor.value.set(P.edgeColor);
+    else if (G["u_" + k]) G["u_" + k].value = P[k];
+    save();
+  };
+  const folders = {
+    "Breeze": ["breezeBase", "breezeAmp", "breezeSpeed", "gust", "gustEvery", "ripple", "twist", "held"],
+    "Curl": ["lean", "corner", "cornerScroll"],
+    "Scroll & hover lift": ["scrollLift", "scrollLiftMax", "scrollSmoothing", "liftRise", "liftSettle", "liftWave", "liftVariety", "hoverLift", "hoverSide", "hoverSideEase", "springK", "springDamping"],
+    "Pin swing": ["swingBreeze", "swingScroll", "swingMax", "swingStiffness", "swingDamping"],
+    "Light & shadow": ["shade", "sheen", "shadowOpacity", "shadowBlur", "shadowX", "shadowY", "shadowDrift"],
+    "Paper edge": ["edgeX", "edgeY", "edgeDepth"],
+  };
+  for (const [name, keys] of Object.entries(folders)) {
+    const f = gui.addFolder(name);
+    for (const k of keys) f.add(P, k, ...RANGES[k]).onChange(() => apply(k));
+    if (name === "Paper edge") f.addColor(P, "edgeColor").onChange(() => apply("edgeColor"));
+    if (name !== "Breeze") f.close();
+  }
+  gui.add({ copy: () => navigator.clipboard.writeText(JSON.stringify(P, null, 2)) }, "copy").name("Copy values");
+  gui.add({ reset: () => { Object.assign(P, DEFAULTS); for (const k in P) apply(k); gui.controllersRecursive().forEach((c) => c.updateDisplay()); } }, "reset").name("Reset to defaults");
+  return gui;
+}
+</script>
+</body>
+</html>

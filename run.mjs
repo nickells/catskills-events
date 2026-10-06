@@ -18,6 +18,7 @@ import { detectTextAtUrl } from "./lib/google-vision.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
 import { findOrganizerLeads, organizerSite } from "./lib/leads.mjs";
 import { discoverCalendars, readCalendar } from "./lib/calendars.mjs";
+import { attachFlyers, postImages } from "./lib/flyers.mjs";
 import {
   createMetaProfileLookup,
   fetchInstagramProfiles,
@@ -696,6 +697,14 @@ async function main() {
   // Output
   const markdown = formatEvents(deduped);
   const json = formatJSON(deduped);
+
+  // Flyer images for the flyer board, kept in output/flyers between runs
+  console.log(`\n--- Flyers ---`);
+  try {
+    await attachFlyers(json, postImages(scrapeCache));
+  } catch (err) {
+    console.error(`  ✗ Error attaching flyers: ${err.message}`);
+  }
 
   writeFileSync(`${OUTPUT_DIR}/events.md`, markdown);
   writeFileSync(`${OUTPUT_DIR}/events.json`, JSON.stringify(json, null, 2));
