@@ -13,7 +13,8 @@ import { cleanEvent } from "./lib/clean.mjs";
 import { extractJsonLdEvents } from "./lib/jsonld.mjs";
 import { mentionsForPosts, resolveTaggedPlaces, taggedPlaceLines } from "./lib/tagged.mjs";
 import { WEB_SOURCES, INSTAGRAM_SOURCES } from "./lib/sources.mjs";
-import { findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
+import { clearUnanchoredDates, findPostForEvent, resolveInstagramRelativeDates } from "./lib/relative-date.mjs";
+import { detectTextAtUrl } from "./lib/google-vision.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
 import {
   createMetaProfileLookup,
@@ -22,6 +23,7 @@ import {
   recordInstagramPoll,
   extractPostEvents,
   prunePostEvents,
+  withFlyerText,
 } from "./lib/instagram.mjs";
 
 const KNOWN_TOWNS = new Set(
@@ -394,7 +396,8 @@ async function handleInstagram(profiles, tagging) {
       continue;
     }
 
-    const posts = await withTaggedPlaces(profile, tagging);
+    const tagged = await withTaggedPlaces(profile, tagging);
+    const posts = await withFlyerText(tagged, { ocr: (url) => detectTextAtUrl(url), cache: scrapeCache, log: console.log });
     const { events, extracted, failed } = await extractPostEvents(
       posts,
       (text) => extractEvents(text, `Instagram @${profile.handle}`, { pageTitle: `Instagram: @${profile.handle}`, h1: profile.handle }),
@@ -404,15 +407,16 @@ async function handleInstagram(profiles, tagging) {
     console.log(`  @${profile.handle} — ${events.length} events from ${profile.posts.length} posts (${extracted} extracted${failed ? `, ${failed} failed` : ""})`);
 
     // Interpret relative phrases against the post timestamp, then do calendar math in code.
-    await resolveInstagramRelativeDates(events, profile.posts, scrapeCache);
+    const { anchored } = await resolveInstagramRelativeDates(events, posts, scrapeCache);
+    clearUnanchoredDates(events, posts, anchored);
 
-    // OCR flyer images for events missing date or venue
-    const needsOcr = events.filter((e) => !e.date || !e.venue);
+    // OCR flyer images for events missing date or venue, unless extraction already saw the flyer
+    const needsOcr = events.filter((e) => (!e.date || !e.venue) && findPostForEvent(e, posts)?.flyerText == null);
     if (needsOcr.length) {
       console.log(`    → OCR pass for ${needsOcr.length} incomplete event(s)`);
       for (const e of needsOcr) {
         try {
-          const post = findPostForEvent(e, profile.posts);
+          const post = findPostForEvent(e, posts);
           if (!post?.displayUrl) continue;
           const patched = await ocrEventImage(post.displayUrl, e);
           for (const [key, val] of Object.entries(patched)) {
@@ -432,7 +436,7 @@ async function handleInstagram(profiles, tagging) {
     if (stillIncomplete.length) {
       for (const e of stillIncomplete) {
         try {
-          const post = findPostForEvent(e, profile.posts);
+          const post = findPostForEvent(e, posts);
           if (!post?.caption) continue;
           const urlMatch = post.caption.match(/https?:\/\/[^\s)]+|(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s)]*)?/i);
           if (!urlMatch) continue;
