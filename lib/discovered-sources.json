@@ -188,5 +188,67 @@
         "dvartsalliance"
       ]
     }
+  ],
+  "calendars": [
+    {
+      "name": "Stissing Center",
+      "url": "http://thestissingcenter.org/events-list",
+      "calendar": "squarespace",
+      "venue": "Stissing Center",
+      "town": "Pine Plains",
+      "addedAt": "2026-10-07",
+      "foundVia": "@stissingcenter"
+    },
+    {
+      "name": "Arrowood Farms",
+      "url": "http://www.arrowoodfarms.com/event-calendar",
+      "calendar": "squarespace",
+      "venue": "Arrowood Farms",
+      "town": "Accord",
+      "addedAt": "2026-10-07",
+      "foundVia": "@arrowoodfarms"
+    },
+    {
+      "name": "Subversive Malting + Brewing",
+      "url": "https://drinksubversive.com/events-1",
+      "calendar": "squarespace",
+      "venue": "Subversive Malting + Brewing",
+      "town": "Catskill",
+      "addedAt": "2026-10-07",
+      "foundVia": "@subversivebeer"
+    },
+    {
+      "name": "phoeniciany.com",
+      "url": "https://phoeniciany.com/",
+      "calendar": "tribe",
+      "town": "Phoenicia",
+      "addedAt": "2026-10-07",
+      "foundVia": "@phoenicianys"
+    },
+    {
+      "name": "sullivancatskills.com",
+      "url": "https://sullivancatskills.com/",
+      "calendar": "tribe",
+      "addedAt": "2026-10-07",
+      "foundVia": "@sullivancatskills"
+    },
+    {
+      "name": "Dear Native Grapes",
+      "url": "https://www.dearnativegrapes.com/events",
+      "calendar": "squarespace",
+      "venue": "Dear Native Grapes",
+      "town": "Walton",
+      "addedAt": "2026-10-07",
+      "foundVia": "@dear.native.grapes"
+    },
+    {
+      "name": "Wayside Cider",
+      "url": "https://www.waysidecider.com/events-1",
+      "calendar": "squarespace",
+      "venue": "Wayside Cider",
+      "town": "Andes",
+      "addedAt": "2026-10-07",
+      "foundVia": "@wayside_cider"
+    }
   ]
 }
