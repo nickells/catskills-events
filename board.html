@@ -112,10 +112,8 @@
     box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--chip);
     transition: transform 0.1s, box-shadow 0.1s;
   }
-  .filter-btn[data-c="all"] { border-radius: 999px; font: var(--ui); letter-spacing: 0.5px; background: var(--card-bg); }
   .filter-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--chip); }
   .filter-btn[aria-pressed="true"] { color: #fff; background: var(--chip); transform: translate(1px, 1px); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
-  .filter-btn[data-c="all"][aria-pressed="true"] { color: var(--text); background: var(--accent); }
 
   .results-bar {
     margin: var(--space-5) calc(-1 * var(--gutter)) 0; padding: var(--space-3) var(--gutter);
@@ -246,8 +244,15 @@ const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 // "Instagram @colonywoodstockny" -> "@colonywoodstockny"; other sources by venue or name.
 const postedBy = (e) => (e.source || "").match(/@[\w.]+/)?.[0] || e.venue || e.source || "";
+// Same order and labels as the What filters on index.html.
+const CATEGORY_LABELS = {
+  music: "Music", food: "Food & Drink", culture: "Arts & Culture", nature: "Nature",
+  community: "Community", nightlife: "Nightlife", wellness: "Wellness", other: "Other",
+};
 const ink = (cat) => `var(--tag-${cat || "other"})`;
-let flyers = [], filter = "all";
+// Selected categories; none selected shows every flyer, like the What filters on index.html.
+let flyers = [], active = new Set();
+const matches = (e) => !active.size || active.has(e.category);
 
 // The scraper sets `image` on events whose Instagram post has a flyer (lib/flyers.mjs).
 fetch("output/events.json").then((r) => r.json()).then((events) => {
@@ -265,27 +270,29 @@ fetch("output/events.json").then((r) => r.json()).then((events) => {
     f.seed = Math.abs(hash(f.img));
     return f;
   }).sort((a, b) => a.date.localeCompare(b.date));
-  const cats = [...new Set(flyers.flatMap((f) => f.events.map((e) => e.category)))].sort();
-  document.getElementById("filters").insertAdjacentHTML("beforeend", ["all", ...cats].map((c) =>
-    `<button class="filter-btn" data-c="${c}" style="${c === "all" ? "" : `--chip:${ink(c)}`}" aria-pressed="${c === filter}">${c}</button>`).join(""));
+  const present = new Set(flyers.flatMap((f) => f.events.map((e) => e.category)));
+  const cats = Object.keys(CATEGORY_LABELS).filter((c) => present.has(c));
+  document.getElementById("filters").insertAdjacentHTML("beforeend", cats.map((c) =>
+    `<button class="filter-btn" data-c="${c}" style="--chip:${ink(c)}" aria-pressed="false">${CATEGORY_LABELS[c]}</button>`).join(""));
   render();
 });
 
 document.getElementById("filters").addEventListener("click", (ev) => {
   const c = ev.target.dataset?.c;
   if (!c) return;
-  filter = c;
-  document.querySelectorAll("#filters button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.c === c));
+  if (active.has(c)) active.delete(c);
+  else active.add(c);
+  ev.target.setAttribute("aria-pressed", active.has(c));
   render();
 });
 
 function render() {
-  const shown = flyers.filter((f) => filter === "all" || f.events.some((e) => e.category === filter));
+  const shown = flyers.filter((f) => f.events.some(matches));
   const days = shown.reduce((m, f) => m.set(f.date, [...(m.get(f.date) || []), f]), new Map());
   document.getElementById("stats").textContent = `${shown.length} flyers · ${days.size} days`;
   document.getElementById("main").innerHTML = shown.length ? `<div class="board">${[...days].map(([day, list]) =>
     list.map((f, i) => {
-      const e = f.events.find((x) => filter === "all" || x.category === filter);
+      const e = f.events.find(matches);
       const tilt = ((f.seed % 9) - 4) * 0.5;
       const taped = f.seed % 3 === 0;
       // A day's heading travels with its first flyer, so it always sits on top of that day.
