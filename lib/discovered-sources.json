@@ -209,6 +209,15 @@
       "foundVia": "@arrowoodfarms"
     },
     {
+      "name": "Catskill Pines",
+      "url": "http://www.catskillpines.com/events",
+      "calendar": "squarespace",
+      "venue": "Catskill Pines",
+      "town": "Mt Tremper",
+      "addedAt": "2026-10-08",
+      "foundVia": "@catskillpines"
+    },
+    {
       "name": "Subversive Malting + Brewing",
       "url": "https://drinksubversive.com/events-1",
       "calendar": "squarespace",
@@ -233,6 +242,20 @@
       "foundVia": "@sullivancatskills"
     },
     {
+      "name": "ucitalianamericanfoundation.org",
+      "url": "https://ucitalianamericanfoundation.org/",
+      "calendar": "tribe",
+      "addedAt": "2026-10-08",
+      "foundVia": "event link"
+    },
+    {
+      "name": "welcometonarrowsburg.com",
+      "url": "https://welcometonarrowsburg.com/events",
+      "calendar": "squarespace",
+      "addedAt": "2026-10-08",
+      "foundVia": "event link"
+    },
+    {
       "name": "Dear Native Grapes",
       "url": "https://www.dearnativegrapes.com/events",
       "calendar": "squarespace",
@@ -249,6 +272,15 @@
       "town": "Andes",
       "addedAt": "2026-10-07",
       "foundVia": "@wayside_cider"
+    },
+    {
+      "name": "Westwind Orchard",
+      "url": "https://www.westwindorchard.com/events",
+      "calendar": "squarespace",
+      "venue": "Westwind Orchard",
+      "town": "Accord",
+      "addedAt": "2026-10-08",
+      "foundVia": "@westwindorchard"
     }
   ]
 }
