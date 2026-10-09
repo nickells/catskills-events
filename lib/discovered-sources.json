@@ -218,6 +218,14 @@
       "foundVia": "@catskillpines"
     },
     {
+      "name": "autocamp.com",
+      "url": "https://autocamp.com/",
+      "calendar": "tribe",
+      "town": "Saugerties",
+      "addedAt": "2026-10-09",
+      "foundVia": "event link"
+    },
+    {
       "name": "Subversive Malting + Brewing",
       "url": "https://drinksubversive.com/events-1",
       "calendar": "squarespace",
@@ -233,6 +241,14 @@
       "town": "Phoenicia",
       "addedAt": "2026-10-07",
       "foundVia": "@phoenicianys"
+    },
+    {
+      "name": "roxburybottleshop.squarespace.com",
+      "url": "https://roxburybottleshop.squarespace.com/events",
+      "calendar": "squarespace",
+      "town": "Roxbury",
+      "addedAt": "2026-10-09",
+      "foundVia": "event link"
     },
     {
       "name": "sullivancatskills.com",
@@ -263,6 +279,14 @@
       "town": "Walton",
       "addedAt": "2026-10-07",
       "foundVia": "@dear.native.grapes"
+    },
+    {
+      "name": "roxburybottleshop.com",
+      "url": "https://www.roxburybottleshop.com/events",
+      "calendar": "squarespace",
+      "town": "Roxbury",
+      "addedAt": "2026-10-09",
+      "foundVia": "event link"
     },
     {
       "name": "Wayside Cider",
