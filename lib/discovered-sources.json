@@ -35,6 +35,24 @@
       ]
     },
     {
+      "handle": "delaware.and.ulster.railroad",
+      "town": "Arkville",
+      "addedAt": "2026-10-10",
+      "foundVia": [
+        "visitmargaretvilleny",
+        "site:durr.org"
+      ]
+    },
+    {
+      "handle": "fieldandsupply",
+      "town": "Kingston, Ny",
+      "addedAt": "2026-10-10",
+      "foundVia": [
+        "huttonbrickyards",
+        "site:fieldandsupply.com"
+      ]
+    },
+    {
       "handle": "gaagallery",
       "town": "Catskill",
       "addedAt": "2026-10-03",
@@ -181,6 +199,15 @@
       ]
     },
     {
+      "handle": "wjffradio",
+      "town": "Catskill",
+      "addedAt": "2026-10-10",
+      "foundVia": [
+        "phoeniciaplayhouse",
+        "site:radiocatskill.org"
+      ]
+    },
+    {
       "handle": "yo_adriennee",
       "town": "Narrowsburg",
       "addedAt": "2026-10-02",
@@ -216,6 +243,13 @@
       "town": "Mt Tremper",
       "addedAt": "2026-10-08",
       "foundVia": "@catskillpines"
+    },
+    {
+      "name": "lydias-cafe.com",
+      "url": "http://www.lydias-cafe.com/",
+      "calendar": "tribe",
+      "addedAt": "2026-10-10",
+      "foundVia": "event link"
     },
     {
       "name": "autocamp.com",
