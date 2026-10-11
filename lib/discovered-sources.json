@@ -252,6 +252,14 @@
       "foundVia": "event link"
     },
     {
+      "name": "timeandthevalleysmuseum.org",
+      "url": "http://www.timeandthevalleysmuseum.org/",
+      "calendar": "tribe",
+      "town": "Grahamsville",
+      "addedAt": "2026-10-11",
+      "foundVia": "event link"
+    },
+    {
       "name": "autocamp.com",
       "url": "https://autocamp.com/",
       "calendar": "tribe",
@@ -296,6 +304,14 @@
       "url": "https://ucitalianamericanfoundation.org/",
       "calendar": "tribe",
       "addedAt": "2026-10-08",
+      "foundVia": "event link"
+    },
+    {
+      "name": "wallkill.art",
+      "url": "https://wallkill.art/",
+      "calendar": "tribe",
+      "town": "Montgomery",
+      "addedAt": "2026-10-11",
       "foundVia": "event link"
     },
     {
