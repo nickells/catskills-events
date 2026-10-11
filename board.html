@@ -321,15 +321,21 @@ function layout() {
   if (!board) return;
   const n = Math.max(2, Math.floor((board.clientWidth + 32) / 252));
   const cols = Array.from({ length: n }, () => Object.assign(document.createElement("div"), { className: "col" }));
+  // Measuring the columns mid-fill forces a layout with the page cut short, and the browser clamps the
+  // scroll up to fit it. Hold the board's height until the columns are full again.
+  board.style.minHeight = board.offsetHeight + "px";
   board.replaceChildren(...cols);
   lastCols = n;
   for (const el of items) {
     const shortest = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
     shortest.append(el);
   }
+  board.style.minHeight = "";
 }
 function scheduleLayout() { cancelAnimationFrame(pending); pending = requestAnimationFrame(layout); }
-addEventListener("resize", scheduleLayout);
+// Mobile browsers fire resize as the address bar slides in and out; only a new width moves the columns.
+let lastW = innerWidth;
+addEventListener("resize", () => { if (innerWidth !== lastW) { lastW = innerWidth; scheduleLayout(); } });
 
 document.getElementById("main").addEventListener("click", (ev) => {
   const card = ev.target.closest(".flyer");
