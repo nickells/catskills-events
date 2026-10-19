@@ -331,6 +331,14 @@
       "foundVia": "@dear.native.grapes"
     },
     {
+      "name": "putnamhistorymuseum.org",
+      "url": "https://www.putnamhistorymuseum.org/events",
+      "calendar": "jsonld",
+      "town": "Cold Spring",
+      "addedAt": "2026-10-19",
+      "foundVia": "event link"
+    },
+    {
       "name": "roxburybottleshop.com",
       "url": "https://www.roxburybottleshop.com/events",
       "calendar": "squarespace",
