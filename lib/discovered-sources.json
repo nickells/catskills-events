@@ -339,6 +339,14 @@
       "foundVia": "@dear.native.grapes"
     },
     {
+      "name": "nextstopcomedy.com",
+      "url": "https://www.nextstopcomedy.com/events",
+      "calendar": "jsonld",
+      "town": "Catskill",
+      "addedAt": "2026-11-02",
+      "foundVia": "@returnoutpost"
+    },
+    {
       "name": "putnamhistorymuseum.org",
       "url": "https://www.putnamhistorymuseum.org/events",
       "calendar": "jsonld",
