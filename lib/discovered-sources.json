@@ -110,6 +110,15 @@
       ]
     },
     {
+      "handle": "olanafredericchurch",
+      "town": "Hudson",
+      "addedAt": "2026-11-11",
+      "foundVia": [
+        "thomascolesite",
+        "site:olana.org"
+      ]
+    },
+    {
       "handle": "oysterparty",
       "addedAt": "2026-10-04",
       "foundVia": [
@@ -277,6 +286,14 @@
       "foundVia": "@subversivebeer"
     },
     {
+      "name": "olana.org",
+      "url": "https://olana.org/programs-events",
+      "calendar": "jsonld",
+      "town": "Hudson",
+      "addedAt": "2026-11-11",
+      "foundVia": "event link"
+    },
+    {
       "name": "phoeniciany.com",
       "url": "https://phoeniciany.com/",
       "calendar": "tribe",
@@ -327,6 +344,14 @@
       "url": "https://welcometonarrowsburg.com/events",
       "calendar": "squarespace",
       "addedAt": "2026-10-08",
+      "foundVia": "event link"
+    },
+    {
+      "name": "clearwater.org",
+      "url": "https://www.clearwater.org/",
+      "calendar": "tribe",
+      "town": "Kingston",
+      "addedAt": "2026-11-11",
       "foundVia": "event link"
     },
     {
