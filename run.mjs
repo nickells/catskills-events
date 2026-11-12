@@ -110,4 +110,8 @@ async function main() {
   console.log(`\n${markdown.slice(0, 2000)}...`);
 }
 
-main().catch(console.error);
+// A failed run must fail the workflow, or CI deploys whatever is left in output/.
+main().catch((err) => {
+  console.error(err);
+  process.exitCode = 1;
+});
