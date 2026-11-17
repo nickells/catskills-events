@@ -364,6 +364,14 @@
       "foundVia": "@dear.native.grapes"
     },
     {
+      "name": "fcgardiner.com",
+      "url": "https://www.fcgardiner.com/events",
+      "calendar": "squarespace",
+      "town": "Gardiner",
+      "addedAt": "2026-11-17",
+      "foundVia": "event link"
+    },
+    {
       "name": "nextstopcomedy.com",
       "url": "https://www.nextstopcomedy.com/events",
       "calendar": "jsonld",
