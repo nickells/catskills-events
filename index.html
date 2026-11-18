@@ -1309,13 +1309,23 @@
       }
     }
 
+    // Minutes after midnight of the start time. A range says AM/PM once, at its end:
+    // "7:00–8:00 PM" starts at 7 PM, and "11:00–1:00 PM" at 11 AM.
     function parseTime(t) {
       if (!t || t === 'null') return 9999;
       const m = t.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm|AM|PM)?/);
       if (!m) return 9999;
       let h = parseInt(m[1]);
       const min = parseInt(m[2] || '0');
-      const ampm = (m[3] || '').toLowerCase();
+      let ampm = (m[3] || '').toLowerCase();
+      if (!ampm) {
+        const end = t.slice(m.index + m[0].length).match(/(\d{1,2})(?::\d{2})?\s*(am|pm)/i);
+        if (end) {
+          ampm = end[2].toLowerCase();
+          const endHour = parseInt(end[1]);
+          if (ampm === 'pm' && h < 12 && endHour < 12 && h > endHour) ampm = 'am';
+        }
+      }
       if (ampm === 'pm' && h < 12) h += 12;
       if (ampm === 'am' && h === 12) h = 0;
       return h * 60 + min;
