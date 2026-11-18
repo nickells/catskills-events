@@ -1257,6 +1257,8 @@
     // Towns that have events, with coordinates taken from the events themselves.
     let townIndex = new Map();
     let commonTowns = [];
+    // Always offered in the place picker, even when it isn't among the busiest towns.
+    const PINNED_TOWNS = new Set(['margaretville']);
     function buildTownIndex() {
       townIndex = new Map();
       for (const e of allEvents) {
@@ -1266,9 +1268,10 @@
         town.count++;
         townIndex.set(key, town);
       }
+      // The busiest towns, plus the pinned ones however few events they have.
       commonTowns = [...townIndex.values()]
         .sort((a, b) => b.count - a.count)
-        .slice(0, 24)
+        .filter((t, i) => i < 24 || PINNED_TOWNS.has(t.name.toLowerCase()))
         .sort((a, b) => a.name.localeCompare(b.name));
     }
     let activeCategories = new Set();
