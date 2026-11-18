@@ -1254,23 +1254,33 @@
     function savePlace(place) { try { place ? localStorage.setItem(PLACE_KEY, place) : localStorage.removeItem(PLACE_KEY); } catch {} }
     let currentPlace = '';
 
-    // Towns that have events, with coordinates taken from the events themselves.
-    let townIndex = new Map();
-    let commonTowns = [];
-    function buildTownIndex() {
-      townIndex = new Map();
-      for (const e of allEvents) {
-        if (!e.town || e._lat == null || /[&,/]/.test(e.town)) continue;
-        const key = e.town.toLowerCase();
-        const town = townIndex.get(key) || { name: e.town, lat: e._lat, lng: e._lng, count: 0 };
-        town.count++;
-        townIndex.set(key, town);
-      }
-      commonTowns = [...townIndex.values()]
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 24)
-        .sort((a, b) => a.name.localeCompare(b.name));
-    }
+    // Where to measure from: the Catskills' hub towns, however many events each has. A town
+    // outside the list is still reachable by zip, or by name from a link or a saved place.
+    const PLACES = [
+      { name: 'Andes', lat: 42.1901, lng: -74.7871 },
+      { name: 'Callicoon', lat: 41.7576, lng: -75.0587 },
+      { name: 'Catskill', lat: 42.2168, lng: -73.8632 },
+      { name: 'Delhi', lat: 42.2782, lng: -74.916 },
+      { name: 'Ellenville', lat: 41.717, lng: -74.396 },
+      { name: 'Fleischmanns', lat: 42.1718, lng: -74.5321 },
+      { name: 'Hunter', lat: 42.1843, lng: -74.2182 },
+      { name: 'Kingston', lat: 41.927, lng: -73.9974 },
+      { name: 'Liberty', lat: 41.801, lng: -74.7464 },
+      { name: 'Livingston Manor', lat: 41.901, lng: -74.8279 },
+      { name: 'Margaretville', lat: 42.1487, lng: -74.6512 },
+      { name: 'Monticello', lat: 41.6543, lng: -74.6893 },
+      { name: 'Narrowsburg', lat: 41.603, lng: -74.9884 },
+      { name: 'New Paltz', lat: 41.7465, lng: -74.0868 },
+      { name: 'Phoenicia', lat: 42.0839, lng: -74.3098 },
+      { name: 'Roscoe', lat: 41.935, lng: -74.9109 },
+      { name: 'Roxbury', lat: 42.2946, lng: -74.5632 },
+      { name: 'Saugerties', lat: 42.0775, lng: -73.953 },
+      { name: 'Tannersville', lat: 42.1943, lng: -74.1361 },
+      { name: 'Walton', lat: 42.1693, lng: -75.1293 },
+      { name: 'Windham', lat: 42.3043, lng: -74.2599 },
+      { name: 'Woodstock', lat: 42.0409, lng: -74.1182 },
+    ];
+    const placeIndex = new Map(PLACES.map(place => [place.name.toLowerCase(), place]));
     let activeCategories = new Set();
     let activeTime = 'all';
     let hideStarted = false;
@@ -1435,7 +1445,7 @@
       const value = place.trim();
       if (!value) return clearHome();
       if (/^\d{5}$/.test(value)) return geocodeZip(value);
-      const town = townIndex.get(value.toLowerCase());
+      const town = placeIndex.get(value.toLowerCase());
       if (town) setHome(town.lat, town.lng, town.name);
       else geocodeTown(value);
     }
@@ -1444,7 +1454,6 @@
       showIssueNumber();
       const res = await fetch('./output/events.json');
       allEvents = await res.json();
-      buildTownIndex();
       readFromUrl();
       computeDistances();
       render();
@@ -1565,10 +1574,10 @@
       function open(filter) {
         const f = filter.trim().toLowerCase();
         const digits = /^\d+$/.test(f);
-        shown = digits ? [] : commonTowns.filter(t => t.name.toLowerCase().includes(f));
+        shown = digits ? [] : PLACES.filter(place => place.name.toLowerCase().includes(f));
         active = -1;
         list.innerHTML = shown.map((t, i) =>
-          `<li role="option" data-i="${i}">${esc(t.name)}<span class="count">${t.count} event${t.count !== 1 ? 's' : ''}</span></li>`
+          `<li role="option" data-i="${i}">${esc(t.name)}</li>`
         ).join('') || `<li class="hint">${digits ? 'Keep typing your zip' : 'No match. Try a zip code'}</li>`;
         list.hidden = false;
         input.setAttribute('aria-expanded', 'true');
@@ -1651,7 +1660,7 @@
       input.addEventListener('blur', () => {
         close();
         const value = input.value.trim();
-        const town = townIndex.get(value.toLowerCase());
+        const town = placeIndex.get(value.toLowerCase());
         if (town && town.name !== currentPlace) choose(town.name);
         else if (!/^\d{5}$/.test(value)) input.value = currentPlace;
       });
