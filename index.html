@@ -193,6 +193,9 @@
     .event-body {
       flex: 1;
       min-width: 0;
+      /* Break a domain or URL too long for the card (roxburybottleshop.squarespace.com
+         on a phone) rather than let it run off the page and widen it. */
+      overflow-wrap: anywhere;
     }
 
     .event-name {
@@ -855,6 +858,8 @@
     #place-options {
       top: calc(100% + var(--space-2));
       width: 240px;
+      /* No wider than the field, which on a 320px phone is narrower than 240px. */
+      max-width: 100%;
       padding: var(--space-1);
       border: var(--rule) solid var(--text);
       border-radius: 0;
@@ -1937,7 +1942,8 @@
           : esc(s);
       });
 
-      return `<div class="event-sources">via ${links.join('<span class="source-sep">·</span>')}</div>`;
+      // <wbr>: with no space around the dot, the whole list would be one unbreakable word.
+      return `<div class="event-sources">via ${links.join('<span class="source-sep">·</span><wbr>')}</div>`;
     }
 
     function esc(s) {
