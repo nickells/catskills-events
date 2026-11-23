@@ -87,94 +87,18 @@ body {
   vertical-align: 1px;
 }
 
-/* ─ The Ko-fi pill (support.js): ink, pinned bottom right, with room left below the page so it
-   never covers the last row ─ */
-.kofi {
-  position: fixed;
-  right: var(--space-4);
-  bottom: var(--space-4);
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  background: var(--text);
-  color: #fff;
-  border-radius: 999px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-  font: var(--label);
-  animation: kofi-in 0.3s ease-out;
+/* ─ kofi-pill.js (the coffee pill and tip panel), in this site's ink, accent and type ─ */
+:root {
+  --kofi-pill-ink: var(--text);
+  --kofi-pill-close: var(--rule);
+  --kofi-pill-accent: var(--accent);
+  --kofi-pill-muted: var(--text-muted);
+  --kofi-pill-hover: var(--hover);
+  --kofi-pill-font: var(--font);
+  --kofi-pill-radius: var(--radius);
 }
-/* Rises into place when it first appears. */
-@keyframes kofi-in { from { opacity: 0; transform: translateY(12px); } }
-@media (prefers-reduced-motion: reduce) { .kofi { animation: none; } }
-.kofi a {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-  color: inherit;
-  text-decoration: none;
-}
-.kofi strong { font-weight: 700; }
-.kofi a:hover strong { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
-.kofi-cup { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
-/* In the nav it sits inline, centered on the text, so the link keeps the others' baseline. */
-.masthead-nav .kofi-cup { width: 18px; height: 18px; margin-right: var(--space-1); vertical-align: middle; }
-.kofi button {
-  width: var(--h-button-s);
-  height: var(--h-button-s);
-  margin-right: var(--space-1);
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  color: var(--rule);
-  font: 400 18px/1 var(--font);
-  cursor: pointer;
-}
-.kofi button:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
-.kofi-note { padding: var(--space-2) var(--space-4); line-height: var(--h-button-s); }
-/* The Ko-fi panel: Ko-fi's tip form in a plain sheet. */
-.kofi-panel {
-  width: min(420px, calc(100vw - 2 * var(--space-4)));
-  max-height: calc(100dvh - 2 * var(--space-4));
-  margin: auto;
-  /* Even on every side. The frame inside stays under 400px wide, where Ko-fi draws its form
-     flush to the frame's edges; wider, it adds side margins of its own and no top one. */
-  padding: var(--space-3);
-  border: 0;
-  border-radius: var(--radius);
-  background: #f9f9f9; /* Ko-fi's embed background, so the frame's edges don't show */
-  overflow: hidden;
-}
-/* Open, it stacks the caption over the form, and the form takes whatever height is left. */
-.kofi-panel[open] { display: flex; flex-direction: column; gap: var(--space-3); }
-.kofi-panel-head { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-1) 0 0 var(--space-1); }
-.kofi-panel-head p { flex: 1; font: var(--small); color: var(--text-muted); text-wrap: pretty; }
-.kofi-panel::backdrop { background: rgba(21, 21, 21, 0.5); }
-.kofi-panel iframe {
-  display: block;
-  width: 100%;
-  height: 712px; /* Ko-fi's suggested embed height: the whole form without its own scrollbar */
-  min-height: 0;
-  flex: 0 1 auto;
-  border: 0;
-}
-.kofi-panel-close {
-  flex: none;
-  width: var(--h-button-s);
-  height: var(--h-button-s);
-  border: 0;
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--text);
-  font: 400 18px/1 var(--font);
-  cursor: pointer;
-}
-.kofi-panel-close:hover { background: var(--hover); }
-/* The pill's height plus its offset from the bottom, so the page's end scrolls clear of it. */
-body.has-kofi { padding-bottom: 72px; }
 
 @media (max-width: 600px) {
-  .kofi { right: var(--space-3); bottom: var(--space-3); }
   .masthead { margin-bottom: var(--space-5); }
   .masthead h1 { margin-top: var(--space-5); }
   .masthead-sub { font-size: 15px; }
