@@ -1,0 +1,94 @@
+/* ── Shared by every page: tokens, type and the masthead. Each page styles its own components.
+
+   Direction: the listings are the design. One typeface at a few fixed sizes, ink on near-white,
+   hairline rules, and nothing decorative (no shadows, tilt or texture).
+   Space   4px steps: rows in a group 12 apart, groups 24, sections 48.
+   Type    Schibsted Grotesk only. Dates and counts use tabular figures; times don't, since this
+           face spaces the colon out with them.
+   Color   Categories appear as a small dot, or fill a chip once it's selected. Orange means now:
+           Tonight and today, nothing else. ── */
+:root {
+  --bg: #fbfbf9;
+  --surface: #ffffff;
+  --hover: #f2f1ec;
+  --text: #151515;
+  --text-muted: #5f5e58;
+  --rule: #e2e0d8;
+  /* Field and chip outlines: a hairline that still reads as a control. */
+  --rule-strong: #bcb9ae;
+  /* Blaze orange, for what's on now. --accent-ink is the same hue dark enough for small text. */
+  --accent: #e8590c;
+  --accent-ink: #b8410a;
+
+  /* Category inks, each dark enough to read as text on white. */
+  --tag-music: #b4295a;
+  --tag-food: #9a5b00;
+  --tag-culture: #1f4fc4;
+  --tag-nature: #18753a;
+  --tag-community: #b3261e;
+  --tag-nightlife: #6a35c8;
+  --tag-wellness: #0e7470;
+  --tag-other: #6b6961;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --gutter: var(--space-4);
+  --radius: 6px;
+
+  --h-input: 40px;
+  --h-chip: 32px;
+  --h-button-s: 28px;
+
+  --font: "Schibsted Grotesk", system-ui, sans-serif;
+  --display: 800 clamp(44px, 11vw, 84px)/0.92 var(--font);
+  --heading: 800 28px/1.1 var(--font);
+  --heading-s: 700 20px/1.2 var(--font);
+  --title: 700 17px/1.3 var(--font);
+  --title-s: 700 14px/1.3 var(--font);
+  --body: 400 15px/1.5 var(--font);
+  --small: 400 13px/1.45 var(--font);
+  --label: 600 13px/1.2 var(--font);
+  --micro: 600 11px/1.25 var(--font);
+  /* Large type sets tighter than text. */
+  --tight: -0.025em;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font: var(--body);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ─ Masthead: links on top, the page's name, one line on what it is ─ */
+.masthead { margin: 0 0 var(--space-6); }
+.masthead-nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2) var(--space-5); font: var(--label); }
+.masthead-nav .back { margin-right: auto; }
+.masthead-nav a { color: var(--text); text-decoration: none; }
+.masthead-nav a:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.masthead h1 { margin-top: var(--space-6); font: var(--display); letter-spacing: -0.035em; }
+.masthead-sub { max-width: 52ch; margin-top: var(--space-3); font: 400 17px/1.45 var(--font); color: var(--text-muted); }
+.beta {
+  margin-left: var(--space-1);
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font: var(--micro);
+  color: var(--text-muted);
+  vertical-align: 1px;
+}
+
+@media (max-width: 600px) {
+  .masthead { margin-bottom: var(--space-5); }
+  .masthead h1 { margin-top: var(--space-5); }
+  .masthead-sub { font-size: 15px; }
+}

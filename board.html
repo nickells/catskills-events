@@ -7,132 +7,53 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛰️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="site.css">
 <style>
-  /* Tokens copied from the gig poster theme in index.html. */
-  :root {
-    --bg: #f4efe4;
-    --card-bg: #fffdf7;
-    --text: #121212;
-    --text-muted: #474440;
-    --accent: #ff3fa4;
-    --riso-blue: #0078bf;
-    --riso-yellow: #ffd900;
-    --tag-music: #ff3fa4;
-    --tag-food: #ff6c2f;
-    --tag-culture: #0078bf;
-    --tag-nature: #00a95c;
-    --tag-community: #e8322b;
-    --tag-nightlife: #765ba7;
-    --tag-wellness: #00a6b8;
-    --tag-other: #5f5b55;
-
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-5: 24px;
-    --space-6: 32px;
-    --space-7: 48px;
-    --gutter: var(--space-4);
-    --label-col: 64px;
-    --h-input: 40px;
-    --h-chip: 32px;
-    --h-tag: 20px;
-    --rule: 2px;
-    --shadow-s: 2px;
-    --shadow-m: 4px;
-    --shadow-l: 6px;
-    --shadow-pressed: 1px;
-
-    --display-l: 400 48px/1 "Anton", sans-serif;
-    --display-m: 400 32px/1 "Anton", sans-serif;
-    --title: 800 18px/1.2 "Archivo", sans-serif;
-    --title-s: 700 13px/1.25 "Archivo", sans-serif;
-    --body: 400 14px/1.5 "Archivo", sans-serif;
-    --ui: 800 13px/1 "Archivo", sans-serif;
-    --meta: 400 13px/1.45 "Space Mono", monospace;
-    --meta-s: 400 11px/1.4 "Space Mono", monospace;
-    --label: 700 11px/1.2 "Space Mono", monospace;
-    --micro: 700 10px/1.2 "Space Mono", monospace;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font: var(--body);
-    color: var(--text);
-    background-color: var(--bg);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  .container { max-width: 736px; margin: 0 auto; padding: var(--space-5) var(--gutter) 0; }
+  /* Tokens, type and the masthead come from site.css. The page around the wall is plain, like
+     the list; the flyers themselves are the show. */
+  :root { --label-col: 64px; }
+  .container { max-width: 736px; margin: 0 auto; padding: var(--space-6) var(--gutter) 0; }
   /* Tape on the outermost sheets reaches past the page edge; trim it rather than scroll sideways.
      (On a full-width wrapper: clip on the root or body would apply to the viewport as hidden.) */
   .wall-clip { overflow-x: clip; }
   .wall { width: min(1280px, 100%); margin: 0 auto; padding: 0 var(--gutter) 120px; }
 
-  .poster-top, .filter-group-label, .stats {
-    font: var(--label); letter-spacing: 1px; text-transform: uppercase; color: var(--text);
-  }
-
-  /* ─ Masthead, as on the main page ─ */
-  .poster-header { position: relative; margin: 0 calc(-1 * var(--gutter)) var(--space-6); padding: 0 var(--gutter); overflow-x: clip; }
-  .poster-top { position: relative; z-index: 1; display: flex; justify-content: space-between; }
-  .poster-top a { color: var(--text); text-decoration: none; border-bottom: var(--rule) solid var(--accent); }
-  .poster-top a:hover { background: var(--riso-yellow); }
-  .halftone {
-    position: absolute; top: var(--space-4); right: calc(-1 * var(--space-6)); width: 224px; height: 224px; border-radius: 50%;
-    background: radial-gradient(circle, var(--riso-yellow) 2.6px, transparent 3px) 0 0 / 9px 9px;
-    -webkit-mask: radial-gradient(circle, #000 35%, transparent 71%);
-    mask: radial-gradient(circle, #000 35%, transparent 71%);
-    pointer-events: none;
-  }
-  .poster-header h1 {
-    position: relative; margin-top: var(--space-3);
-    font: 400 clamp(64px, 17vw, 128px)/0.84 "Anton", sans-serif; text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .poster-header h1 span { display: block; mix-blend-mode: multiply; }
-  .poster-header h1 .l1 { color: var(--text); text-shadow: 5px 4px 0 var(--accent); }
-  .poster-header h1 .l2 { color: var(--riso-blue); text-shadow: -4px 3px 0 var(--accent); margin-left: 0.6em; }
-  .poster-sub {
-    position: relative; display: inline-block; margin-top: var(--space-4); padding: var(--space-1) var(--space-2);
-    font: var(--label); letter-spacing: 1px; text-transform: uppercase;
-    background: var(--riso-yellow); transform: rotate(-1.5deg); box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
-  }
-
-  /* ─ What: category chips in their own ink ─ */
+  /* ─ What: outlined chips with the category's dot; selected fills with its color ─ */
   .filter-group {
     position: relative; display: flex; flex-wrap: wrap; gap: var(--space-2); min-height: var(--h-input);
     padding: calc((var(--h-input) - var(--h-chip)) / 2) 0 calc((var(--h-input) - var(--h-chip)) / 2) calc(var(--label-col) + var(--space-3));
   }
-  .filter-group-label { position: absolute; top: calc(var(--h-input) / 2); left: 0; transform: translateY(-50%); }
+  .filter-group-label { position: absolute; top: calc(var(--h-input) / 2); left: 0; transform: translateY(-50%); font: var(--label); color: var(--text-muted); }
   .filter-btn {
     --chip: var(--text);
-    display: inline-flex; align-items: center; height: var(--h-chip); padding: 0 var(--space-3);
-    border: var(--rule) solid var(--text); cursor: pointer;
-    font: var(--label); letter-spacing: 1px; text-transform: uppercase; color: var(--text);
-    background: color-mix(in srgb, var(--chip) 16%, var(--card-bg));
-    box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--chip);
-    transition: transform 0.1s, box-shadow 0.1s;
+    display: inline-flex; align-items: center; gap: 6px; height: var(--h-chip); padding: 0 var(--space-3);
+    border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--surface); cursor: pointer;
+    font: var(--label); color: var(--text);
+    transition: background-color 0.1s, border-color 0.1s;
   }
-  .filter-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--chip); }
-  .filter-btn[aria-pressed="true"] { color: #fff; background: var(--chip); transform: translate(1px, 1px); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
+  .filter-btn::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--chip); }
+  .filter-btn:hover { border-color: var(--text); }
+  .filter-btn[aria-pressed="true"] { color: #fff; background: var(--chip); border-color: var(--chip); }
+  .filter-btn[aria-pressed="true"]::before { background: #fff; }
 
-  .results-bar {
-    margin: var(--space-5) calc(-1 * var(--gutter)) 0; padding: var(--space-3) var(--gutter);
-    border-bottom: var(--rule) solid var(--text);
-  }
+  .results-bar { margin: var(--space-4) calc(-1 * var(--gutter)) var(--space-6); padding: var(--space-3) var(--gutter); border-bottom: 1px solid var(--rule); }
+  .stats { font: var(--label); font-variant-numeric: tabular-nums; }
 
   /* ─ The wall: one masonry flow. Each day's heading sits in the flow ahead of its flyers, so
      a short day doesn't leave a gap before the next. ─ */
   .board { display: flex; align-items: flex-start; gap: var(--space-6); }
   .board .col { flex: 1; min-width: 0; }
   .day-start { break-inside: avoid; }
+  /* Plain type on a 2px rule, as on the list; Tonight's rule is orange. */
   .day-mark {
-    display: flex; align-items: center; width: fit-content; break-inside: avoid;
-    margin: var(--space-2) 0 var(--space-6); padding: 0 var(--space-2) 0 0;
-    font: var(--display-m); text-transform: uppercase; letter-spacing: 0.5px;
-    background: linear-gradient(transparent 55%, var(--riso-yellow) 55% 92%, transparent 92%);
+    display: flex; align-items: baseline; gap: var(--space-2); break-inside: avoid;
+    margin: var(--space-2) 0 var(--space-6); padding-bottom: var(--space-2); border-bottom: 2px solid var(--text);
+    font: var(--heading-s); letter-spacing: var(--tight);
   }
-  .day-mark .event-count { margin-left: var(--space-3); padding: var(--space-1) var(--space-2); font: var(--label); color: #fff; background: var(--accent); transform: rotate(4deg); }
+  .day-mark .event-count { font: var(--label); font-variant-numeric: tabular-nums; letter-spacing: 0; color: var(--text-muted); }
+  .day-mark.tonight { border-color: var(--accent); }
+  .day-mark.tonight .event-count { color: var(--accent-ink); }
 
   /* ─ Flyers: real paper, pinned or taped up crooked ─ */
   .flyer {
@@ -146,11 +67,11 @@
     content: ""; position: absolute; inset: 0; pointer-events: none;
     background: linear-gradient(115deg, rgba(255,255,255,.18) 0 30%, transparent 45%, rgba(0,0,0,.05) 100%);
   }
-  .flyer:focus-visible { outline: var(--rule) solid var(--accent); outline-offset: 4px; }
+  .flyer:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .flyer img { display: block; width: 100%; height: auto; min-height: 120px; background: #eee; }
   .flyer .cap { padding: var(--space-2) var(--space-3) var(--space-3); }
   .flyer .name { font: var(--title-s); }
-  .flyer .meta { margin-top: 2px; font: var(--meta-s); color: var(--text-muted); }
+  .flyer .meta { margin-top: 2px; font: var(--small); color: var(--text-muted); }
   .flyer .meta .more { color: var(--text); font-weight: 700; }
 
   /* Pushpin, in the flyer's category ink */
@@ -185,35 +106,34 @@
   /* ─ Detail: the flyer full size beside its listings ─ */
   dialog {
     width: min(920px, calc(100vw - 2 * var(--gutter))); max-height: 90vh; margin: auto; padding: 0;
-    border: var(--rule) solid var(--text); background: var(--card-bg); color: var(--text);
-    box-shadow: var(--shadow-l) var(--shadow-l) 0 var(--accent); overflow: hidden;
+    border: 0; border-radius: var(--radius); background: var(--surface); color: var(--text); overflow: hidden;
   }
-  dialog::backdrop { background: color-mix(in srgb, var(--text) 70%, transparent); }
+  dialog::backdrop { background: rgb(21 21 21 / 0.7); }
   .detail { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); max-height: 90vh; }
   .detail img { display: block; width: 100%; max-height: 90vh; object-fit: contain; background: var(--text); }
   .detail .info { padding: var(--space-5); overflow: auto; }
-  .detail h2 { font: var(--display-m); text-transform: uppercase; margin: 0 var(--space-7) var(--space-4) 0; overflow-wrap: anywhere; }
-  .listing { padding: var(--space-3) 0; border-top: var(--rule) solid var(--text); }
-  .listing .day-name { display: inline-block; padding: 2px var(--space-1); font: var(--label); letter-spacing: 1px; text-transform: uppercase; background: var(--riso-yellow); }
-  .listing .name { margin-top: var(--space-2); font: var(--title); }
-  .listing .meta { margin-top: var(--space-1); font: var(--meta); }
+  .detail h2 { margin: 0 var(--space-7) var(--space-4) 0; font: var(--heading); letter-spacing: var(--tight); overflow-wrap: anywhere; }
+  .listing { padding: var(--space-3) 0; border-top: 1px solid var(--rule); }
+  .listing .day-name { font: var(--label); color: var(--text-muted); }
+  .listing .name { margin-top: var(--space-1); font: var(--title); }
+  .listing .meta { margin-top: 2px; font: var(--small); color: var(--text-muted); }
   .post-link {
-    display: inline-flex; align-items: center; height: var(--h-chip); margin-top: var(--space-4); padding: 0 var(--space-3);
-    border: var(--rule) solid var(--text); background: var(--accent); color: var(--text); text-decoration: none;
-    font: var(--ui); letter-spacing: 0.5px; text-transform: uppercase; box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+    display: inline-flex; align-items: center; height: var(--h-chip); margin-top: var(--space-4); padding: 0 var(--space-4);
+    border-radius: 999px; background: var(--text); color: var(--surface); text-decoration: none; font: var(--label);
   }
-  .post-link:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--text); }
+  .post-link:hover { background: #333; }
   .close {
     position: absolute; top: var(--space-3); right: var(--space-3); z-index: 1; width: var(--h-chip); height: var(--h-chip);
-    border: var(--rule) solid var(--text); background: var(--riso-yellow); box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
-    font: var(--ui); font-size: 18px; cursor: pointer;
+    border: 1px solid var(--rule-strong); border-radius: 50%; background: var(--surface); color: var(--text);
+    font: 400 20px/1 var(--font); cursor: pointer;
   }
-  .empty { margin-top: var(--space-6); font: var(--meta); }
+  .close:hover { border-color: var(--text); }
+  .empty { margin-top: var(--space-6); font: var(--body); color: var(--text-muted); }
 
   @media (max-width: 640px) {
+    :root { --label-col: 48px; }
     .board { gap: var(--space-5); }
-    .day-start { break-inside: avoid; }
-  .day-mark { font: var(--display-s, 400 24px/1 "Anton", sans-serif); }
+    .day-mark { font-size: 18px; }
     .detail { grid-template-columns: 1fr; overflow: auto; }
     .detail img { max-height: 60vh; }
   }
@@ -223,11 +143,10 @@
 </head>
 <body>
 <div class="container">
-  <header class="poster-header">
-    <div class="halftone" aria-hidden="true"></div>
-    <div class="poster-top"><a href="index.html">← List</a><a href="sources.html">Sources ↗</a></div>
-    <h1><span class="l1">Flyer</span><span class="l2">Board</span></h1>
-    <p class="poster-sub">Every flyer posted to a local Instagram, pinned up by date.</p>
+  <header class="masthead">
+    <nav class="masthead-nav"><a class="back" href="index.html">← All events</a><a href="sources.html">Sources</a></nav>
+    <h1>Flyer board</h1>
+    <p class="masthead-sub">Every flyer posted to a local Instagram, pinned up by date.</p>
   </header>
   <div class="filter-group" id="filters"><span class="filter-group-label">What</span></div>
   <div class="results-bar"><p class="stats" id="stats"></p></div>
@@ -298,7 +217,7 @@ function render() {
       const tilt = ((f.seed % 9) - 4) * 0.5;
       const taped = f.seed % 3 === 0;
       // A day's heading travels with its first flyer, so it always sits on top of that day.
-      const heading = i ? "" : `<h2 class="day-mark">${fmtDay(day)}<span class="event-count">${list.length}</span></h2>`;
+      const heading = i ? "" : `<h2 class="day-mark${day === today ? " tonight" : ""}">${fmtDay(day)}<span class="event-count">${list.length}</span></h2>`;
       return `${heading ? '<div class="day-start">' + heading : ""}<button class="flyer ${taped ? "tape" : "pin"}" style="--tilt:${tilt}deg;--ink:${ink(e.category)}" data-img="${esc(f.img)}">
         ${taped ? '<span class="t1"></span><span class="t2"></span>' : ""}
         <img src="${esc(f.img)}" alt="${esc(e.name)} flyer" onerror="this.closest('.flyer').remove()">
@@ -542,7 +461,7 @@ function start() {
     const left = 12, width = w - 24;
     let y = cap.offsetTop + 8;
     const runs = (node, font, color) => [...node.childNodes].flatMap((n) =>
-      n.nodeType === 3 ? [{ text: n.textContent, font, color }] : runs(n, n.classList.contains("more") ? font.replace("400", "700") : font, n.classList.contains("more") ? "#121212" : color));
+      n.nodeType === 3 ? [{ text: n.textContent, font, color }] : runs(n, n.classList.contains("more") ? font.replace("400", "700") : font, n.classList.contains("more") ? "#151515" : color));
     const write = (tokens, lineHeight) => {
       let x = 0;
       y += lineHeight * 0.78;
@@ -559,9 +478,9 @@ function start() {
       }
       y += lineHeight * 0.22;
     };
-    write([{ text: cap.querySelector(".name").textContent, font: '700 13px "Archivo"', color: "#121212" }], 16.25);
+    write([{ text: cap.querySelector(".name").textContent, font: '700 14px "Schibsted Grotesk"', color: "#151515" }], 18.2);
     y += 2;
-    write(runs(cap.querySelector(".meta"), '400 11px "Space Mono"', "#474440"), 15.4);
+    write(runs(cap.querySelector(".meta"), '400 13px "Schibsted Grotesk"', "#5f5e58"), 18.85);
     // Paper sheen, as on the CSS card
     const sheen = g.createLinearGradient(0, 0, w, h * 0.6);
     sheen.addColorStop(0, "rgba(255,255,255,.18)"); sheen.addColorStop(0.3, "rgba(255,255,255,.18)");

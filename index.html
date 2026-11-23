@@ -7,26 +7,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛰️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700;800&display=swap" />
+  <link rel="stylesheet" href="site.css" />
   <style>
-    :root {
-      --bg: #faf9f6;
-      --card-bg: #ffffff;
-      --text: #1a1a1a;
-      --text-muted: #6b6b6b;
-      --border: #e5e2dc;
-      --accent: #2d5a27;
-      --accent-light: #e8f0e6;
-      --tag-music: #7c3aed;
-      --tag-food: #d97706;
-      --tag-culture: #2563eb;
-      --tag-nature: #059669;
-      --tag-community: #dc2626;
-      --tag-nightlife: #db2777;
-      --tag-wellness: #0891b2;
-      --tag-other: #6b7280;
-    }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -583,163 +566,50 @@
       .cal-day { min-height: auto; }
     }
 
-    /* ── Gig poster theme: a risograph show flyer (misregistered ink, halftones, hard
-       shadows), layered over the base styles above.
-
-       Everything below is built from these tokens; nothing sets its own size or spacing.
-       Space   4px steps: rows in a group 12 apart, groups 24, sections 48.
-       Grid    a 64px label column (Near, Within, When, What, Find) with controls on one line.
-       Type    Anton for display, Archivo for content, Space Mono for data, each a few fixed roles.
-       Weight  2px rules for structure; 1px only on the smallest calendar tags.
-       Depth   hard shadows at three offsets: small (chips, buttons), medium (inputs, popovers),
-               large (cards). Hover lifts one step; pressed sinks to 1px. ── */
+    /* ── Theme: layered over the base styles above. Tokens, type and the masthead come from
+       site.css; this layer only restyles this page's components.
+       Grid    a 64px label column (Near, Within, When, What, Find) with controls on one line,
+               every row the same 40px box 12px apart.
+       Rules   1px hairlines between things, 2px ink under a section heading. ── */
     :root {
-      --bg: #f4efe4;
-      --card-bg: #fffdf7;
-      --text: #121212;
-      --text-muted: #474440;
-      --border: #121212;
-      --accent: #ff3fa4;
-      --accent-light: #ffd8ec;
-      --riso-blue: #0078bf;
-      --riso-yellow: #ffd900;
-      --tag-music: #ff3fa4;
-      --tag-food: #ff6c2f;
-      --tag-culture: #0078bf;
-      --tag-nature: #00a95c;
-      --tag-community: #e8322b;
-      --tag-nightlife: #765ba7;
-      --tag-wellness: #00a6b8;
-      --tag-other: #5f5b55;
-
-      --space-1: 4px;
-      --space-2: 8px;
-      --space-3: 12px;
-      --space-4: 16px;
-      --space-5: 24px;
-      --space-6: 32px;
-      --space-7: 48px;
-      --gutter: var(--space-4);
       --label-col: 64px;
-
-      --h-input: 40px;
-      --h-chip: 32px;
-      --h-button-s: 24px;
-      --h-tag: 20px;
-      --thumb: 22px;
-
-      --rule: 2px;
-      --rule-thin: 1px;
-      --shadow-s: 2px;
-      --shadow-m: 4px;
-      --shadow-l: 6px;
-      --shadow-pressed: 1px;
-
-      --display-l: 400 48px/1 "Anton", sans-serif;
-      --display-m: 400 32px/1 "Anton", sans-serif;
-      --display-s: 400 24px/1 "Anton", sans-serif;
-      --display-xs: 400 20px/1 "Anton", sans-serif;
-      --title: 800 18px/1.2 "Archivo", sans-serif;
-      --title-s: 700 13px/1.25 "Archivo", sans-serif;
-      --body: 400 14px/1.5 "Archivo", sans-serif;
-      --ui: 800 13px/1 "Archivo", sans-serif;
-      --meta: 400 13px/1.45 "Space Mono", monospace;
-      --meta-s: 400 11px/1.4 "Space Mono", monospace;
-      --label: 700 11px/1.2 "Space Mono", monospace;
-      --micro: 700 10px/1.2 "Space Mono", monospace;
+      --thumb: 20px;
+      /* The slider's track */
+      --track: 2px;
+      /* Names the base styles above still use (the town list, calendar), mapped onto site.css. */
+      --card-bg: var(--surface);
+      --border: var(--rule);
+      --accent-light: var(--hover);
     }
 
     /* Components below set display, which would otherwise override the hidden attribute. */
     [hidden] { display: none !important; }
 
-    body {
-      font: var(--body);
-      background-color: var(--bg);
-      /* Paper grain */
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
+    body { font: var(--body); color: var(--text); background: var(--bg); }
     /* 736px: wide enough for the full What row on one line, and a multiple of 16. */
-    .container { max-width: 736px; padding: var(--space-5) var(--gutter) 120px; }
+    .container { max-width: 736px; padding: var(--space-6) var(--gutter) 120px; }
 
-    /* Every label in the system: mono, uppercase, tracked. */
-    .poster-top, .where-word, .filter-group-label, .find-word, .stats,
-    .clear-filters, .jump-filters, .started-toggle, .section-header .event-count {
-      font: var(--label);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text);
-    }
-
-    /* ─ Masthead ─ */
-    .poster-header { position: relative; margin: 0 calc(-1 * var(--gutter)) var(--space-6); padding: 0 var(--gutter); overflow-x: clip; }
-    /* Above the headline, whose tight line-height reaches up over this row and took its clicks. */
-    .poster-top { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2) var(--space-4); }
-    .poster-top a { color: var(--text); text-decoration: none; border-bottom: var(--rule) solid var(--accent); }
-    .poster-top a:hover { background: var(--riso-yellow); }
-    .poster-links { display: flex; gap: var(--space-4); }
-    /* A small pink tag, like the section counts */
-    .poster-top .beta { margin-left: var(--space-1); padding: 1px var(--space-1); font: var(--micro); letter-spacing: 1px; color: #fff; background: var(--accent); }
-    .halftone {
-      position: absolute;
-      top: var(--space-4);
-      right: calc(-1 * var(--space-6));
-      width: 224px;
-      height: 224px;
-      border-radius: 50%;
-      background: radial-gradient(circle, var(--riso-yellow) 2.6px, transparent 3px) 0 0 / 9px 9px;
-      -webkit-mask: radial-gradient(circle, #000 35%, transparent 71%);
-      mask: radial-gradient(circle, #000 35%, transparent 71%);
-      pointer-events: none;
-    }
-    .poster-header h1 {
-      position: relative;
-      margin-top: var(--space-3);
-      font: 400 clamp(64px, 17vw, 128px)/0.84 "Anton", sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .poster-header h1 span { display: block; mix-blend-mode: multiply; }
-    .poster-header h1 .l1 { color: var(--text); text-shadow: 5px 4px 0 var(--accent); }
-    .poster-header h1 .l2 { color: var(--riso-blue); text-shadow: -4px 3px 0 var(--accent); margin-left: 0.6em; }
-    .poster-sub {
-      position: relative;
-      display: inline-block;
-      margin-top: var(--space-4);
-      padding: var(--space-1) var(--space-2);
-      font: var(--label);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      background: var(--riso-yellow);
-      transform: rotate(-1.5deg);
-      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
-    }
+    /* ─ Ticker: what's on this week, running past in an ink band. The orange dots mark it as live. ─ */
     .ticker {
       margin: var(--space-5) calc(-1 * var(--gutter)) 0;
       overflow: hidden;
-      border-block: var(--rule) solid var(--text);
       background: var(--text);
-      transform: rotate(-1deg);
     }
     .ticker-track {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       width: max-content;
-      gap: var(--space-5);
-      padding: var(--space-2) 0;
-      font: var(--display-xs);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--riso-yellow);
+      gap: var(--space-4);
+      padding: var(--space-3) 0;
+      font: var(--title-s);
+      font-size: 15px;
+      white-space: nowrap;
+      color: #fff;
       animation: ticker 28s linear infinite;
     }
-    .ticker-track .star { color: var(--accent); }
-    .ticker-track em {
-      margin-left: var(--space-1);
-      font: italic var(--label);
-      text-transform: none;
-      color: var(--bg);
-      opacity: 0.75;
-    }
+    .ticker-track em { margin-left: var(--space-1); font: var(--body); font-style: normal; color: #a9a79f; }
+    .ticker-track .sep { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .ticker:hover .ticker-track { animation-play-state: paused; }
     @keyframes ticker { to { transform: translateX(-50%); } }
     @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
 
@@ -751,22 +621,25 @@
       gap: var(--space-2);
       min-height: var(--h-input);
       margin: 0 0 var(--space-3);
-      font: var(--meta);
+      font: var(--small);
       color: var(--text);
     }
     .where { flex-wrap: wrap; row-gap: var(--space-3); }
-    .where-range { margin: 0; }
+    .where-range { flex: 1 0 100%; margin: 0; }
     .where-word, .filter-group-label, .find-word {
       flex: none;
       width: var(--label-col);
       margin: 0 var(--space-1) 0 0;
+      font: var(--label);
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text-muted);
       /* Trim the box to the capitals, so centering it centers the letters, not a line box
          that includes room for descenders. */
       text-box: trim-both cap alphabetic;
     }
-    .where-range { flex: 1 0 100%; gap: var(--space-2); }
-    /* The distance slider: a 4px track filled in pink up to a round sticker of a thumb. The fill
-       (--fill) is set from the value on every render. */
+    /* The distance slider: a thin ink track filled up to a white thumb. The fill (--fill) is set
+       from the value on every render. */
     .where input[type="range"] {
       --fill: 100%;
       flex: 1;
@@ -778,19 +651,18 @@
       appearance: none;
     }
     .where input[type="range"]::-webkit-slider-runnable-track {
-      height: 4px;
-      background: linear-gradient(to right, var(--accent) var(--fill), var(--text) var(--fill));
+      height: var(--track);
+      background: linear-gradient(to right, var(--text) var(--fill), var(--rule-strong) var(--fill));
     }
-    .where input[type="range"]::-moz-range-track { height: 4px; background: var(--text); }
-    .where input[type="range"]::-moz-range-progress { height: 4px; background: var(--accent); }
+    .where input[type="range"]::-moz-range-track { height: var(--track); background: var(--rule-strong); }
+    .where input[type="range"]::-moz-range-progress { height: var(--track); background: var(--text); }
     .where input[type="range"]::-webkit-slider-thumb {
       width: var(--thumb);
       height: var(--thumb);
-      margin-top: calc((4px - var(--thumb)) / 2);
-      border: var(--rule) solid var(--text);
+      margin-top: calc((var(--track) - var(--thumb)) / 2);
+      border: 2px solid var(--text);
       border-radius: 50%;
-      background: var(--accent);
-      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+      background: var(--surface);
       -webkit-appearance: none;
       appearance: none;
     }
@@ -798,30 +670,30 @@
       box-sizing: border-box;
       width: var(--thumb);
       height: var(--thumb);
-      border: var(--rule) solid var(--text);
+      border: 2px solid var(--text);
       border-radius: 50%;
-      background: var(--accent);
-      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+      background: var(--surface);
     }
     /* Disabled (no place set yet) is drawn muted rather than with opacity: opacity puts the input
        on its own layer, which iOS clips to the input's box, cutting off the thumb at the end. */
     .where input[type="range"]:disabled { cursor: default; opacity: 1; }
-    .where input[type="range"]:disabled::-webkit-slider-runnable-track { background: color-mix(in srgb, var(--text) 25%, transparent); }
-    .where input[type="range"]:disabled::-moz-range-track { background: color-mix(in srgb, var(--text) 25%, transparent); }
+    .where input[type="range"]:disabled::-webkit-slider-runnable-track { background: var(--rule); }
+    .where input[type="range"]:disabled::-moz-range-track { background: var(--rule); }
     .where input[type="range"]:disabled::-moz-range-progress { background: transparent; }
-    .where input[type="range"]:disabled::-webkit-slider-thumb {
-      border-color: color-mix(in srgb, var(--text) 35%, transparent);
-      background: var(--card-bg);
-      box-shadow: none;
-    }
-    .where input[type="range"]:disabled::-moz-range-thumb {
-      border-color: color-mix(in srgb, var(--text) 35%, transparent);
-      background: var(--card-bg);
-      box-shadow: none;
-    }
+    .where input[type="range"]:disabled::-webkit-slider-thumb { border-color: var(--rule-strong); }
+    .where input[type="range"]:disabled::-moz-range-thumb { border-color: var(--rule-strong); }
     #location-label { color: var(--text-muted); }
-    /* As wide as "any distance" (12 monospace characters), so the slider keeps its length. */
-    #distance-label { flex: none; min-width: 0; width: 12ch; white-space: nowrap; font: var(--meta); font-weight: 700; color: var(--text); text-align: right; }
+    /* As wide as "any distance", so the slider keeps its length. */
+    #distance-label {
+      flex: none;
+      min-width: 0;
+      width: 12ch;
+      white-space: nowrap;
+      font: var(--label);
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+      text-align: right;
+    }
     .filters { display: block; margin: 0; }
     /* The label holds the label column, so chips that wrap stay on the control line. */
     .filter-group {
@@ -844,58 +716,79 @@
     #zip-input, .search-box {
       height: var(--h-input);
       padding: 0 var(--space-3);
-      border: var(--rule) solid var(--text);
-      border-radius: 0;
-      background: var(--card-bg);
-      box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--riso-blue);
-      font: var(--meta);
+      border: 1px solid var(--rule-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font: var(--body);
       color: var(--text);
     }
     #zip-input { width: 200px; padding-right: var(--space-6); }
     .search-box { flex: 1; min-width: 0; margin: 0; }
-    #zip-input:focus, .search-box:focus { outline: none; border-color: var(--text); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--accent); }
+    #zip-input:hover, .search-box:hover { border-color: var(--text-muted); }
+    #zip-input:focus, .search-box:focus { outline: none; border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
     #place-toggle { width: var(--space-6); }
+
+    /* Use my location: a round button with a navigation arrow, filled with ink while distances
+       are measured from you (the same "selected" look as a chip). */
+    .locate-btn {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--h-input);
+      height: var(--h-input);
+      padding: 0;
+      border: 1px solid var(--rule-strong);
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .locate-btn:hover { border-color: var(--text); }
+    /* The arrow's point sits up and right of its box's center; nudge it so it looks centered. */
+    .locate-btn svg { width: 18px; height: 18px; transform: translate(-1px, 1px); fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+    .locate-btn[data-state="on"] { background: var(--text); border-color: var(--text); color: var(--surface); }
+    .locate-btn[data-state="on"] svg { fill: currentColor; }
+    .locate-btn[data-state="locating"] svg { animation: locating 1s ease-in-out infinite; }
+    @keyframes locating { 50% { opacity: 0.25; } }
+    @media (prefers-reduced-motion: reduce) { .locate-btn[data-state="locating"] svg { animation: none; opacity: 0.4; } }
     #place-options {
-      top: calc(100% + var(--space-2));
+      top: calc(100% + var(--space-1));
       width: 240px;
       /* No wider than the field, which on a 320px phone is narrower than 240px. */
       max-width: 100%;
       padding: var(--space-1);
-      border: var(--rule) solid var(--text);
-      border-radius: 0;
-      box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--text);
+      border: 1px solid var(--rule-strong);
+      border-radius: var(--radius);
+      /* The one shadow on the page: a list that opens over the page has to read as above it. */
+      box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
     }
-    #place-options li { padding: var(--space-2) var(--space-3); border-radius: 0; font: var(--meta); }
-    #place-options li .count { font: var(--meta); color: var(--text-muted); }
-    #place-options li.active, #place-options li[data-i]:hover { background: var(--riso-yellow); }
+    #place-options li { padding: var(--space-2) var(--space-3); border-radius: 4px; font: var(--small); }
+    #place-options li .count { font: var(--small); font-variant-numeric: tabular-nums; color: var(--text-muted); }
+    #place-options li.active, #place-options li[data-i]:hover { background: var(--hover); }
 
-    /* Chips: When are pills in Archivo; What are the category tags, in their own ink. */
+    /* Chips: outlined pills. A selected When chip fills with ink; a selected What chip with its
+       category's color, which otherwise shows only as the dot. */
     .filter-btn {
       display: inline-flex;
       align-items: center;
+      gap: 6px;
       height: var(--h-chip);
       padding: 0 var(--space-3);
-      border: var(--rule) solid var(--text);
+      border: 1px solid var(--rule-strong);
       border-radius: 999px;
-      background: var(--card-bg);
-      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
-      font: var(--ui);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--text);
-      transition: transform 0.1s, box-shadow 0.1s;
-    }
-    .filter-btn:hover { border-color: var(--text); transform: translate(-1px, -1px); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--text); }
-    .filter-btn.active { background: var(--accent); border-color: var(--text); color: var(--text); transform: translate(1px, 1px); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
-    .filter-btn[data-category] {
-      border-radius: 0;
+      background: var(--surface);
       font: var(--label);
-      letter-spacing: 1px;
-      background: color-mix(in srgb, var(--chip) 16%, var(--card-bg));
-      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--chip);
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text);
+      transition: background-color 0.1s, border-color 0.1s;
     }
-    .filter-btn[data-category]:hover { box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--chip); }
-    .filter-btn[data-category].active { color: #fff; background: var(--chip); border-color: var(--text); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
+    .filter-btn:hover { border-color: var(--text); }
+    .filter-btn.active { background: var(--text); border-color: var(--text); color: var(--surface); }
+    .filter-btn[data-category]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--chip); }
+    .filter-btn[data-category].active { background: var(--chip); border-color: var(--chip); color: #fff; }
+    .filter-btn[data-category].active::before { background: #fff; }
     .filter-btn[data-category="music"] { --chip: var(--tag-music); }
     .filter-btn[data-category="food"] { --chip: var(--tag-food); }
     .filter-btn[data-category="culture"] { --chip: var(--tag-culture); }
@@ -910,30 +803,31 @@
       display: inline-flex;
       align-items: center;
       height: var(--h-button-s);
-      padding: 0 var(--space-2);
-      border: var(--rule) solid var(--text);
-      background: var(--riso-yellow);
-      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
+      padding: 0 var(--space-3);
+      border: 1px solid var(--rule-strong);
+      border-radius: 999px;
+      background: var(--surface);
+      font: var(--label);
+      color: var(--text);
       cursor: pointer;
     }
+    .clear-filters:hover, .jump-filters:hover, .started-toggle:hover { border-color: var(--text); }
+    .started-toggle { margin-left: auto; }
+    .started-toggle[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: var(--surface); }
 
-    .jump-filters { background: var(--accent); }
-    .started-toggle { margin-left: var(--space-3); background: var(--card-bg); }
-    .started-toggle[aria-pressed="true"] { background: var(--riso-yellow); transform: translate(1px, 1px); box-shadow: var(--shadow-pressed) var(--shadow-pressed) 0 var(--text); }
-
-    .view-toggle { gap: var(--space-1); }
+    /* List / Calendar: one outlined control, the current view filled in. */
+    .view-toggle { gap: 0; padding: 2px; border: 1px solid var(--rule-strong); border-radius: 999px; }
     .view-btn {
-      height: var(--h-chip);
+      height: calc(var(--h-button-s) - 2 * 2px);
       padding: 0 var(--space-3);
-      border: var(--rule) solid var(--text);
-      border-radius: 0;
-      background: var(--card-bg);
-      font: var(--ui);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--text);
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      font: var(--label);
+      color: var(--text-muted);
     }
-    .view-btn.active { background: var(--text); border-color: var(--text); color: var(--riso-yellow); }
+    .view-btn:hover { color: var(--text); }
+    .view-btn.active { background: var(--text); color: var(--surface); }
 
     /* ─ Results bar: count and active filters, pinned while scrolling through results ─ */
     .results-bar {
@@ -941,6 +835,7 @@
       top: 0;
       z-index: 30;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: var(--space-3);
@@ -948,148 +843,148 @@
       padding: var(--space-3) var(--gutter);
       /* Background and rule painted out to the browser's edges (border-image outset doesn't
          widen the page), so the bar also spans the wider calendar beneath it. */
-      border-bottom: var(--rule) solid transparent;
-      border-image: linear-gradient(to top, var(--text) 2px, var(--bg) 2px) fill 0 / 0 0 2px / 0 100vmax;
+      border-bottom: 1px solid transparent;
+      border-image: linear-gradient(to top, var(--rule) 1px, var(--bg) 1px) fill 0 / 0 0 1px / 0 100vmax;
     }
-    .results-bar { flex-wrap: wrap; }
     /* Sized to its text: the buttons drop to their own line only when the summary is long. */
-    .results-bar .stats { flex: 1 1 auto; margin: 0; line-height: var(--h-button-s); }
-    .results-actions { margin-left: auto; }
-    .results-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; }
+    .results-bar .stats {
+      flex: 1 1 auto;
+      margin: 0;
+      font: var(--label);
+      line-height: var(--h-button-s);
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .results-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; margin-left: auto; }
 
-    /* ─ Section headings: highlighter over big type ─ */
+    /* ─ Section headings: big type on a 2px ink rule, the count beside it. Tonight's rule is
+       orange, as everything happening now is. ─ */
     .section-header {
       display: flex;
-      align-items: center;
-      width: fit-content;
-      margin: var(--space-7) 0 var(--space-4);
-      padding: 0 var(--space-2) 0 0;
-      border: none;
-      font: var(--display-l);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: linear-gradient(transparent 55%, var(--riso-yellow) 55% 92%, transparent 92%);
+      align-items: baseline;
+      gap: var(--space-2);
+      margin: var(--space-7) 0 0;
+      padding: 0 0 var(--space-2);
+      border-bottom: 2px solid var(--text);
+      font: var(--heading);
+      letter-spacing: var(--tight);
     }
     .section-header:first-of-type { margin-top: var(--space-5); }
-    .section-header .event-count {
-      margin-left: var(--space-3);
-      padding: var(--space-1) var(--space-2);
-      color: #fff;
-      background: var(--accent);
-      transform: rotate(4deg);
-    }
+    .section-header .event-count { margin: 0; font: var(--label); font-variant-numeric: tabular-nums; letter-spacing: 0; color: var(--text-muted); }
+    .section-header[data-bucket="tonight"] { border-color: var(--accent); }
+    .section-header[data-bucket="tonight"] .event-count { color: var(--accent-ink); }
 
-    /* ─ Cards: flyers pinned up slightly crooked, shadowed in their category's ink ─ */
+    /* ─ Events: ruled rows, the date big in its own column ─ */
     .event-card {
-      --ink: var(--riso-blue);
-      position: relative;
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr);
       gap: var(--space-4);
-      margin: 0 var(--shadow-l) var(--space-5) 0;
-      padding: var(--space-4);
-      border: var(--rule) solid var(--text);
-      background: var(--card-bg);
-      box-shadow: var(--shadow-l) var(--shadow-l) 0 var(--ink);
-      transform: rotate(var(--tilt, 0deg));
-      transition: transform 0.15s, box-shadow 0.15s;
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--rule);
     }
-    .event-card:last-child { border-bottom: var(--rule) solid var(--text); }
-    .event-card:nth-child(3n) { --tilt: -0.7deg; }
-    .event-card:nth-child(3n + 1) { --tilt: 0.45deg; }
-    .event-card:nth-child(3n + 2) { --tilt: -0.2deg; }
-    .event-card:hover { transform: rotate(0deg) translate(-2px, -2px); box-shadow: calc(var(--shadow-l) + 2px) calc(var(--shadow-l) + 2px) 0 var(--ink); }
-    .event-card:has(.tag-music) { --ink: var(--tag-music); }
-    .event-card:has(.tag-food) { --ink: var(--tag-food); }
-    .event-card:has(.tag-culture) { --ink: var(--tag-culture); }
-    .event-card:has(.tag-nature) { --ink: var(--tag-nature); }
-    .event-card:has(.tag-community) { --ink: var(--tag-community); }
-    .event-card:has(.tag-nightlife) { --ink: var(--tag-nightlife); }
-    .event-card:has(.tag-wellness) { --ink: var(--tag-wellness); }
-    .event-date-col { width: 56px; padding: 0; }
-    .event-date-col .day-name {
-      display: inline-block;
-      padding: 2px var(--space-1);
-      font: var(--label);
-      letter-spacing: 1px;
-      color: var(--text);
-      background: var(--riso-yellow);
-    }
-    .event-date-col .day-num { margin-top: var(--space-1); font: var(--display-m); }
+    .event-card:last-child { border-bottom: 1px solid var(--rule); }
+    /* Only cards on screen get laid out and painted, so a list of a thousand re-renders as fast
+       as one of a dozen. The browser remembers each card's height once seen; 140px is a typical
+       row, used until then. */
+    .event-card { content-visibility: auto; contain-intrinsic-size: auto 140px; }
+    .event-date-col { width: auto; padding: 0; text-align: left; }
+    .event-date-col .day-name { font: var(--label); text-transform: none; letter-spacing: 0; color: var(--text-muted); }
+    .event-date-col .day-num { margin: 2px 0; font: 800 30px/1 var(--font); font-variant-numeric: tabular-nums; letter-spacing: var(--tight); }
     .event-name { font: var(--title); }
-    .event-meta { margin-top: var(--space-1); font: var(--meta); color: var(--text); }
-    .event-desc { margin-top: var(--space-2); font: var(--body); color: var(--text-muted); }
-    .event-link:hover { text-decoration: none; background: var(--riso-yellow); }
-    .link-icon { font-size: 12px; }
-    .event-tag, .distance-badge {
+    .event-link:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .link-icon {
+      width: 11px;
+      height: 11px;
+      margin-left: 6px;
+      vertical-align: 0;
+      fill: none;
+      stroke: var(--text-muted);
+      stroke-width: 1.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 1;
+    }
+    .event-link:hover .link-icon { stroke: var(--accent); }
+    .event-meta { margin-top: var(--space-1); font: var(--small); color: var(--text); }
+    .event-desc { margin-top: var(--space-1); font: var(--small); color: var(--text-muted); }
+    /* Category and distance share one line: a dot in the category's color, then plain text. */
+    .event-tag {
       display: inline-flex;
       align-items: center;
-      gap: var(--space-1);
-      height: var(--h-tag);
-      margin: var(--space-3) var(--space-1) 0 0;
-      padding: 0 var(--space-2);
-      border: var(--rule) solid var(--text);
-      border-radius: 0;
-      font: var(--micro);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      vertical-align: top;
-    }
-    .event-tag { color: #fff; }
-    .distance-badge { color: var(--text); }
-    .distance-close { background: #7ee2a8; }
-    .distance-medium { background: var(--riso-yellow); }
-    .distance-far { background: #ff9bc9; }
-    .event-sources { margin-top: var(--space-3); font: var(--meta-s); color: var(--text-muted); }
-    .event-sources a { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: var(--rule); }
-
-    /* ─ Calendar: columns of plain type; rules run across, not down ─ */
-    .cal-week-nav { margin: var(--space-4) 0 var(--space-3); }
-    .cal-week-nav button {
-      height: var(--h-chip);
-      padding: 0 var(--space-3);
-      border: var(--rule) solid var(--text);
-      border-radius: 0;
-      background: var(--card-bg);
-      box-shadow: var(--shadow-s) var(--shadow-s) 0 var(--text);
-      font: var(--ui);
-      text-transform: uppercase;
-    }
-    .cal-week-label { font: var(--display-s); text-transform: uppercase; }
-    .cal-grid { gap: var(--space-2); }
-    .cal-day { padding: var(--space-3); border: var(--rule) solid var(--text); border-radius: 0; background: var(--card-bg); }
-    .cal-day.today { border-color: var(--text); background: #fff6b8; box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--accent); }
-    .cal-day-header {
-      margin-bottom: var(--space-3);
-      padding-bottom: var(--space-2);
-      border-bottom: var(--rule) solid var(--text);
-      font: var(--label);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text);
-    }
-    .cal-day-header .cal-day-num { margin-left: var(--space-1); font: var(--display-s); }
-    .cal-event {
-      margin: 0;
-      padding: var(--space-3) 0;
-      border: none;
-      border-top: var(--rule-thin) solid color-mix(in srgb, var(--text) 18%, transparent);
+      gap: 6px;
+      height: auto;
+      margin: var(--space-2) var(--space-4) 0 0;
+      padding: 0;
+      border: 0;
       border-radius: 0;
       background: none;
+      font: var(--label);
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text);
+      vertical-align: top;
     }
+    .event-tag::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+
+    /* ─ Compass: a weather vane pointing which way, and the miles, from your place. ─ */
+    .compass { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); margin-top: var(--space-3); }
+    .compass svg { display: block; width: 34px; height: 34px; }
+    .compass .tick, .cal-event-dist .tick { stroke: var(--rule-strong); stroke-width: 1.6; stroke-linecap: round; }
+    .compass .vane-shaft, .cal-event-dist .vane-shaft { stroke: var(--text); stroke-width: 1.8; }
+    .compass .vane-fill, .cal-event-dist .vane-fill { fill: var(--text); }
+    .compass-mi { font: var(--label); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tag-music { --ink: var(--tag-music); }
+    .tag-food { --ink: var(--tag-food); }
+    .tag-culture { --ink: var(--tag-culture); }
+    .tag-nature { --ink: var(--tag-nature); }
+    .tag-community { --ink: var(--tag-community); }
+    .tag-nightlife { --ink: var(--tag-nightlife); }
+    .tag-wellness { --ink: var(--tag-wellness); }
+    .tag-other { --ink: var(--tag-other); }
+    .event-sources { margin-top: var(--space-2); font: var(--small); color: var(--text-muted); }
+    .event-sources a { color: var(--text-muted); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 2px; }
+    .event-sources a:hover { color: var(--text); text-decoration-color: var(--accent); }
+    .source-sep { color: var(--rule-strong); }
+
+    .empty-state { font: var(--body); color: var(--text-muted); }
+
+    /* ─ Calendar: columns of plain type under a 2px rule; today's rule is orange ─ */
+    .cal-week-nav { margin: var(--space-4) 0 var(--space-3); }
+    .cal-week-nav button {
+      height: var(--h-button-s);
+      padding: 0 var(--space-3);
+      border: 1px solid var(--rule-strong);
+      border-radius: 999px;
+      background: var(--surface);
+      font: var(--label);
+      color: var(--text);
+    }
+    .cal-week-nav button:hover { border-color: var(--text); }
+    .cal-week-label { font: var(--heading-s); letter-spacing: var(--tight); }
+    .cal-grid { gap: var(--space-3); }
+    .cal-day { padding: var(--space-2) 0 0; border: 0; border-top: 2px solid var(--text); border-radius: 0; background: none; }
+    .cal-day.today { border-width: 2px 0 0; border-color: var(--accent); }
+    .cal-day-header { margin-bottom: var(--space-2); font: var(--label); color: var(--text-muted); }
+    .cal-day-header .cal-day-num { margin-left: var(--space-1); font: var(--heading-s); font-variant-numeric: tabular-nums; color: var(--text); }
+    .cal-day.today .cal-day-header, .cal-day.today .cal-day-num { color: var(--accent-ink); }
+    .cal-event { margin: 0; padding: var(--space-2) 0; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: none; }
     .cal-day-header + .cal-event { border-top: none; padding-top: 0; }
-    .cal-event:hover { background: var(--riso-yellow); }
+    .cal-event:hover { background: var(--hover); }
+    /* Time left, distance right; the distance drops under a long time range rather than being cut off. */
     .cal-event-meta {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
-      gap: var(--space-2);
+      gap: 2px var(--space-2);
       font: var(--micro);
       white-space: nowrap;
     }
     .cal-event-time { color: var(--text); }
-    .cal-event-dist { font-weight: 400; color: var(--text-muted); }
-    .cal-event-dist .direction-arrow { margin-right: 2px; font-size: 10px; }
+    .cal-event-dist { display: inline-flex; align-items: center; gap: 3px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+    .cal-event-dist svg { flex: none; width: 13px; height: 13px; }
     .cal-event-name {
       display: -webkit-box;
-      margin-top: var(--space-1);
+      margin-top: 2px;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
@@ -1099,37 +994,33 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      font: var(--meta-s);
+      font: var(--micro);
+      font-weight: 400;
       color: var(--text-muted);
     }
     .cal-event .event-tag {
       max-width: 100%;
-      height: 16px;
-      margin: var(--space-2) 0 0;
-      padding: 0 var(--space-1);
-      border-width: var(--rule-thin);
+      margin: var(--space-1) 0 0;
+      font: var(--micro);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
+    .cal-event .event-tag::before { width: 6px; height: 6px; }
 
-    .tooltip { padding: var(--space-3); border-radius: 0; background: var(--text); box-shadow: var(--shadow-m) var(--shadow-m) 0 var(--accent); font: var(--meta); }
-    .tooltip .tt-name { font: var(--title-s); color: var(--riso-yellow); }
-    .tooltip .tt-meta, .tooltip .tt-desc { font: var(--meta-s); }
+    .tooltip { padding: var(--space-3); border-radius: var(--radius); background: var(--text); box-shadow: none; font: var(--small); }
+    .tooltip .tt-name { font: var(--title-s); color: #fff; }
+    .tooltip .tt-meta, .tooltip .tt-desc { font: var(--micro); font-weight: 400; }
 
     /* Touch screens: a thumb-sized slider handle, and 16px text in the text fields, below which
        iOS Safari zooms the page in when one is tapped. */
     @media (pointer: coarse) {
-      :root { --thumb: 32px; }
+      :root { --thumb: 28px; }
       #zip-input, .search-box { font-size: 16px; }
     }
 
     @media (max-width: 600px) {
-      :root {
-        --label-col: 56px;
-        --display-l: 400 36px/1 "Anton", sans-serif;
-        --display-xs: 400 16px/1 "Anton", sans-serif;
-      }
+      :root { --label-col: 56px; }
 
       /* One sideways-scrolling row per filter group instead of five wrapped rows. */
       .filter-group {
@@ -1139,7 +1030,6 @@
         /* Bleed to both screen edges so chips scroll off the edge, not short of it. */
         width: calc(100% + 2 * var(--gutter));
         margin: 0 calc(-1 * var(--gutter)) var(--space-3);
-        /* The same row box as everywhere else, chips centered, room left for their shadows. */
         padding: calc((var(--h-input) - var(--h-chip)) / 2) var(--gutter);
       }
       .filter-group::-webkit-scrollbar { display: none; }
@@ -1157,12 +1047,11 @@
       #zip-input { width: 100%; }
       .place-picker { flex: 1; }
 
-      /* A smaller poster so the first events fit on the first screen. */
-      .poster-header { margin-bottom: var(--space-5); }
-      .poster-header h1 { font-size: 15vw; }
-      .halftone { width: 152px; height: 152px; top: var(--space-3); right: calc(-1 * var(--space-5)); }
-      .ticker { margin-top: var(--space-4); }
-      .ticker-track { padding: var(--space-1) 0; }
+      .section-header { font-size: 24px; }
+      .event-card { grid-template-columns: 44px minmax(0, 1fr); gap: var(--space-3); }
+      .event-date-col .day-num { font-size: 26px; }
+      .compass svg { width: 30px; height: 30px; }
+      .compass-mi { font: var(--micro); }
       .view-btn { padding: 0 var(--space-2); }
     }
   </style>
@@ -1170,12 +1059,11 @@
 </head>
 <body>
   <div class="container">
-    <header class="poster-header">
-      <div class="halftone" aria-hidden="true"></div>
-      <div class="poster-top"><span id="issue">Vol. 1</span><span class="poster-links"><a href="board.html">Flyer board <span class="beta">beta</span></a><a href="sources.html">Sources ↗</a></span></div>
-      <h1><span class="l1">Catskills</span><span class="l2">Events</span></h1>
-      <p class="poster-sub">Scraped every morning from local Instagrams, newsletters &amp; calendars.</p>
-      <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span><span>Live music</span><span class="star">★</span><span>Barn dances</span><span class="star">★</span><span>Fire towers</span><span class="star">★</span><span>Cider</span><span class="star">★</span><span>Open mics</span><span class="star">★</span><span>Film nights</span><span class="star">★</span><span>Hoedowns</span><span class="star">★</span></div></div>
+    <header class="masthead">
+      <nav class="masthead-nav"><a href="board.html">Flyer board<span class="beta">beta</span></a><a href="sources.html">Sources</a></nav>
+      <h1>Catskills Events</h1>
+      <p class="masthead-sub">Scraped every morning from local Instagrams, newsletters and calendars.</p>
+      <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"><span>Live music</span><span class="sep"></span><span>Barn dances</span><span class="sep"></span><span>Fire towers</span><span class="sep"></span><span>Cider</span><span class="sep"></span><span>Open mics</span><span class="sep"></span><span>Film nights</span><span class="sep"></span><span>Hoedowns</span><span class="sep"></span><span>Live music</span><span class="sep"></span><span>Barn dances</span><span class="sep"></span><span>Fire towers</span><span class="sep"></span><span>Cider</span><span class="sep"></span><span>Open mics</span><span class="sep"></span><span>Film nights</span><span class="sep"></span><span>Hoedowns</span><span class="sep"></span></div></div>
     </header>
 
     <!-- Location first: distance is the main way people narrow the list. -->
@@ -1189,6 +1077,9 @@
         </button>
         <ul id="place-options" role="listbox" hidden></ul>
       </div>
+      <button type="button" id="locate-me" class="locate-btn" data-state="idle" aria-pressed="false" aria-label="Use my location" title="Use my location">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 22 2l-9 19-2-8z"/></svg>
+      </button>
       <span id="location-label"></span>
       <!-- Kept together so "within" never wraps away from its slider. -->
       <div class="where-range">
@@ -1203,8 +1094,8 @@
         <div class="filter-group-label">When</div>
         <button class="filter-btn active" data-time="all">All</button>
         <button class="filter-btn" data-time="tonight">Tonight</button>
-        <button class="filter-btn" data-time="week">This Week</button>
-        <button class="filter-btn" data-time="month">This Month</button>
+        <button class="filter-btn" data-time="week">This week</button>
+        <button class="filter-btn" data-time="month">This month</button>
       </div>
       <div class="filter-group">
         <div class="filter-group-label">What</div>
@@ -1255,7 +1146,13 @@
     let homeLat = null, homeLng = null;
     // Your place is a zip or a town name. The key predates towns, so saved zips carry over.
     const PLACE_KEY = 'catskills-events:zip';
-    function savedPlace() { try { return localStorage.getItem(PLACE_KEY) || ''; } catch { return ''; } }
+    // "My location" is never restored: the page only looks you up when you click the button.
+    function savedPlace() {
+      try {
+        const place = localStorage.getItem(PLACE_KEY) || '';
+        return place === MY_LOCATION ? '' : place;
+      } catch { return ''; }
+    }
     function savePlace(place) { try { place ? localStorage.setItem(PLACE_KEY, place) : localStorage.removeItem(PLACE_KEY); } catch {} }
     let currentPlace = '';
 
@@ -1313,6 +1210,7 @@
     }
 
     function computeDistances() {
+      cardCache.clear();
       for (const e of allEvents) {
         if (homeLat != null && e._lat != null && e._lng != null) {
           e._miles = Math.round(haversine(homeLat, homeLng, e._lat, e._lng));
@@ -1360,7 +1258,7 @@
       if (maxDistance < 120) p.set('dist', maxDistance);
       if (calWeekOffset) p.set('week', calWeekOffset);
       // The place always rides in the URL, so any link carries it.
-      if (currentPlace) p.set(/^\d{5}$/.test(currentPlace) ? 'zip' : 'near', currentPlace);
+      if (currentPlace && currentPlace !== MY_LOCATION) p.set(/^\d{5}$/.test(currentPlace) ? 'zip' : 'near', currentPlace);
       const str = p.toString();
       history.replaceState(null, '', str ? '?' + str : location.pathname);
     }
@@ -1455,8 +1353,57 @@
       else geocodeTown(value);
     }
 
+    // "My location" is a place like a town, measured from where the browser says you are. It lasts
+    // until you reload: it isn't saved or written to the URL, so the page never locates you
+    // without a click, and a shared link never carries where you were.
+    const MY_LOCATION = 'My location';
+    const LOCATE_TIMEOUT_MS = 10000;
+    // A fix up to five minutes old is close enough; reusing it skips waiting for a new one.
+    const LOCATE_MAX_AGE_MS = 5 * 60 * 1000;
+
+    // idle, locating, or on (distances are from you). A message, if any, shows beside the box.
+    function setLocateState(state, message = '') {
+      const btn = document.getElementById('locate-me');
+      btn.dataset.state = state;
+      btn.setAttribute('aria-pressed', String(state === 'on'));
+      if (message) document.getElementById('location-label').textContent = message;
+    }
+
+    // Closer than this to a known town, you're "near" it; farther, the label says how far.
+    const NEAR_TOWN_MILES = 5;
+
+    // Where the browser put you, in words, so you can see it worked: the closest town the page
+    // already has coordinates for (the hub towns and every event's town). Worked out here, so
+    // your position isn't sent anywhere.
+    function whereYouAre(lat, lng) {
+      let best = null;
+      const consider = (name, townLat, townLng) => {
+        const miles = haversine(lat, lng, townLat, townLng);
+        if (!best || miles < best.miles) best = { name, miles };
+      };
+      for (const place of PLACES) consider(place.name, place.lat, place.lng);
+      for (const e of allEvents) if (e.town && e._lat != null && e._lng != null) consider(e.town, e._lat, e._lng);
+      if (!best) return '';
+      return best.miles < NEAR_TOWN_MILES ? `near ${best.name}` : `${Math.round(best.miles)} mi from ${best.name}`;
+    }
+
+    // Asks the browser for your position; the first time, that's its permission prompt.
+    function locate() {
+      if (!navigator.geolocation) return setLocateState('idle', 'Location isn’t available in this browser');
+      setLocateState('locating', 'Finding you…');
+      navigator.geolocation.getCurrentPosition(pos => {
+        currentPlace = MY_LOCATION;
+        document.getElementById('zip-input').value = MY_LOCATION;
+        setHome(pos.coords.latitude, pos.coords.longitude, 'you');
+        setLocateState('on', whereYouAre(pos.coords.latitude, pos.coords.longitude));
+      }, err => {
+        // A failed refresh keeps the position you already had.
+        const stillOn = currentPlace === MY_LOCATION && homeLat != null;
+        setLocateState(stillOn ? 'on' : 'idle', err.code === err.PERMISSION_DENIED ? 'Location is blocked for this site' : 'Couldn’t find your location');
+      }, { timeout: LOCATE_TIMEOUT_MS, maximumAge: LOCATE_MAX_AGE_MS });
+    }
+
     async function init() {
-      showIssueNumber();
       const res = await fetch('./output/events.json');
       allEvents = await res.json();
       readFromUrl();
@@ -1464,16 +1411,6 @@
       render();
       bindFilters();
       fillTicker();
-    }
-
-    // Volume and issue: years and days since the first scrape on June 29, 2026.
-    function showIssueNumber() {
-      const launch = new Date(2026, 5, 29);
-      const now = new Date();
-      const issue = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - launch) / 864e5) + 1;
-      let vol = now.getFullYear() - launch.getFullYear();
-      if (now.getMonth() > 5 || (now.getMonth() === 5 && now.getDate() >= 29)) vol++;
-      document.getElementById('issue').textContent = `Vol. ${vol} · No. ${issue}`;
     }
 
     // The ticker scrolls through what's actually on in the next week; with too few events
@@ -1488,7 +1425,7 @@
         .sort(() => Math.random() - 0.5)
         .slice(0, 16);
       if (picks.length < 6) return;
-      const run = picks.map(e => `<span>${esc(e.name)}${e.town ? ` <em>${esc(e.town)}</em>` : ''}</span><span class="star">★</span>`).join('');
+      const run = picks.map(e => `<span>${esc(e.name)}${e.town ? ` <em>${esc(e.town)}</em>` : ''}</span><span class="sep"></span>`).join('');
       const track = document.getElementById('ticker');
       track.innerHTML = run + run;
       track.style.animationDuration = `${picks.length * 5}s`;
@@ -1528,10 +1465,14 @@
 
       const slider = document.getElementById('distance-slider');
       const distLabel = document.getElementById('distance-label');
+      let renderFrame = 0;
       slider.addEventListener('input', () => {
         maxDistance = parseInt(slider.value);
         distLabel.textContent = distanceText();
-        render();
+        paintSlider();
+        // Scrubbing fires input several times a frame; render the list at most once per frame.
+        cancelAnimationFrame(renderFrame);
+        renderFrame = requestAnimationFrame(render);
       });
 
       document.querySelectorAll('.view-btn').forEach(btn => {
@@ -1600,6 +1541,7 @@
       }
 
       function choose(place) {
+        setLocateState('idle');
         currentPlace = place;
         input.value = place;
         savePlace(place);
@@ -1642,6 +1584,8 @@
           input.blur();
         }
       });
+
+      document.getElementById('locate-me').addEventListener('click', locate);
 
       // The caret opens the list, or closes it if open. mousedown keeps the input's focus.
       document.getElementById('place-toggle').addEventListener('mousedown', e => {
@@ -1755,8 +1699,17 @@
       render();
     }
 
+    // Safari throws once the URL is replaced about 100 times in 10 seconds, which scrubbing the
+    // slider would do; write it once the filters settle instead.
+    const URL_SYNC_DELAY_MS = 250;
+    let urlTimer = 0;
+    function scheduleUrlSync() {
+      clearTimeout(urlTimer);
+      urlTimer = setTimeout(syncToUrl, URL_SYNC_DELAY_MS);
+    }
+
     function render() {
-      syncToUrl();
+      scheduleUrlSync();
       paintSlider();
       const filtered = allEvents.filter(e => matchesFilters(e));
       // Tonight's events that would show but have already started, hidden or not.
@@ -1779,7 +1732,7 @@
 
     function renderList(filtered, container, startedTonight = 0) {
       const bucketOrder = ['tonight', 'week', 'month', 'later'];
-      const bucketLabels = { tonight: 'Tonight', week: 'This Week', month: 'This Month', later: 'Coming Up' };
+      const bucketLabels = { tonight: 'Tonight', week: 'This week', month: 'This month', later: 'Coming up' };
       const grouped = {};
       for (const e of filtered) {
         const bucket = classifyTime(e);
@@ -1787,7 +1740,7 @@
         grouped[bucket].push(e);
       }
 
-      let html = '';
+      const list = [];
       for (const bucket of bucketOrder) {
         const events = grouped[bucket] || [];
         // Tonight stays when everything started was hidden, so its toggle can bring it back.
@@ -1800,15 +1753,47 @@
         const toggle = bucket === 'tonight' && startedTonight
           ? `<button type="button" class="started-toggle" data-toggle="hide-started" aria-pressed="${hideStarted}">${hideStarted ? `Show ${startedTonight} started` : `Hide ${startedTonight} started`}</button>`
           : '';
-        html += `<div class="section-header">${bucketLabels[bucket]}<span class="event-count">${events.length}</span>${toggle}</div>`;
+        list.push(fromHtml(`<div class="section-header" data-bucket="${bucket}">${bucketLabels[bucket]}<span class="event-count">${events.length}</span>${toggle}</div>`).firstElementChild);
 
         const showMonth = bucket === 'month' || bucket === 'later';
         for (const e of events) {
-          html += renderEventCard(e, showMonth);
+          list.push(cardFor(e, showMonth));
         }
       }
 
-      container.innerHTML = html;
+      patchChildren(container, list);
+    }
+
+    // Make the container's children exactly `nodes`, touching only what changed: scrubbing the
+    // distance drops or adds a few cards per step, and re-inserting the rest would make the browser
+    // restyle all of them. The list's order never changes, so once the dropped nodes are gone,
+    // what's left is already in order and only the new ones need inserting.
+    function patchChildren(container, nodes) {
+      const keep = new Set(nodes);
+      for (const child of [...container.children]) if (!keep.has(child)) child.remove();
+      let at = container.firstElementChild;
+      for (const node of nodes) {
+        if (node === at) at = at.nextElementSibling;
+        else container.insertBefore(node, at);
+      }
+    }
+
+    // Each event's card is built once and reused, so re-rendering moves existing nodes rather
+    // than parsing a thousand cards of HTML again. computeDistances() empties it, since every
+    // card's compass depends on your place.
+    const cardCache = new Map(); // event -> { el, showMonth }
+    function cardFor(e, showMonth) {
+      const cached = cardCache.get(e);
+      if (cached && cached.showMonth === showMonth) return cached.el;
+      const el = fromHtml(renderEventCard(e, showMonth)).firstElementChild;
+      cardCache.set(e, { el, showMonth });
+      return el;
+    }
+
+    function fromHtml(html) {
+      const t = document.createElement('template');
+      t.innerHTML = html.trim();
+      return t.content;
     }
 
     function renderEventCard(e, showMonth) {
@@ -1829,13 +1814,13 @@
             <div class="day-name">${monthLabel ? monthLabel : dayName}</div>
             <div class="day-num">${dayNum}</div>
             ${monthLabel ? `<div class="day-name">${dayName}</div>` : ''}
+            ${compass(e)}
           </div>
           <div class="event-body">
-            <div class="event-name">${e.url ? `<a href="${esc(e.url)}" target="_blank" class="event-link">${esc(e.name)} <span class="link-icon">&#x1F517;</span></a>` : esc(e.name)}</div>
+            <div class="event-name">${e.url ? `<a href="${esc(e.url)}" target="_blank" class="event-link">${esc(e.name)}${OUTBOUND_ICON}</a>` : esc(e.name)}</div>
             ${metaParts ? `<div class="event-meta">${esc(metaParts)}</div>` : ''}
             ${e.description ? `<div class="event-desc">${esc(e.description)}</div>` : ''}
             <span class="event-tag ${tagClass}">${CATEGORY_LABELS[cat] || cat}</span>
-            ${distanceBadge(e)}
             ${sourceLinks}
           </div>
         </div>`;
@@ -1911,18 +1896,40 @@
       container.innerHTML = html;
     }
 
-    function calDistance(e) {
-      if (e._miles == null) return '';
-      const deg = e._bearing != null ? Math.round(e._bearing) : 0;
-      return `<span class="cal-event-dist"><span class="direction-arrow" style="transform:rotate(${deg}deg)">↑</span>${e._miles} mi</span>`;
+    // "Opens another site": a box with an arrow leaving it, so it never reads as a direction.
+    const OUTBOUND_ICON = '<svg class="link-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M5 2H2v8h8V7M7 1h4v4M11 1 5.5 6.5"/></svg>';
+
+    // Eight-point name of a bearing (0 = north, clockwise), for the compass's label.
+    const POINTS = ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'];
+    // 45° per point: rounding gives each name the bearings within 22.5° of it.
+    const pointName = deg => POINTS[Math.round(deg / 45) % POINTS.length];
+    // Closer than this the bearing means little, so the compass shows a dot instead of a needle.
+    const HERE_MILES = 1;
+
+    // A weather vane: faint ticks at the four cardinal points, and an arrow with a feathered tail
+    // turned toward the event. Drawn on a 32-unit square, the vane 27 long through the center.
+    function compassSvg(e) {
+      const vane = e._miles < HERE_MILES || e._bearing == null
+        ? '<circle class="vane-fill" cx="16" cy="16" r="3.5"/>'
+        : `<g transform="rotate(${Math.round(e._bearing)} 16 16)"><path class="vane-shaft" d="M16 6v19"/><path class="vane-fill" d="M16 2.5 20.5 10 16 8.4 11.5 10Z"/><path class="vane-fill" d="M16 21.5 20 25.5V29.5L16 25.5 12 29.5V25.5Z"/></g>`;
+      return `<svg viewBox="0 0 32 32" aria-hidden="true"><path class="tick" d="M16 .8v2.4M31.2 16h-2.4M16 31.2v-2.4M.8 16h2.4"/>${vane}</svg>`;
     }
 
-    function distanceBadge(e) {
+    function compassLabel(e) {
+      return e._miles < HERE_MILES || e._bearing == null ? 'here' : `${e._miles} mi`;
+    }
+
+    // Under the date in a list row: the dial, and the miles beneath it.
+    function compass(e) {
       if (e._miles == null) return '';
-      const mi = e._miles;
-      const cls = mi <= 15 ? 'distance-close' : mi <= 40 ? 'distance-medium' : 'distance-far';
-      const deg = e._bearing != null ? Math.round(e._bearing) : 0;
-      return ` <span class="distance-badge ${cls}"><span class="direction-arrow" style="transform:rotate(${deg}deg)">↑</span>${mi} mi</span>`;
+      const title = e._miles < HERE_MILES || e._bearing == null ? 'Here' : `${e._miles} mi ${pointName(e._bearing)}`;
+      return `<div class="compass" title="${title}" aria-label="${title}" role="img">${compassSvg(e)}<span class="compass-mi">${compassLabel(e)}</span></div>`;
+    }
+
+    // The calendar's version: a small dial beside the miles, on the time line.
+    function calDistance(e) {
+      if (e._miles == null) return '';
+      return `<span class="cal-event-dist">${compassSvg(e)}${compassLabel(e)}</span>`;
     }
 
     function buildSourceLinks(e) {
