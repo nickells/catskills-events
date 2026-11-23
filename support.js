@@ -1,4 +1,4 @@
-// This site's settings for kofi-pill.js (github.com/nickells/kofi-pill), which loads after this,
+// This site's settings for kofi-pill (github.com/nickells/kofi-pill, from jsDelivr), which loads after this,
 // and its clicks passed to analytics.js.
 window.kofiPill = {
   kofiId: "A7S62B6EOC",
