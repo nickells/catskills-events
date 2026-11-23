@@ -932,6 +932,7 @@
     .compass .tick, .cal-event-dist .tick { stroke: var(--rule-strong); stroke-width: 1.6; stroke-linecap: round; }
     .compass .vane-shaft, .cal-event-dist .vane-shaft { stroke: var(--text); stroke-width: 1.8; }
     .compass .vane-fill, .cal-event-dist .vane-fill { fill: var(--text); }
+    .cal-event-dist .vane-bold { fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .compass-mi { font: var(--label); font-variant-numeric: tabular-nums; white-space: nowrap; }
     .tag-music { --ink: var(--tag-music); }
     .tag-food { --ink: var(--tag-food); }
@@ -981,7 +982,7 @@
     }
     .cal-event-time { color: var(--text); }
     .cal-event-dist { display: inline-flex; align-items: center; gap: 3px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
-    .cal-event-dist svg { flex: none; width: 13px; height: 13px; }
+    .cal-event-dist svg { flex: none; width: 16px; height: 16px; }
     .cal-event-name {
       display: -webkit-box;
       margin-top: 2px;
@@ -1908,10 +1909,19 @@
 
     // A weather vane: faint ticks at the four cardinal points, and an arrow with a feathered tail
     // turned toward the event. Drawn on a 32-unit square, the vane 27 long through the center.
-    function compassSvg(e) {
-      const vane = e._miles < HERE_MILES || e._bearing == null
+    // `small` is the calendar's version: at that size feathers and ticks blur, so it's just a
+    // heavy shaft and a big head.
+    function compassSvg(e, small = false) {
+      const here = e._miles < HERE_MILES || e._bearing == null;
+      const turn = here ? '' : `rotate(${Math.round(e._bearing)} 16 16)`;
+      if (small) {
+        return `<svg viewBox="0 0 32 32" aria-hidden="true">${here
+          ? '<circle class="vane-fill" cx="16" cy="16" r="6"/>'
+          : `<g transform="${turn}"><path class="vane-bold" d="M16 9v20"/><path class="vane-fill" d="M16 1 24.5 14 16 11 7.5 14Z"/></g>`}</svg>`;
+      }
+      const vane = here
         ? '<circle class="vane-fill" cx="16" cy="16" r="3.5"/>'
-        : `<g transform="rotate(${Math.round(e._bearing)} 16 16)"><path class="vane-shaft" d="M16 6v19"/><path class="vane-fill" d="M16 2.5 20.5 10 16 8.4 11.5 10Z"/><path class="vane-fill" d="M16 21.5 20 25.5V29.5L16 25.5 12 29.5V25.5Z"/></g>`;
+        : `<g transform="${turn}"><path class="vane-shaft" d="M16 6v19"/><path class="vane-fill" d="M16 2.5 20.5 10 16 8.4 11.5 10Z"/><path class="vane-fill" d="M16 21.5 20 25.5V29.5L16 25.5 12 29.5V25.5Z"/></g>`;
       return `<svg viewBox="0 0 32 32" aria-hidden="true"><path class="tick" d="M16 .8v2.4M31.2 16h-2.4M16 31.2v-2.4M.8 16h2.4"/>${vane}</svg>`;
     }
 
@@ -1929,7 +1939,7 @@
     // The calendar's version: a small dial beside the miles, on the time line.
     function calDistance(e) {
       if (e._miles == null) return '';
-      return `<span class="cal-event-dist">${compassSvg(e)}${compassLabel(e)}</span>`;
+      return `<span class="cal-event-dist">${compassSvg(e, true)}${compassLabel(e)}</span>`;
     }
 
     function buildSourceLinks(e) {
