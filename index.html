@@ -1139,6 +1139,9 @@
     const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     let allEvents = [];
+    // Categories with at least one upcoming event. What chips for the others are hidden, so a new
+    // or out-of-season category doesn't offer an empty list.
+    let presentCategories = null;
     let homeLat = null, homeLng = null;
     // Your place is a zip or a town name. The key predates towns, so saved zips carry over.
     const PLACE_KEY = 'catskills-events:zip';
@@ -1289,7 +1292,10 @@
 
     function syncButtons() {
       document.querySelectorAll('.filter-btn[data-category]').forEach(b => {
-        b.classList.toggle('active', activeCategories.has(b.dataset.category));
+        const cat = b.dataset.category;
+        b.classList.toggle('active', activeCategories.has(cat));
+        // A selected chip stays, even when empty, so a shared link's filter can be turned off.
+        b.hidden = presentCategories && !presentCategories.has(cat) && !activeCategories.has(cat);
       });
       document.querySelectorAll('.view-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.view === activeView);
@@ -1405,6 +1411,7 @@
     async function init() {
       const res = await fetch('./output/events.json');
       allEvents = await res.json();
+      presentCategories = new Set(allEvents.filter(e => classifyTime(e) !== 'past').map(e => e.category || 'other'));
       readFromUrl();
       computeDistances();
       render();
