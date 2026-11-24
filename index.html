@@ -103,6 +103,7 @@
     .filter-btn[data-category="community"].active { background: var(--tag-community); border-color: var(--tag-community); }
     .filter-btn[data-category="nightlife"].active { background: var(--tag-nightlife); border-color: var(--tag-nightlife); }
     .filter-btn[data-category="wellness"].active { background: var(--tag-wellness); border-color: var(--tag-wellness); }
+    .filter-btn[data-category="kids"].active { background: var(--tag-kids); border-color: var(--tag-kids); }
     .filter-btn[data-category="other"].active { background: var(--tag-other); border-color: var(--tag-other); }
 
     .search-box {
@@ -406,6 +407,7 @@
     .tag-community { background: var(--tag-community); }
     .tag-nightlife { background: var(--tag-nightlife); }
     .tag-wellness { background: var(--tag-wellness); }
+    .tag-kids { background: var(--tag-kids); }
     .tag-other { background: var(--tag-other); }
 
     .empty-state {
@@ -789,6 +791,7 @@
     .filter-btn[data-category="community"] { --chip: var(--tag-community); }
     .filter-btn[data-category="nightlife"] { --chip: var(--tag-nightlife); }
     .filter-btn[data-category="wellness"] { --chip: var(--tag-wellness); }
+    .filter-btn[data-category="kids"] { --chip: var(--tag-kids); }
     .filter-btn[data-category="other"] { --chip: var(--tag-other); }
 
     /* Small buttons: Clear, Filters, Hide started */
@@ -934,6 +937,7 @@
     .tag-community { --ink: var(--tag-community); }
     .tag-nightlife { --ink: var(--tag-nightlife); }
     .tag-wellness { --ink: var(--tag-wellness); }
+    .tag-kids { --ink: var(--tag-kids); }
     .tag-other { --ink: var(--tag-other); }
     .event-sources { margin-top: var(--space-2); font: var(--small); color: var(--text-muted); }
     .event-sources a { color: var(--text-muted); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 2px; }
@@ -1097,6 +1101,7 @@
         <button class="filter-btn" data-category="community">Community</button>
         <button class="filter-btn" data-category="nightlife">Nightlife</button>
         <button class="filter-btn" data-category="wellness">Wellness</button>
+        <button class="filter-btn" data-category="kids">Kids</button>
         <button class="filter-btn" data-category="other">Other</button>
       </div>
     </div>
@@ -1128,7 +1133,7 @@
     const CATEGORY_LABELS = {
       music: 'Music', food: 'Food & Drink', culture: 'Arts & Culture',
       nature: 'Nature', community: 'Community', nightlife: 'Nightlife',
-      wellness: 'Wellness', other: 'Other',
+      wellness: 'Wellness', kids: 'Kids', other: 'Other',
     };
     const FULL_DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

@@ -170,7 +170,7 @@ const postedBy = (e) => (e.source || "").match(/@[\w.]+/)?.[0] || e.venue || e.s
 // Same order and labels as the What filters on index.html.
 const CATEGORY_LABELS = {
   music: "Music", food: "Food & Drink", culture: "Arts & Culture", nature: "Nature",
-  community: "Community", nightlife: "Nightlife", wellness: "Wellness", other: "Other",
+  community: "Community", nightlife: "Nightlife", wellness: "Wellness", kids: "Kids", other: "Other",
 };
 const ink = (cat) => `var(--tag-${cat || "other"})`;
 // Selected categories; none selected shows every flyer, like the What filters on index.html.
