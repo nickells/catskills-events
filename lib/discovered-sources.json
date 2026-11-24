@@ -1,12 +1,84 @@
 {
   "accepted": [
     {
+      "handle": "_woodstockschoolofart",
+      "town": "Woodstock",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:woodstockschoolofart.org"
+      ]
+    },
+    {
+      "handle": "art_omi",
+      "town": "Ghent",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:artomi.org"
+      ]
+    },
+    {
+      "handle": "arteastopenstudio",
+      "town": "Pawling",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:arteastdutchess.com"
+      ]
+    },
+    {
+      "handle": "athensculturalcenter",
+      "town": "Athens",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:athensculturalcenter.org"
+      ]
+    },
+    {
+      "handle": "bardavonpresents",
+      "town": "Poughkeepsie",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:bardavon.org"
+      ]
+    },
+    {
+      "handle": "baugallery",
+      "town": "Beacon",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:baugallery.org"
+      ]
+    },
+    {
+      "handle": "beaconmovies",
+      "town": "Beacon",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:beaconmovietheater.com"
+      ]
+    },
+    {
+      "handle": "beatrixfarrandgarden",
+      "town": "Hyde Park",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:beatrixfarrandgarden.org"
+      ]
+    },
+    {
       "handle": "bigeddyfilmfestival",
       "town": "Narrowsburg",
       "addedAt": "2026-10-02",
       "foundVia": [
         "theheronny",
         "callicoontheater"
+      ]
+    },
+    {
+      "handle": "boscobelhg",
+      "town": "Garrison",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:boscobel.org"
       ]
     },
     {
@@ -27,11 +99,67 @@
       ]
     },
     {
+      "handle": "catskillmountainrailroad",
+      "town": "Kingston",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:catskillmountainrailroad.com"
+      ]
+    },
+    {
       "handle": "catskills.visitor.center",
       "town": "Arkville",
       "addedAt": "2026-10-06",
       "foundVia": [
         "catskillcenter"
+      ]
+    },
+    {
+      "handle": "ccecgc",
+      "town": "Hudson",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:ccecolumbiagreene.org"
+      ]
+    },
+    {
+      "handle": "cfhvny",
+      "town": "Poughkeepsie",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:communityfoundationshv.org"
+      ]
+    },
+    {
+      "handle": "chapelrestoration_coldspringny",
+      "town": "Cold Spring",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:chapelrestoration.org"
+      ]
+    },
+    {
+      "handle": "congregationemanuelofthehv",
+      "town": "Kingston",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:cehv.org"
+      ]
+    },
+    {
+      "handle": "cornellkingstonny",
+      "town": "Kingston",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:cornellkingston.com"
+      ]
+    },
+    {
+      "handle": "creative.legion",
+      "town": "Hudson",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:creativelegion.com"
       ]
     },
     {
@@ -41,6 +169,14 @@
       "foundVia": [
         "visitmargaretvilleny",
         "site:durr.org"
+      ]
+    },
+    {
+      "handle": "eastdalevillage",
+      "town": "Poughkeepsie",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:eastdalevillage.com"
       ]
     },
     {
@@ -61,6 +197,14 @@
       ]
     },
     {
+      "handle": "garrisonartcenter",
+      "town": "Garrison",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:garrisonartcenter.org"
+      ]
+    },
+    {
       "handle": "greatwesterncatskills",
       "addedAt": "2026-10-02",
       "foundVia": [
@@ -77,11 +221,64 @@
       ]
     },
     {
+      "handle": "guardianrevival",
+      "town": "Beacon",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:give.guardianrevival.org"
+      ]
+    },
+    {
+      "handle": "headlesshorsemanattractions",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:headlesshorseman.com"
+      ]
+    },
+    {
       "handle": "herbalwoodstock",
       "town": "Woodstock",
       "addedAt": "2026-10-05",
       "foundVia": [
         "woodstockfilmfestival"
+      ]
+    },
+    {
+      "handle": "hhnaturecenter",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:hhnaturecenter.org"
+      ]
+    },
+    {
+      "handle": "holistichealthcommunity",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:holistichealthcommunity.org"
+      ]
+    },
+    {
+      "handle": "hudsonarealibraryny",
+      "town": "Hudson",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:hudsonarealibrary.org",
+        "returnbrewing"
+      ]
+    },
+    {
+      "handle": "hudsonrivermaritimemuseum",
+      "town": "Kingston",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:hrmm.org"
+      ]
+    },
+    {
+      "handle": "hudsonvalleypotterytour",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "site:hudsonvalleypotterytour.com"
       ]
     },
     {
@@ -173,6 +370,15 @@
       ]
     },
     {
+      "handle": "slowfoodhudsonvalley",
+      "town": "Accord",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "seminaryhillny",
+        "site:slowfoodhudsonvalley.org"
+      ]
+    },
+    {
       "handle": "sugarblastmusic",
       "town": "Kingston",
       "addedAt": "2026-10-05",
@@ -195,6 +401,15 @@
       "foundVia": [
         "visitmargaretvilleny",
         "themeadowson28"
+      ]
+    },
+    {
+      "handle": "upperdepot",
+      "town": "Hudson",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "returnbrewing",
+        "site:upperdepot.com"
       ]
     },
     {
