@@ -126,6 +126,13 @@
       ]
     },
     {
+      "handle": "phoeniciadiner",
+      "addedAt": "2026-11-24",
+      "foundVia": [
+        "request:#37"
+      ]
+    },
+    {
       "handle": "pollinator.spirits",
       "town": "Bethel",
       "addedAt": "2026-10-02",
