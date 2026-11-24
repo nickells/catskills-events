@@ -28,7 +28,7 @@ jobs:
       SKIP_SCRAPE: ${{ github.event_name == 'push' || inputs.skip_scrape == true }}
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment-retry.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v5
@@ -105,5 +105,14 @@ jobs:
           cp -r output _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
+      # deploy-pages looks up the uploaded artifact once, half a second after the upload, and GitHub's
+      # artifact list sometimes lags that ("Found 0 artifact(s)"). If it misses, wait and try again.
       - uses: actions/deploy-pages@v5
         id: deployment
+        continue-on-error: true
+      - name: Wait for the artifact to be listed
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30 # seconds; the lag seen so far is under one
+      - uses: actions/deploy-pages@v5
+        id: deployment-retry
+        if: steps.deployment.outcome == 'failure'
