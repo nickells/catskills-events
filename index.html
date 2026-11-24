@@ -559,13 +559,6 @@
       opacity: 0.85;
     }
 
-    @media (max-width: 700px) {
-      .cal-grid {
-        grid-template-columns: 1fr;
-      }
-      .cal-day { min-height: auto; }
-    }
-
     /* ── Theme: layered over the base styles above. Tokens, type and the masthead come from
        site.css; this layer only restyles this page's components.
        Grid    a 64px label column (Near, Within, When, What, Find) with controls on one line,
@@ -961,7 +954,9 @@
       color: var(--text);
     }
     .cal-week-nav button:hover { border-color: var(--text); }
+    /* The range sits left over the first day; centered, it read as Friday's heading. */
     .cal-week-label { font: var(--heading-s); letter-spacing: var(--tight); }
+    .cal-week-steps { display: flex; gap: var(--space-2); }
     .cal-grid { gap: var(--space-3); }
     .cal-day { padding: var(--space-2) 0 0; border: 0; border-top: 2px solid var(--text); border-radius: 0; background: none; }
     .cal-day.today { border-width: 2px 0 0; border-color: var(--accent); }
@@ -1094,13 +1089,6 @@
 
     <div class="filters">
       <div class="filter-group">
-        <div class="filter-group-label">When</div>
-        <button class="filter-btn active" data-time="all">All</button>
-        <button class="filter-btn" data-time="tonight">Tonight</button>
-        <button class="filter-btn" data-time="week">This week</button>
-        <button class="filter-btn" data-time="month">This month</button>
-      </div>
-      <div class="filter-group">
         <div class="filter-group-label">What</div>
         <button class="filter-btn" data-category="music">Music</button>
         <button class="filter-btn" data-category="food">Food &amp; Drink</button>
@@ -1127,7 +1115,7 @@
         <button type="button" class="jump-filters" id="jump-filters" hidden>Filters ↑</button>
         <div class="view-toggle">
           <button class="view-btn active" data-view="list">List</button>
-          <button class="view-btn" data-view="calendar">Calendar</button>
+          <button class="view-btn" data-view="calendar">Week</button>
         </div>
       </div>
     </div>
@@ -1187,7 +1175,6 @@
     ];
     const placeIndex = new Map(PLACES.map(place => [place.name.toLowerCase(), place]));
     let activeCategories = new Set();
-    let activeTime = 'all';
     let hideStarted = false;
     let searchQuery = '';
     let maxDistance = 120;
@@ -1196,6 +1183,15 @@
     let activeView = 'list';
     let calWeekOffset = 0;
     let calEventMap = {};
+    // The week view needs room for seven columns side by side; narrower, it falls back to the list
+    // and its toggle hides. The choice is kept, so widening the window brings the week back.
+    const WEEK_VIEW_MIN_WIDTH_PX = 900;
+    const weekViewFits = window.matchMedia(`(min-width: ${WEEK_VIEW_MIN_WIDTH_PX}px)`);
+    const currentView = () => (weekViewFits.matches ? activeView : 'list');
+    function syncViewWidth() {
+      document.querySelector('.view-toggle').hidden = !weekViewFits.matches;
+      document.getElementById('events').classList.toggle('wide', currentView() === 'calendar');
+    }
 
     function toRad(d) { return d * Math.PI / 180; }
 
@@ -1254,7 +1250,6 @@
     function syncToUrl() {
       const p = new URLSearchParams();
       if (activeView !== 'list') p.set('view', activeView);
-      if (activeTime !== 'all') p.set('when', activeTime);
       if (hideStarted) p.set('started', 'hide');
       if (activeCategories.size) p.set('cat', [...activeCategories].join(','));
       if (searchQuery) p.set('q', searchQuery);
@@ -1269,7 +1264,6 @@
     function readFromUrl() {
       const p = new URLSearchParams(location.search);
       if (p.has('view')) activeView = p.get('view');
-      if (p.has('when')) activeTime = p.get('when');
       hideStarted = p.get('started') === 'hide';
       if (p.has('cat')) p.get('cat').split(',').forEach(c => activeCategories.add(c));
       if (p.has('q')) { searchQuery = p.get('q'); document.getElementById('search').value = searchQuery; }
@@ -1289,16 +1283,13 @@
     }
 
     function syncButtons() {
-      document.querySelectorAll('.filter-btn[data-time]').forEach(b => {
-        b.classList.toggle('active', b.dataset.time === activeTime);
-      });
       document.querySelectorAll('.filter-btn[data-category]').forEach(b => {
         b.classList.toggle('active', activeCategories.has(b.dataset.category));
       });
       document.querySelectorAll('.view-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.view === activeView);
       });
-      document.getElementById('events').classList.toggle('wide', activeView === 'calendar');
+      syncViewWidth();
     }
 
     async function geocodeZip(zip) {
@@ -1435,15 +1426,6 @@
     }
 
     function bindFilters() {
-      document.querySelectorAll('.filter-btn[data-time]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.filter-btn[data-time]').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          activeTime = btn.dataset.time;
-          render();
-        });
-      });
-
       // The hide-started toggle lives in the Tonight heading, which is redrawn on every render.
       document.getElementById('events').addEventListener('click', e => {
         if (!e.target.closest('[data-toggle="hide-started"]')) return;
@@ -1484,9 +1466,13 @@
           btn.classList.add('active');
           activeView = btn.dataset.view;
           calWeekOffset = 0;
-          document.getElementById('events').classList.toggle('wide', activeView === 'calendar');
+          syncViewWidth();
           render();
         });
+      });
+      weekViewFits.addEventListener('change', () => {
+        syncViewWidth();
+        render();
       });
 
       bindPlacePicker();
@@ -1649,10 +1635,6 @@
       if (timeBucket === 'past') return false;
       if (hideStarted && !ignoreStarted && timeBucket === 'tonight' && hasStarted(event)) return false;
 
-      if (activeTime === 'tonight' && timeBucket !== 'tonight') return false;
-      if (activeTime === 'week' && timeBucket !== 'tonight' && timeBucket !== 'week') return false;
-      if (activeTime === 'month' && timeBucket === 'later') return false;
-
       if (activeCategories.size > 0 && !activeCategories.has(event.category)) return false;
 
       if (searchQuery) {
@@ -1667,13 +1649,10 @@
       return true;
     }
 
-    const TIME_LABELS = { tonight: 'Tonight', week: 'This week', month: 'This month' };
-
     // "12 events · Music · within 25 mi of Woodstock", so you can see what's applied; Clear shows
     // whenever anything is.
     function statsLine(count) {
       const parts = [];
-      if (activeTime !== 'all') parts.push(TIME_LABELS[activeTime] || activeTime);
       if (hideStarted) parts.push('Not started yet');
       for (const c of activeCategories) parts.push(CATEGORY_LABELS[c] || c);
       if (searchQuery) parts.push(`“${searchQuery}”`);
@@ -1690,7 +1669,6 @@
     }
 
     function clearFilters() {
-      activeTime = 'all';
       activeCategories.clear();
       hideStarted = false;
       searchQuery = '';
@@ -1721,12 +1699,12 @@
       const container = document.getElementById('events');
       document.getElementById('stats').innerHTML = statsLine(filtered.length);
 
-      if (!filtered.length && !(hideStarted && startedTonight && activeView === 'list')) {
+      if (!filtered.length && !(hideStarted && startedTonight && currentView() === 'list')) {
         container.innerHTML = '<div class="empty-state">No events match your filters</div>';
         return;
       }
 
-      if (activeView === 'calendar') {
+      if (currentView() === 'calendar') {
         renderCalendar(filtered, container);
       } else {
         renderList(filtered, container, startedTonight);
@@ -1857,9 +1835,11 @@
 
       let html = `
         <div class="cal-week-nav">
-          <button onclick="calWeekOffset--;render()">← Prev</button>
           <span class="cal-week-label">${weekLabel}</span>
-          <button onclick="calWeekOffset++;render()">Next →</button>
+          <span class="cal-week-steps">
+            <button onclick="calWeekOffset--;render()">← Prev</button>
+            <button onclick="calWeekOffset++;render()">Next →</button>
+          </span>
         </div>
         <div class="cal-grid">`;
 
