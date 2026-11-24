@@ -1,11 +1,14 @@
 // Venue requests from the Sources page (deployed on Railway). Checks the account with Meta and
-// opens a `venue-request` issue for the daily scrape and for us to follow up on.
-//   META_PAGE_TOKEN    the scrape's Meta token, for the business-account check
-//   GITHUB_TOKEN       fine-grained, Issues read/write on this repository only
-//   GITHUB_REPOSITORY  owner/name of this repository
-// Without GITHUB_TOKEN or GITHUB_REPOSITORY it only logs the issue it would open (local testing).
+// opens a `venue-request` issue for us to follow up on.
+//   META_PAGE_TOKEN             the scrape's Meta token, for the business-account check
+//   GITHUB_REPOSITORY           owner/name of this repository
+//   GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY
+//                               the "catskills-events submitter" GitHub App (Issues read/write,
+//                               installed on this repository only), so issues are opened by its bot
+// Without the GitHub ones it only logs the issue it would open (local testing).
 import "dotenv/config";
 import { createServer } from "node:http";
+import { createAppAuth } from "@octokit/auth-app";
 import registry from "./lib/discovered-sources.json" with { type: "json" };
 import { INSTAGRAM_SOURCES } from "./lib/sources.mjs";
 import { createMetaProfileLookup } from "./lib/instagram.mjs";
@@ -23,7 +26,18 @@ const REQUESTS_PER_HOUR = 30;
 const MAX_BODY_BYTES = 1024;
 
 const known = new Set([...INSTAGRAM_SOURCES, ...registry.accepted].map((source) => source.handle.toLowerCase()));
-const github = createGitHub();
+const { GITHUB_REPOSITORY, GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY } = process.env;
+// Installation tokens last an hour; the library caches each one and fetches the next.
+const appAuth = GITHUB_APP_ID && GITHUB_APP_INSTALLATION_ID && GITHUB_APP_PRIVATE_KEY && createAppAuth({
+  appId: GITHUB_APP_ID,
+  installationId: GITHUB_APP_INSTALLATION_ID,
+  // A key pasted on one line keeps its line breaks as "\n".
+  privateKey: GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n"),
+});
+const github = createGitHub({
+  repo: GITHUB_REPOSITORY,
+  getToken: appAuth && (async () => (await appAuth({ type: "installation" })).token),
+});
 
 // Connects to Meta on first use, and again after a failure (an expired token, a blip).
 let meta;
@@ -104,4 +118,4 @@ createServer(async (req, res) => {
     console.error(`Request failed: ${error.message}`);
     reply(502, "Something went wrong on our end. Try again later.");
   }
-}).listen(PORT, () => console.log(`Venue requests on :${PORT}${PATH}${github ? "" : " (no GitHub token: dry run)"}`));
+}).listen(PORT, () => console.log(`Venue requests on :${PORT}${PATH}${github ? "" : " (no GitHub App: dry run)"}`));

@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@octokit/auth-app": "^8.3.1",
     "apify-client": "^2.23.4",
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
