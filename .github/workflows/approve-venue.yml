@@ -1,10 +1,14 @@
 name: Approve venue request
 
-# Labeling a venue-request issue `approved` adds its account as a source, replies on the issue
-# and closes it. Only people with triage access to the repo can add labels.
+# Labeling a venue-request issue `approved`, or commenting "!approve" (by email reply too), adds
+# its account as a source, replies on the issue and closes it. "!reject" closes it as not planned.
+# Only people with triage access can add labels; commands only count from the repo's owner,
+# since anyone can comment on a public issue.
 on:
   issues:
     types: [labeled]
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: write # commits lib/discovered-sources.json
@@ -17,7 +21,12 @@ concurrency:
 
 jobs:
   approve:
-    if: github.event.label.name == 'approved' && contains(github.event.issue.labels.*.name, 'venue-request')
+    if: >-
+      contains(github.event.issue.labels.*.name, 'venue-request') &&
+      ((github.event_name == 'issues' && github.event.label.name == 'approved') ||
+       (github.event_name == 'issue_comment' && github.event.issue.state == 'open' &&
+        github.event.comment.author_association == 'OWNER' &&
+        startsWith(github.event.comment.body, '!approve')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -65,3 +74,17 @@ jobs:
           else
             gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body "$MESSAGE"
           fi
+
+  reject:
+    if: >-
+      github.event_name == 'issue_comment' && github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'venue-request') &&
+      github.event.comment.author_association == 'OWNER' &&
+      startsWith(github.event.comment.body, '!reject')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close as not planned
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: gh issue close "$NUMBER" --repo "$GITHUB_REPOSITORY" --reason "not planned" --comment "Not adding this one for now."

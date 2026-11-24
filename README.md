@@ -80,8 +80,9 @@ the scrape's hourly budget. Its variables: `META_PAGE_TOKEN`, `GITHUB_REPOSITORY
 GitHub ones it only logs the issue it would open. GitHub users can also use the issue
 form in `.github/ISSUE_TEMPLATE/add-venue.yml`.
 
-Requests wait for us: we follow up with the venue, then label the issue `approved` to
-add it, or close it. Approving runs `.github/workflows/approve-venue.yml`, which adds
+Requests wait for us: we follow up with the venue, then label the issue `approved` or
+comment `!approve` (an email reply works) to add it, or comment `!reject` or close it.
+Commands only count from the repo's owner. Approving runs `.github/workflows/approve-venue.yml`, which adds
 the account to `lib/discovered-sources.json` without vetting, commits it, replies and
 closes the issue; it's read from the next daily run. The `venue-request` and `approved`
 labels must exist in the repo, or issue forms drop them.
