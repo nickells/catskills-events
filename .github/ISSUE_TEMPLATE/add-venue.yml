@@ -1,0 +1,25 @@
+# Opened from the Sources page. The daily scrape reads these (lib/requests.mjs), checks the
+# account, replies here and closes the issue. The label must exist in the repo, or GitHub drops
+# it and the scrape never sees the request. Field labels are parsed: keep them in sync.
+name: Add a venue
+description: Suggest an Instagram account that posts events in the Catskills or Hudson Valley.
+title: Add a venue
+labels: [venue-request]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every morning a script reads event posts from local venues' Instagram accounts. Tell us one we're missing: the next run checks the account, then replies here.
+  - type: input
+    id: handle
+    attributes:
+      label: Instagram account
+      placeholder: "@yourvenue"
+    validations:
+      required: true
+  - type: input
+    id: town
+    attributes:
+      label: Town
+      description: Where most of its events are. Optional.
+      placeholder: Phoenicia

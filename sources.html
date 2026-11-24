@@ -79,6 +79,38 @@
       #town-map { height: 300px; }
       .aggregators { grid-template-columns: 1fr; }
     }
+
+    /* ─ Missing a venue: one field and a button on the same 40px line, styled like the list's search ─ */
+    .request { display: flex; gap: var(--space-2); max-width: 420px; }
+    .request input {
+      flex: 1;
+      min-width: 0;
+      height: var(--h-input);
+      padding: 0 var(--space-3);
+      border: 1px solid var(--rule-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font: var(--body);
+      color: var(--text);
+    }
+    .request input:hover { border-color: var(--text-muted); }
+    .request input:focus { outline: none; border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+    .request button {
+      flex: none;
+      height: var(--h-input);
+      padding: 0 var(--space-4);
+      border: 1px solid var(--text);
+      border-radius: var(--radius);
+      background: var(--text);
+      font: var(--label);
+      color: var(--surface);
+      cursor: pointer;
+    }
+    .request button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+    .request button:disabled { opacity: 0.6; cursor: default; }
+    .request-trap { position: absolute; left: -9999px; }
+    .request-note { margin-top: var(--space-2); font: var(--small); color: var(--text-muted); }
+    .request-note:empty { display: none; }
   </style>
   <script src="analytics.js" defer></script>
   <script src="support.js" defer></script>
@@ -95,6 +127,7 @@
     <p class="intro">
       Every morning a script reads these calendars, newsletters and Instagram accounts, pulls
       out the events, and links each one back to where it was posted.
+      <a href="#add">Missing a venue?</a>
     </p>
 
     <h2 class="section-header">By town<span class="count" id="towns-count"></span></h2>
@@ -112,6 +145,17 @@
     <h2 class="section-header">Instagram<span class="count" id="instagram-count"></span></h2>
     <p class="section-note">Venue, town and tourism accounts. Events are read from post captions and flyer text.</p>
     <ul class="accounts" id="instagram"></ul>
+
+    <h2 class="section-header" id="add">Missing a venue?</h2>
+    <p class="section-note">Send us its Instagram account and we'll add it.</p>
+    <form class="request" id="request-form">
+      <input name="handle" type="text" placeholder="@yourvenue" aria-label="Instagram account" required
+        autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <!-- Hidden from people; a bot that fills it in is ignored. -->
+      <input name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" class="request-trap" />
+      <button type="submit">Send</button>
+    </form>
+    <p class="request-note" id="request-status" role="status"></p>
   </div>
 
   <script>
@@ -127,6 +171,10 @@
       { name: "Eventbrite", url: "https://www.eventbrite.com/d/ny--kingston/all-events/", type: "calendar" },
     ];
     const TYPE_LABELS = { newsletter: "Newsletter", calendar: "Calendar" };
+    // api.mjs, on Railway; run it locally (node api.mjs) when testing with serve.mjs.
+    const REQUEST_URL = location.hostname === 'localhost'
+      ? 'http://localhost:8787/venue-request'
+      : 'https://api.catskills.events/venue-request';
     const plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
 
     // "allevents.in/kingston-ny/all" → "Kingston"; "eventbrite.com/d/ny--livingston-manor/all-events/?page=2" → "Livingston Manor 2".
@@ -151,6 +199,39 @@
       el.textContent = s;
       return el.innerHTML;
     }
+
+    // Starts what's typed with "@", so it reads as an Instagram account; a pasted profile link
+    // ("https://www.instagram.com/yourvenue/?hl=en") becomes "@yourvenue".
+    const PROFILE_LINK = /^@?(?:https?:\/\/)?(?:www\.)?instagram\.com\/([\w.]+)/i;
+    document.querySelector('#request-form [name="handle"]').addEventListener('input', (e) => {
+      const { value } = e.target;
+      const link = value.match(PROFILE_LINK);
+      if (link) e.target.value = `@${link[1]}`;
+      else if (value && !value.startsWith('@')) e.target.value = `@${value}`;
+    });
+
+    // Sends a venue's account; the server checks Instagram can be read and says what happened.
+    document.getElementById('request-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const status = document.getElementById('request-status');
+      const button = form.querySelector('button');
+      button.disabled = true;
+      status.textContent = 'Sending…';
+      try {
+        const res = await fetch(REQUEST_URL, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ handle: form.elements.handle.value, website: form.elements.website.value }),
+        });
+        status.textContent = (await res.json()).message;
+        if (res.ok) form.reset();
+      } catch {
+        status.textContent = "Couldn't send that. Try again later.";
+      } finally {
+        button.disabled = false;
+      }
+    });
 
     fetch('./output/events.json')
       .then(r => r.json())
