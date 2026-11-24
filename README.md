@@ -73,19 +73,18 @@ fetched a run; each site's answer is cached for 30 days.
 The Sources page asks visitors for a missing venue's Instagram account and sends it to
 `api.mjs`, a small server on Railway. It turns away accounts Meta can't see (personal
 or misspelled), with how to fix that, and opens a GitHub issue labeled `venue-request`
-for the rest. If Meta can't be reached the request goes through and is vetted later.
+for the rest. If Meta can't be reached the request goes through anyway.
 It allows 5 requests an hour per IP and 30 overall, since each costs a Meta lookup from
 the scrape's hourly budget. Its variables: `META_PAGE_TOKEN`, `GITHUB_REPOSITORY`, and
 `GITHUB_TOKEN` (fine-grained, Issues read/write on this repository only). Without the
 GitHub ones it only logs the issue it would open. GitHub users can also use the issue
 form in `.github/ISSUE_TEMPLATE/add-venue.yml`.
 
-The `venue-request` label must exist in the repo, or issue forms drop it. Each scheduled run reads open
-requests with the workflow's `GITHUB_TOKEN` and vets them through discovery ahead of
-everything else, even accounts rejected in the last 90 days. It then replies on the
-issue and closes it: completed when the account was added or is already a source, not
-planned with the reason otherwise. A request discovery didn't reach stays open for the
-next run. Local runs never read or answer requests.
+Requests wait for us: we follow up with the venue, then label the issue `approved` to
+add it, or close it. Approving runs `.github/workflows/approve-venue.yml`, which adds
+the account to `lib/discovered-sources.json` without vetting, commits it, replies and
+closes the issue; it's read from the next daily run. The `venue-request` and `approved`
+labels must exist in the repo, or issue forms drop them.
 
 ## Venue calendars
 

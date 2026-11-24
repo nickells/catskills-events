@@ -8,7 +8,6 @@ import { readSources, readInstagram } from "./lib/readers/index.mjs";
 import { enrichEvents } from "./lib/enrich.mjs";
 import { discoverInstagramSources, loadDiscoveredSources, saveDiscoveredSources } from "./lib/discover.mjs";
 import { findOrganizerLeads, organizerSite } from "./lib/leads.mjs";
-import { answerVenueRequests, createGitHub, fetchVenueRequests } from "./lib/requests.mjs";
 import { discoverCalendars } from "./lib/calendars.mjs";
 import { attachFlyers, postImages } from "./lib/flyers.mjs";
 import { createMetaProfileLookup, fetchInstagramProfiles } from "./lib/instagram.mjs";
@@ -21,30 +20,18 @@ function withDiscovered(handPicked, discovered, key) {
   return [...handPicked, ...discovered.filter((source) => !known.has(key(source)))];
 }
 
-// Vets accounts that visitors ask for, sources @mention or organizers' sites link to, and looks
-// for calendars on those sites and Instagram accounts' websites. Finds are read from the next run on.
+// Vets accounts that sources @mention or organizers' sites link to, and looks for calendars on
+// those sites and Instagram accounts' websites. Finds are read from the next run on.
 async function discover({ listed, profiles, instagramSources, registry, cache, lookupProfile }) {
   console.log(`\n--- Instagram Discovery ---`);
-  // Venue requests are GitHub issues, read and answered only in GitHub Actions.
-  const github = createGitHub();
-  let requests = [];
-  try {
-    if (github) requests = await fetchVenueRequests({ github });
-    if (requests.length) console.log(`  ${requests.length} open venue request(s)`);
-  } catch (err) {
-    console.error(`  ✗ Error reading venue requests: ${err.message}`);
-  }
-
   let organizerSites = [];
-  let stats = { decisions: {}, accepted: [] };
   try {
     const organizers = await findOrganizerLeads(listed, { cache: cache.data, fetchPage });
     organizerSites = organizers.sites;
     if (!lookupProfile) throw new Error("no Meta profile lookup");
-    stats = await discoverInstagramSources({
+    await discoverInstagramSources({
       sources: instagramSources,
       leads: organizers.leads,
-      requests: requests.filter((r) => r.handle).map((r) => ({ handle: r.handle, town: r.town, request: r.number })),
       cache: cache.data,
       registry,
       lookupProfile,
@@ -52,10 +39,6 @@ async function discover({ listed, profiles, instagramSources, registry, cache, l
     saveDiscoveredSources(registry);
   } catch (err) {
     console.error(`  ✗ Error discovering Instagram sources: ${err.message}`);
-  }
-  if (requests.length) {
-    const known = new Set(instagramSources.map((source) => source.handle.toLowerCase()));
-    await answerVenueRequests(requests, { known, ...stats }, { github });
   }
 
   console.log(`\n--- Calendar Discovery ---`);

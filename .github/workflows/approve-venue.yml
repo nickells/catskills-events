@@ -1,0 +1,67 @@
+name: Approve venue request
+
+# Labeling a venue-request issue `approved` adds its account as a source, replies on the issue
+# and closes it. Only people with triage access to the repo can add labels.
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write # commits lib/discovered-sources.json
+  issues: write # replies on and closes the request
+
+# One approval at a time, so two never push over each other.
+concurrency:
+  group: approve-venue
+  cancel-in-progress: false
+
+jobs:
+  approve:
+    if: github.event.label.name == 'approved' && contains(github.event.issue.labels.*.name, 'venue-request')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Add the account
+        id: approve
+        env:
+          # The body is the visitor's text: passed as data, never written into the script.
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          # discover.mjs creates the OpenAI client when loaded; approving never calls it.
+          OPENAI_API_KEY: placeholder
+        run: |
+          set +e
+          message=$(node approve.mjs)
+          status=$?
+          echo "$message"
+          { echo "message<<EOF"; echo "$message"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+          exit $status
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add lib/discovered-sources.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Add the venue from request #${{ github.event.issue.number }}"
+            git pull --rebase
+            git push
+          fi
+      - name: Reply and close
+        if: always() && steps.approve.outputs.message
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MESSAGE: ${{ steps.approve.outputs.message }}
+          NUMBER: ${{ github.event.issue.number }}
+          SUCCEEDED: ${{ steps.approve.outcome == 'success' }}
+        run: |
+          if [ "$SUCCEEDED" = "true" ]; then
+            gh issue close "$NUMBER" --repo "$GITHUB_REPOSITORY" --reason completed --comment "$MESSAGE"
+          else
+            gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body "$MESSAGE"
+          fi

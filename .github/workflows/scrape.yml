@@ -14,7 +14,6 @@ on:
 
 permissions:
   contents: write # commits lib/discovered-sources.json
-  issues: write # answers and closes venue requests
   pages: write
   id-token: write
 
@@ -64,7 +63,6 @@ jobs:
           META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           PROXY_URL: ${{ secrets.PROXY_URL }}
-          GITHUB_TOKEN: ${{ github.token }} # reads and answers venue requests
       - name: Commit discovered sources
         if: env.SKIP_SCRAPE != 'true'
         continue-on-error: true # never block the cache save and deploy
