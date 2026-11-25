@@ -569,11 +569,27 @@
       "foundVia": "event link"
     },
     {
+      "name": "catskillartspace.org",
+      "url": "https://www.catskillartspace.org/events",
+      "calendar": "squarespace",
+      "town": "Livingston Manor",
+      "addedAt": "2026-11-25",
+      "foundVia": "event link"
+    },
+    {
       "name": "clearwater.org",
       "url": "https://www.clearwater.org/",
       "calendar": "tribe",
       "town": "Kingston",
       "addedAt": "2026-11-11",
+      "foundVia": "event link"
+    },
+    {
+      "name": "copakegrange.org",
+      "url": "https://www.copakegrange.org/events",
+      "calendar": "squarespace",
+      "town": "Copake",
+      "addedAt": "2026-11-25",
       "foundVia": "event link"
     },
     {
@@ -586,11 +602,27 @@
       "foundVia": "@dear.native.grapes"
     },
     {
+      "name": "depottheater.org",
+      "url": "https://www.depottheater.org/shows-tickets",
+      "calendar": "squarespace",
+      "town": "Garrison",
+      "addedAt": "2026-11-25",
+      "foundVia": "event link"
+    },
+    {
       "name": "fcgardiner.com",
       "url": "https://www.fcgardiner.com/events",
       "calendar": "squarespace",
       "town": "Gardiner",
       "addedAt": "2026-11-17",
+      "foundVia": "event link"
+    },
+    {
+      "name": "got2lindy.com",
+      "url": "https://www.got2lindy.com/",
+      "calendar": "tribe",
+      "town": "Kingston",
+      "addedAt": "2026-11-25",
       "foundVia": "event link"
     },
     {
@@ -634,6 +666,14 @@
       "town": "Accord",
       "addedAt": "2026-10-08",
       "foundVia": "@westwindorchard"
+    },
+    {
+      "name": "wylderhotels.com",
+      "url": "https://wylderhotels.com/",
+      "calendar": "tribe",
+      "town": "Windham",
+      "addedAt": "2026-11-25",
+      "foundVia": "event link"
     }
   ]
 }
