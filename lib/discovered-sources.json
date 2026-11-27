@@ -123,6 +123,13 @@
       ]
     },
     {
+      "handle": "cdymca",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:cdymca.org"
+      ]
+    },
+    {
       "handle": "cfhvny",
       "town": "Poughkeepsie",
       "addedAt": "2026-11-24",
@@ -147,6 +154,14 @@
       ]
     },
     {
+      "handle": "copake_grange",
+      "town": "Copake",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:copakegrange.org"
+      ]
+    },
+    {
       "handle": "cornellkingstonny",
       "town": "Kingston",
       "addedAt": "2026-11-24",
@@ -155,11 +170,27 @@
       ]
     },
     {
+      "handle": "cornwallhighlandsartsalliance",
+      "town": "Cornwall",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:cornwallhighlandsarts.org"
+      ]
+    },
+    {
       "handle": "creative.legion",
       "town": "Hudson",
       "addedAt": "2026-11-24",
       "foundVia": [
         "site:creativelegion.com"
+      ]
+    },
+    {
+      "handle": "crotonfreelibrary",
+      "town": "Croton-on-Hudson",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:crotonfreelibrary.org"
       ]
     },
     {
@@ -177,6 +208,14 @@
       "addedAt": "2026-11-24",
       "foundVia": [
         "site:eastdalevillage.com"
+      ]
+    },
+    {
+      "handle": "fdr_library",
+      "town": "Hyde Park",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:fdrlibrary.org"
       ]
     },
     {
@@ -202,6 +241,14 @@
       "addedAt": "2026-11-24",
       "foundVia": [
         "site:garrisonartcenter.org"
+      ]
+    },
+    {
+      "handle": "got2lindy",
+      "town": "Kingston",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:got2lindy.com"
       ]
     },
     {
@@ -275,10 +322,27 @@
       ]
     },
     {
+      "handle": "hudsonrivermuseum",
+      "town": "Yonkers",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "olanafredericchurch",
+        "site:hrm.org"
+      ]
+    },
+    {
       "handle": "hudsonvalleypotterytour",
       "addedAt": "2026-11-24",
       "foundVia": [
         "site:hudsonvalleypotterytour.com"
+      ]
+    },
+    {
+      "handle": "huguenotstreet",
+      "town": "New Paltz",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:huguenotstreet.org"
       ]
     },
     {
@@ -370,6 +434,14 @@
       ]
     },
     {
+      "handle": "sloopclearwater",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "site:clearwater.org",
+        "cfhvny"
+      ]
+    },
+    {
       "handle": "slowfoodhudsonvalley",
       "town": "Accord",
       "addedAt": "2026-11-24",
@@ -427,6 +499,14 @@
       "foundVia": [
         "returnbrewing",
         "returnoutpost"
+      ]
+    },
+    {
+      "handle": "wildonesmidhudsonvalley",
+      "addedAt": "2026-11-27",
+      "foundVia": [
+        "beatrixfarrandgarden",
+        "site:midhudsonvalley.wildones.org"
       ]
     },
     {
